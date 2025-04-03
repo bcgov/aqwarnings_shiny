@@ -1,0 +1,13 @@
+.Rproj.user
+*.Rhistory
+.RData
+.Ruserdata
+
+data/raw/logos
+data/raw/shapefiles
+
+# ignore all outputs but keep the folders
+outputs/qmd/*
+!outputs/qmd/.gitkeep
+outputs/rnw/*
+!outputs/rnw/.gitkeep

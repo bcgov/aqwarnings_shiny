@@ -1,0 +1,127 @@
+---
+title: "Air Quality Warning - Wildfire Smoke Ended" 
+type: "wildfire_smoke" 
+date: "`r Sys.Date()`" 
+params: 
+  sel_aqMet: "Sakshi" 
+  lastWarning: "2025-02-10" 
+  customMessage: "`Custom message.`" 
+  ice: "End" 
+  sel_healthAuth: 
+    - First Nations Health Authority 
+    - Northern Health 
+ice: "`r params$ice`" 
+sel_aqMet: "`r params$sel_aqMet`" 
+customMessage: "`r params$customMessage`" 
+lastWarning: "`r params$lastWarning`" 
+sel_healthAuth: "`r paste(params$sel_healthAuth, collapse=', ')`" 
+---
+
+```{=html}
+<!--
+Copyright 2025 Province of British Columbia
+
+This work is licensed under the Creative Commons Attribution 4.0 International License.
+To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/.
+-->
+```
+
+```{r setup, echo=FALSE, include=FALSE, warning=FALSE, message=FALSE}
+
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      warning=FALSE)
+
+library(dplyr)
+
+#Import files in the quarto environment
+source(here::here("src", "load_metadata.R"))
+
+```
+
+```{r lookup, results="asis", strip.white=FALSE}
+#AQ met information
+
+ENVcontact <- aq_mets |>
+  filter(nickname == params$sel_aqMet) |>
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
+  pull(contact)
+
+HAcontact <- health_contact |> 
+   filter(authority %in% params$sel_healthAuth) |> 
+   mutate(authority = factor(authority))
+```
+
+```{r}
+# Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
+# This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
+logos_list <- list(
+  "Government of British Columbia" = "BCID_V_RGB_pos",
+  "First Nations Health Authority" = "FNHA",
+  "Interior Health Authority" = "IH", 
+  "Fraser Health Authority" = "FH", 
+  "Vancouver Coastal Health Authority" = "VCH", 
+  "Vancouver Island Health Authority" = "VIH", 
+  "Northern Health Authority" = "NH")
+
+# Logos selected by user and ordered as per logos_list
+logos_names_selected <- c(
+  "Government of British Columbia", # always select BC
+  "First Nations Health Authority", # always select FNHA 
+  params$sel_healthAuth) # Note: if FNHA is selected in app, it will duplicate
+## This line will remove the duplicated FNHA value if it appears twice
+## Side effect: If the app user did NOT select FNHA, this will force FNHA to appear
+logos_names_selected <- unique(logos_names_selected)
+logos_names_selected <- logos_names_selected[order(match(logos_names_selected, names(logos_list)))]  # match order to logos_list
+logos_selected <- logos_list[logos_names_selected] # subset of logo_list
+
+# Count number of logos to display
+n_logos <- length(logos_selected)
+
+# Build a vector of quarto lines to insert image for each logo
+# It is more efficient to use `sapply` but this might be more readable
+logo_image_line <- c() # start with empty vector
+# Add each logo's insert line to the vector
+for(logo_name in names(logos_selected)) {
+   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](assets/logo_", logos_selected[[logo_name]], ".png)\\"))
+}
+```
+
+<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov-->
+
+<!-- the trailing slash means the text in square brackets is alt text -->
+
+`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`
+
+```{r}
+#| results: asis
+# `cat` is used to avoid extra processing
+# `sep` argument adds the line break and then a new line as required
+cat(logo_image_line, sep="\n\n")
+```
+
+`r paste(":::")`
+
+This Air Quality Warning for wildfire smoke that was last updated on `r format(as.Date(params$lastWarning), '%B %d, %Y')` has ended.
+
+`r params$customMessage`
+
+Real-time air quality information is available on the [BC Air Quality website](https://gov.bc.ca/airqualityhealthindex).
+
+# Contact information
+
+**Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
+
+{{< card_start >}}
+
+`r ENVcontact`
+
+{{< card_end >}}
+
+**Media questions regarding health implications of wildfires:**
+
+{{< card_start >}}
+
+`r paste(HAcontact$contact, collapse = "<br />")`
+
+{{< card_end >}}
