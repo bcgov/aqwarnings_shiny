@@ -154,12 +154,12 @@ nextUpdateDateString <- format_datestring(input$nextUpdate)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% 	AGENCY LOGOS
 %insert logo(s) in header
-\fancypagestyle{firstpagestyle}
-{
+  \fancypagestyle{firstpagestyle}
+  {
    \fancyhf{}
-   \Sexpr{header}
+   % \Sexpr{header}
    \rfoot{Page \thepage \hspace{1pt} of \pageref{LastPage}}
-}
+  }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% SMOKY SKIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% SMOKY SKIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
