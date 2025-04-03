@@ -6,6 +6,8 @@
 data/raw/logos
 data/raw/shapefiles
 
+rsconnect/
+
 # ignore all outputs but keep the folders
 outputs/qmd/*
 !outputs/qmd/.gitkeep
