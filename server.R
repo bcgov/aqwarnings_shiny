@@ -12,6 +12,10 @@
 
 ## Air Quality Warning - Wildfire Smoke Server
 
+# Fix to Phantom JS issue - PhantomJS is not installable from CRAN so isn't installed and loaded upon launch of the app
+# library(webshot)
+# if (is.null(suppressMessages(webshot:::find_phantom()))) { webshot::install_phantomjs() }
+
 shinyServer(function(input, output, session) {
   callModule(issueWildfireSmoke, id = "issue_wildfire_smoke")
   callModule(endWildfireSmoke, id = "end_wildfire_smoke")
