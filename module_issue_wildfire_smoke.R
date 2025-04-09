@@ -16,6 +16,8 @@ library(shiny)
 library(shinydashboard)
 library(leaflet)
 library(dplyr)
+library(webshot)
+if (is.null(suppressMessages(webshot:::find_phantom()))) { webshot::install_phantomjs() }
 
 
 fireIcons <- awesomeIconList(
@@ -424,9 +426,9 @@ issueWildfireSmoke <- function(input, output, session){
       htmlwidgets::saveWidget(usermap, html_map)
       
       png_map <- here::here("outputs", "rnw", "map.png")
-      webshot::webshot(url = html_map,  
-                       file = png_map,
-                       cliprect = cliprect
+      webshot(url = html_map,
+              file = png_map,
+              cliprect = cliprect
       )
 
       usermapForWebsite <- usermap |> 
@@ -446,9 +448,9 @@ issueWildfireSmoke <- function(input, output, session){
       htmlwidgets::saveWidget(usermapForWebsite, file = html_map_for_web)
       
       png_map_for_web <- sprintf(here::here("outputs", "rnw", "%s_%s_map.png"), currentDate, issueBasename)
-      webshot::webshot(url = html_map_for_web,  
-                       file = png_map_for_web,
-                       cliprect = cliprect
+      webshot(url = html_map_for_web,
+              file = png_map_for_web,
+              cliprect = cliprect
       )
       
       # Write selected polygon IDs to CSV file
