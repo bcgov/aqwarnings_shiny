@@ -16,7 +16,7 @@
 # packages required to run the app locally
 list_of_packages <- c(
   "bcmaps",
-  "data.table", #to do: consider using readr:read_csv instead of data.table::fread (see load_metadata.R)
+  "data.table", #to do: consider using readr:read_csv instead of data.table::fread (see load_metadata.r)
   "htmlwidgets",
   "knitr",
   "leaflet",

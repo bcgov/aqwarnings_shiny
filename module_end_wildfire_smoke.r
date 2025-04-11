@@ -126,7 +126,7 @@ endWildfireSmoke <- function(input, output, session){
 
       # PDF
       showNotification("Generating PDF...")
-      knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.Rnw"), endBasename), clean = TRUE,
+      knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), endBasename), clean = TRUE,
                       output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, endBasename))
 
       showNotification("PDF generation complete!", duration = NULL)

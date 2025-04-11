@@ -32,7 +32,7 @@
 \usepackage{lastpage}							% For footer
 %\input{resetHeader}					% resetHeader
 %% --> see below for header code
-<<reset-header, child = "resetHeader.Rnw">>=
+<<reset-header, child = "resetHeader.rnw">>=
 @
 
 \usepackage{etoolbox}
@@ -233,7 +233,7 @@ People with pre-existing health conditions, respiratory infections such as COVID
 \item Maintaining good overall health is a good way to prevent health effects resulting from short-term exposure to air pollution.
 \end{itemize}
 %\input{resetHeader}		%%%%% resets fancyhf to have only footer w/no header. ENSURE THIS IS ON SECOND PAGE.
-<<reset-header, child = "resetHeader.Rnw">>=
+<<reset-header, child = "resetHeader.rnw">>=
 @
 
 

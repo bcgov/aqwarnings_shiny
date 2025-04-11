@@ -123,7 +123,7 @@ issueWildfireSmokeUI <- function(id) {
 # Server
 #--------------------------------------------------
 
-source(here::here("src", "assign_urls.R"))
+source(here::here("src", "assign_urls.r"))
 
 issueWildfireSmoke <- function(input, output, session){
 
@@ -481,7 +481,7 @@ issueWildfireSmoke <- function(input, output, session){
 
       # PDF
       showNotification("Generating PDF...")
-      knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.Rnw"), issueBasename), clean = TRUE,
+      knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
                       output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, issueBasename))
 
       id <- showNotification("PDF generation complete!", duration = NULL)
