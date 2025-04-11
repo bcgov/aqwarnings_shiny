@@ -30,7 +30,7 @@
 \usepackage{fancyhdr}							% For header and footer
 \usepackage{lastpage}							% For footer
 %\input{LaTeX/resetHeader}					% resetHeader
-<<reset-header, child = "resetHeader.Rnw">>=
+<<reset-header, child = "resetHeader.rnw">>=
 @
 
 

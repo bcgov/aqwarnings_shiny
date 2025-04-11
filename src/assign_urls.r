@@ -12,7 +12,7 @@
 
 
 
-## URLs assignments (issueSmokySkies_module.R)
+## URLs assignments (issueSmokySkies_module.r)
 
 bcwfs_fire_layer <- "https://services6.arcgis.com/ubm4tcTYICKBpist/arcgis/rest/services/BCWS_ActiveFires_PublicView/FeatureServer/0"
 current_weather <- "https://geo.weather.gc.ca/geomet"
