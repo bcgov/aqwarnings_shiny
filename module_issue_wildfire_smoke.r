@@ -18,6 +18,7 @@ library(leaflet)
 library(dplyr)
 library(webshot)
 if (is.null(suppressMessages(webshot:::find_phantom()))) { webshot::install_phantomjs() }
+Sys.setenv(OPENSSL_CONF="/dev/null")
 
 
 fireIcons <- awesomeIconList(
