@@ -501,7 +501,6 @@ issueWildfireSmoke <- function(input, output, session){
                                                   customMessage = input$smokeMessage,
                                                   ice = "Issue",
                                                   output_root = quarto_output_root),
-                            #execute_dir = here::here("outputs", "qmd"),
                             debug = FALSE)
       
       id <- showNotification("Markdown generation complete!", duration = NULL)
