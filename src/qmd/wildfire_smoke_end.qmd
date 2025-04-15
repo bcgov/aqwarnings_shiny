@@ -10,6 +10,7 @@ params:
   sel_healthAuth: 
     - First Nations Health Authority 
     - Northern Health 
+  output_root: "."
 ice: "`r params$ice`" 
 sel_aqMet: "`r params$sel_aqMet`" 
 customMessage: "`r params$customMessage`" 
