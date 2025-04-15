@@ -109,7 +109,7 @@ m <- leaflet() |>
         fillOpacity = 0.025,
         opacity = 0.75,
         color = "black",
-        fillColor = "#f7f7f7",
+        fillColor = "#FFF716",
         stroke = TRUE,
         weight = 1,
         smoothFactor = 0.2,
@@ -123,7 +123,7 @@ m <- leaflet() |>
                   opacity = 0.65,
                   color = "black",
                   weight = 1.75,
-                  fillColor = "#bdbdbd",
+                  fillColor = "#FFF716",
                   label = ~NAME,
                   labelOptions = labelOptions(textsize = "15px"))
 
