@@ -138,7 +138,7 @@ endWildfireSmoke <- function(input, output, session){
       
       quarto::quarto_render(input = sprintf(here::here("src", "qmd", "%s.qmd"), endBasename),
                             output_format = "markdown",
-                            output_file = sprintf(file.path(quarto_output_root, "%s_%s.md"), currentDate, endBasename),
+                            output_file = sprintf("%s_%s.md", currentDate, endBasename),
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   lastWarning = input$lastWarning,
                                                   customMessage = input$customMessage,
