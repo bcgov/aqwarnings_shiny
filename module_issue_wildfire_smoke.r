@@ -489,16 +489,19 @@ issueWildfireSmoke <- function(input, output, session){
       # Quarto
       showNotification("Generating Markdown...")
       
+      quarto_output_root <- here::here("outputs", "qmd")
+      
       quarto::quarto_render(input = sprintf(here::here("src", "qmd", "%s.qmd"), issueBasename),
                             output_format = "markdown",
-                            output_file = sprintf("%s_%s.md", currentDate, issueBasename),
+                            output_file = sprintf(file.path(quarto_output_root, "%s_%s.md"), currentDate, issueBasename),
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
                                                   smokeDuration = input$smokeDuration,
                                                   selRegionsIDs = selRegions$ids,
                                                   customMessage = input$smokeMessage,
-                                                  ice = "Issue"),
-                            execute_dir = here::here("outputs", "qmd"),
+                                                  ice = "Issue",
+                                                  output_root = quarto_output_root),
+                            #execute_dir = here::here("outputs", "qmd"),
                             debug = FALSE)
       
       id <- showNotification("Markdown generation complete!", duration = NULL)
