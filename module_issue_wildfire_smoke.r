@@ -508,6 +508,9 @@ issueWildfireSmoke <- function(input, output, session){
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
       
+      map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
+      fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs", "qmd"))
+      
       id <- showNotification("Markdown file moved to outputs/qmd directory.")
 
     } #end else
