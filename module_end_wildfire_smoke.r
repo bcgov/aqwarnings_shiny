@@ -133,9 +133,8 @@ endWildfireSmoke <- function(input, output, session){
       
       # Quarto
       showNotification("Generating Markdown...")
-      
-      #should the .qmd file go it it's own directory, similar to LaTeX?
-      quarto::quarto_render(input = sprintf(here::here("src", "qmd", "%s.qmd"), endBasename),
+
+      quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_format = "markdown",
                             output_file = sprintf("%s_%s.md", currentDate, endBasename),
                             execute_params = list(sel_aqMet = input$sel_aqMet,
@@ -143,7 +142,6 @@ endWildfireSmoke <- function(input, output, session){
                                                   customMessage = input$customMessage,
                                                   sel_healthAuth = input$sel_healthAuth,
                                                   ice = "End"),
-                            execute_dir = here::here("outputs", "qmd"),
                             debug = FALSE)
       
       id <- showNotification("Markdown generation complete!", duration = NULL)

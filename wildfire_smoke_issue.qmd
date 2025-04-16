@@ -39,7 +39,7 @@ library(dplyr)
 library(leaflet)
 
 #Import files in the quarto environment
-source(here::here("src", "load_metadata.r"))
+source(here::here("load_metadata.r"))
 
 ```
 
@@ -109,7 +109,7 @@ m <- leaflet() |>
         fillOpacity = 0.025,
         opacity = 0.75,
         color = "black",
-        fillColor = "#FFF716",
+        fillColor = "#f7f7f7",
         stroke = TRUE,
         weight = 1,
         smoothFactor = 0.2,
@@ -123,16 +123,16 @@ m <- leaflet() |>
                   opacity = 0.65,
                   color = "black",
                   weight = 1.75,
-                  fillColor = "#FFF716",
+                  fillColor = "#bdbdbd",
                   label = ~NAME,
                   labelOptions = labelOptions(textsize = "15px"))
 
-map_html <- sprintf(here::here("outputs", "qmd", "%s_%s_map.html"), currentDate, issueBasename)
+map_html <- sprintf(file.path("%s_%s_map.html"), currentDate, issueBasename)
 m <- mapview::mapshot(m, url = map_html, cliprect = c(140, 147, 610, 480))
 ```
 
 ```{r}
-# Add in extra infomation if Interior Health Authority (IH) is present in contacts
+# Add in extra information if Interior Health Authority (IH) is present in contacts
 HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
   "{{< card_start title=\"Interior Health Authority\" logo=\"/assets/logo_IH_horizontal.png\" >}}
 Steps to prepare and manage wildfire-related issues.

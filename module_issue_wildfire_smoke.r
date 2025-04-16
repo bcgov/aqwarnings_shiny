@@ -492,7 +492,7 @@ issueWildfireSmoke <- function(input, output, session){
       # Quarto
       showNotification("Generating Markdown...")
       
-      quarto::quarto_render(input = sprintf(here::here("src", "qmd", "%s.qmd"), issueBasename),
+      quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_format = "markdown",
                             output_file = sprintf("%s_%s.md", currentDate, issueBasename),
                             execute_params = list(sel_aqMet = input$sel_aqMet,
@@ -501,13 +501,15 @@ issueWildfireSmoke <- function(input, output, session){
                                                   selRegionsIDs = selRegions$ids,
                                                   customMessage = input$smokeMessage,
                                                   ice = "Issue"),
-                            execute_dir = here::here("outputs", "qmd"),
                             debug = FALSE)
       
       id <- showNotification("Markdown generation complete!", duration = NULL)
       
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
+      
+      map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
+      fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs", "qmd"))
       
       id <- showNotification("Markdown file moved to outputs/qmd directory.")
 
