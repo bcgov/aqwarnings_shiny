@@ -13,6 +13,7 @@ params:
     - Prince George
     - Whistler
     - South Okanagan
+  output_root: "."
 ice: "`r params$ice`"
 sel_aqMet: "`r params$sel_aqMet`"
 smokeDuration: "`r params$smokeDuration`"
