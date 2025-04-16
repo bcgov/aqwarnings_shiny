@@ -36,7 +36,7 @@ knitr::opts_chunk$set(echo=FALSE,
 library(dplyr)
 
 #Import files in the quarto environment
-source(here::here("src", "load_metadata.r"))
+source(here::here("load_metadata.r"))
 
 ```
 

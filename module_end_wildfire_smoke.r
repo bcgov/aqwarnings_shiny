@@ -133,18 +133,15 @@ endWildfireSmoke <- function(input, output, session){
       
       # Quarto
       showNotification("Generating Markdown...")
-      
-      quarto_output_root <- here::here("outputs", "qmd")
-      
-      quarto::quarto_render(input = sprintf(here::here("src", "qmd", "%s.qmd"), endBasename),
+
+      quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_format = "markdown",
                             output_file = sprintf("%s_%s.md", currentDate, endBasename),
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   lastWarning = input$lastWarning,
                                                   customMessage = input$customMessage,
                                                   sel_healthAuth = input$sel_healthAuth,
-                                                  ice = "End",
-                                                  output_root = quarto_output_root),
+                                                  ice = "End"),
                             debug = FALSE)
       
       id <- showNotification("Markdown generation complete!", duration = NULL)

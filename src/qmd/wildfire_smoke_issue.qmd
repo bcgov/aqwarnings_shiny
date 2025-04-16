@@ -127,7 +127,7 @@ m <- leaflet() |>
                   label = ~NAME,
                   labelOptions = labelOptions(textsize = "15px"))
 
-map_html <- sprintf(file.path(params$output_root, "%s_%s_map.html"), currentDate, issueBasename)
+map_html <- sprintf(file.path("%s_%s_map.html"), currentDate, issueBasename)
 m <- mapview::mapshot(m, url = map_html, cliprect = c(140, 147, 610, 480))
 ```
 
