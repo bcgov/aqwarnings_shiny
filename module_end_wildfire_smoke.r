@@ -14,6 +14,7 @@
 
 library(shiny)
 library(shinydashboard)
+library(zip)
 library(dplyr)
 
 #--------------------------------------------------
@@ -165,16 +166,14 @@ endWildfireSmoke <- function(input, output, session){
     content = function(file) {
       # Build file paths correctly using sprintf()
       files_to_zip <- c(
-        sprintf("outputs/qmd/%s_wildfire_smoke_end.md", Sys.Date()),
-        sprintf("outputs/rnw/%s_wildfire_smoke_end.pdf", Sys.Date())
+        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_end.md", Sys.Date())),
+        file.path("outputs", "rnw", sprintf("%s_wildfire_smoke_end.pdf", Sys.Date()))
       )
-      
-      # Check they exist (optional but good practice)
-      files_to_zip <- files_to_zip[file.exists(files_to_zip)]
       
       # Zip the files into the download target
       zip::zip(zipfile = file, files = files_to_zip, mode = "cherry-pick")
     },
     contentType = "application/zip"
   )
+  
 }
