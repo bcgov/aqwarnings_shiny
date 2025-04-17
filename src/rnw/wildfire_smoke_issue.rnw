@@ -248,8 +248,8 @@ People with pre-existing health conditions, respiratory infections such as COVID
 
 \subsubsection{Air Quality Data}
 \begin{itemize}
-\item Air Quality Health Index: \url{gov.bc.ca/airqualityhealthindex     }
-\item Air Quality Map: \url{gov.bc.ca/airqualitymap }
+\item Air Quality Health Index: \url{gov.bc.ca/airqualityhealthindex}
+\item Air Quality Map: \url{gov.bc.ca/airqualitymap}
 \end{itemize}
 
 \subsubsection{Wildfire smoke forecasts}
