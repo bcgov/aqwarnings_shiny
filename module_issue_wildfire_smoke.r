@@ -17,6 +17,7 @@ library(shinydashboard)
 library(leaflet)
 library(dplyr)
 library(webshot)
+library(zip)
 if (is.null(suppressMessages(webshot:::find_phantom()))) { webshot::install_phantomjs() }
 Sys.setenv(OPENSSL_CONF="/dev/null")
 
@@ -99,8 +100,15 @@ issueWildfireSmokeUI <- function(id) {
             style = "width: 100%; min-height: 40px; height: auto;"),
        
         hr(),
-        actionButton(inputId = ns("cleanupdir"), label = "clean dir")
-       
+        
+        ## Add the download button here:
+        downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
+        
+        hr(),
+        
+        actionButton(inputId = ns("cleanupdir"), label = "clean dir"),
+        
+        hr()
       ),
 
       #
@@ -481,7 +489,8 @@ issueWildfireSmoke <- function(input, output, session){
       completeNotificationIDs <<- c(completeNotificationIDs, c(id, id2))
 
       output$alttext <- renderText(alttext)
-
+      
+      
       # PDF
       showNotification("Generating PDF...")
       knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
@@ -515,4 +524,25 @@ issueWildfireSmoke <- function(input, output, session){
 
     } #end else
   }) #end observeEvent for generating report
+
+## Download files
+
+  output$download_report <- downloadHandler(
+    filename = function() {
+      sprintf("%s_wildfire_smoke_issue.zip", Sys.Date())
+    },
+    content = function(file) {
+      # Build file paths correctly using sprintf()
+      files_to_zip <- c(
+        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue.md", Sys.Date())),
+        file.path("outputs", "rnw", sprintf("%s_wildfire_smoke_issue.pdf", Sys.Date())),
+        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue_map.html", Sys.Date()))
+      )
+      
+      # Zip the files into the download target
+      zip::zip(zipfile = file, files = files_to_zip, mode = "cherry-pick")
+    },
+    contentType = "application/zip"
+  )
+  
 }
