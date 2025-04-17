@@ -70,6 +70,10 @@ endWildfireSmokeUI <- function(id) {
          label = "Go!",
          style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
        ),
+       
+       hr(),
+       ## Add the download button here:
+       downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
 
        hr(),
        actionButton(
@@ -152,4 +156,25 @@ endWildfireSmoke <- function(input, output, session){
       id <- showNotification("Markdown file moved to outputs/qmd directory.")
     }
   })
+  ## Download files
+  
+  output$download_report <- downloadHandler(
+    filename = function() {
+      sprintf("%s_wildfire_smoke_end.zip", Sys.Date())
+    },
+    content = function(file) {
+      # Build file paths correctly using sprintf()
+      files_to_zip <- c(
+        sprintf("outputs/qmd/%s_wildfire_smoke_end.md", Sys.Date()),
+        sprintf("outputs/rnw/%s_wildfire_smoke_end.pdf", Sys.Date())
+      )
+      
+      # Check they exist (optional but good practice)
+      files_to_zip <- files_to_zip[file.exists(files_to_zip)]
+      
+      # Zip the files into the download target
+      zip::zip(zipfile = file, files = files_to_zip, mode = "cherry-pick")
+    },
+    contentType = "application/zip"
+  )
 }

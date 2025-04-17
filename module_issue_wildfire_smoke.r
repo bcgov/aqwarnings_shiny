@@ -99,8 +99,15 @@ issueWildfireSmokeUI <- function(id) {
             style = "width: 100%; min-height: 40px; height: auto;"),
        
         hr(),
-        actionButton(inputId = ns("cleanupdir"), label = "clean dir")
-       
+        
+        ## Add the download button here:
+        downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
+        
+        hr(),
+        
+        actionButton(inputId = ns("cleanupdir"), label = "clean dir"),
+        
+        hr()
       ),
 
       #
@@ -481,7 +488,8 @@ issueWildfireSmoke <- function(input, output, session){
       completeNotificationIDs <<- c(completeNotificationIDs, c(id, id2))
 
       output$alttext <- renderText(alttext)
-
+      
+      
       # PDF
       showNotification("Generating PDF...")
       knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
@@ -515,4 +523,27 @@ issueWildfireSmoke <- function(input, output, session){
 
     } #end else
   }) #end observeEvent for generating report
+
+## Download files
+
+  output$download_report <- downloadHandler(
+    filename = function() {
+      sprintf("%s_wildfire_smoke_issue.zip", Sys.Date())
+    },
+    content = function(file) {
+      # Build file paths correctly using sprintf()
+      files_to_zip <- c(
+        sprintf("outputs/qmd/%s_wildfire_smoke_issue.md", Sys.Date()),
+        sprintf("outputs/rnw/%s_wildfire_smoke_issue.pdf", Sys.Date()),
+        sprintf("outputs/qmd/%s_wildfire_smoke_issue_map.html", Sys.Date())
+      )
+      
+      # Check they exist (optional but good practice)
+      files_to_zip <- files_to_zip[file.exists(files_to_zip)]
+      
+      # Zip the files into the download target
+      zip::zip(zipfile = file, files = files_to_zip, mode = "cherry-pick")
+    },
+    contentType = "application/zip"
+  )
 }
