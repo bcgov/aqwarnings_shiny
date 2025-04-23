@@ -16,22 +16,21 @@
 # packages required to run the app locally
 list_of_packages <- c(
   "bcmaps",
-  "data.table", #to do: consider using readr:read_csv instead of data.table::fread (see load_metadata.r)
+  "fs",
+  "here",
   "htmlwidgets",
   "knitr",
   "leaflet",
   "leaflet.esri",
-  "lubridate",
   "mapview",
+  "sf",
   "shiny",
   "shinydashboard",
   "shinyjs",
-  "sf",
-  "tidyverse",
+  "tidyverse", # mostly using dplyr, tidyr, readr, lubridate
   "quarto",
   "webshot",
-  "mapshot",
-  "fs"
+  "zip"
 )
 
 # identify which packages are not yet installed on user computer
