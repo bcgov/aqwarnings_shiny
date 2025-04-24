@@ -106,7 +106,7 @@ header <- paste0(header, "{", logo_path, "}}")
 \hfill \break
 The Air Quality Warning for wildfire smoke that was last updated on \Sexpr{format(as.Date(input$lastWarning), '%B %d, %Y')} has ended. \Sexpr{input$customMessage}\\
 \hfill \break
-Real-time air quality information is available on the BC Air Quality website: \url{gov.bc.ca/airqualityhealthindex     }. \\
+Real-time air quality information is available on the BC Air Quality website: \url{https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html}. \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ADD ALL AGENCY CONTACT INFORMATION
 \hfill \break
 {\color{bcblue}\Large \textbf{Contact information}} \large \\
