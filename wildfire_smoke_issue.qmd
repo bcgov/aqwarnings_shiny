@@ -293,18 +293,15 @@ People with pre-existing health conditions, respiratory infections such as COVID
 **Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
 
 {{< card_start width="wide" >}}
-
 `r ENVcontact`
-
 {{< card_end >}}
 
 **Media questions regarding health implications of wildfires:**
 
 {{< card_start  width="wide" >}}
-
 `r paste(HAcontact$contact, collapse = "<br />")`
-
 {{< card_end >}}
+
 
 {{< accordion_start title="Regions included under the Air Quality Warning - Wildfire Smoke" headerClass="h2" >}}
 
