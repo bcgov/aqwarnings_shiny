@@ -256,6 +256,7 @@ People with pre-existing health conditions, respiratory infections such as COVID
 
 **For additional general information about wildfire smoke and air quality:**
 
+<div class="bcds-card-wrapper"> 
 {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
 
 [What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
@@ -267,9 +268,11 @@ People with pre-existing health conditions, respiratory infections such as COVID
 [Smoke forecasts](https://firesmoke.ca/forecasts/current/) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Advisories and map of air quality and weather data.
 
 [Air quality data and advisories](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
+</div>
 
 **For additional general information about wildfire smoke and your health:**
 
+<div class="bcds-card-wrapper"> 
 {{< card_start title="BC Centre for Disease Control" >}} Fact sheets on wildfire smoke and its health impacts.
 
 [Wildfire smoke](http://www.bccdc.ca/health-info/prevention-public-health/wildfire-smoke) {{< card_end >}}
@@ -283,6 +286,7 @@ People with pre-existing health conditions, respiratory infections such as COVID
 [Wildfires and your health](https://www.healthlinkbc.ca/health-library/health-features/wildfires-and-your-health) {{< card_end >}} {{< card_start title="Worksafe BC" logo="/assets/logo_worksafebc.jpg" >}} Info on working outdoors during smoky conditions.
 
 [Wildfire FAQ](https://www.worksafebc.com/en/resources/health-safety/information-sheets/wildfire-smoke-frequently-asked-questions-faq) {{< card_end >}}
+</div>
 
 ## Contact
 
