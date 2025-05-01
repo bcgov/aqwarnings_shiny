@@ -6,6 +6,7 @@ params:
   sel_aqMet: "Sakshi" 
   lastWarning: "2025-02-10" 
   customMessage: "`Custom message.`" 
+  location: "Multiple locations in B.C."
   ice: "End" 
   sel_healthAuth: 
     - First Nations Health Authority 
@@ -15,6 +16,7 @@ author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`" 
 lastWarning: "`r params$lastWarning`" 
 sel_healthAuth: "`r paste(params$sel_healthAuth, collapse=', ')`" 
+location: "`r params$location`"
 ---
 
 ```{=html}
