@@ -1,5 +1,5 @@
 ---
-title: "Air Quality Warning - Wildfire Smoke Ended" 
+title: "Air Quality Warning - Wildfire Smoke" 
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`" 
 params: 
@@ -11,7 +11,7 @@ params:
     - First Nations Health Authority 
     - Northern Health 
 ice: "`r params$ice`" 
-sel_aqMet: "`r params$sel_aqMet`" 
+author: "`r params$sel_aqMet`" 
 customMessage: "`r params$customMessage`" 
 lastWarning: "`r params$lastWarning`" 
 sel_healthAuth: "`r paste(params$sel_healthAuth, collapse=', ')`" 
@@ -83,7 +83,7 @@ n_logos <- length(logos_selected)
 logo_image_line <- c() # start with empty vector
 # Add each logo's insert line to the vector
 for(logo_name in names(logos_selected)) {
-   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](assets/logo_", logos_selected[[logo_name]], ".png)\\"))
+   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](//assets/logo_", logos_selected[[logo_name]], ".png)\\"))
 }
 ```
 
@@ -112,7 +112,7 @@ Real-time air quality information is available on the [BC Air Quality website](h
 
 **Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
 
-{{< card_start >}}
+{{< card_start width="wide" >}}
 
 `r ENVcontact`
 
@@ -120,7 +120,7 @@ Real-time air quality information is available on the [BC Air Quality website](h
 
 **Media questions regarding health implications of wildfires:**
 
-{{< card_start >}}
+{{< card_start width="wide" >}}
 
 `r paste(HAcontact$contact, collapse = "<br />")`
 
