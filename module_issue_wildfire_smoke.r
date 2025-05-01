@@ -60,7 +60,7 @@ issueWildfireSmokeUI <- function(id) {
           inputId = ns("sel_aqMet"),
           label = h5("Author:"),
           selected = "",
-          choices = c("", aq_mets$nickname),
+          choices = c("", aq_mets$fullname),
           width = "100%"
         ),
 
@@ -85,7 +85,18 @@ issueWildfireSmokeUI <- function(id) {
                       resize = "vertical"),
 
         h5("2. Select regions on map."),
-        h5("3. Generate Warning:"),
+        h5("3. Select or create summary description of affected regions (for AQ Warnings Table)."),
+        
+        selectizeInput(
+          inputId = ns("location"),
+          label = h5("Describe regions affected:"),
+          selected = "",
+          choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
+          width = "100%",
+          options = list(create = TRUE)
+        ),
+        
+        h5("4. Generate Warning:"),
 
         actionButton(
           inputId = ns("genWarning"),
@@ -94,6 +105,7 @@ issueWildfireSmokeUI <- function(id) {
         ),
        
         hr(),
+        
         h5("alt-text:"),
         div(textOutput(ns("alttext")),
             class = "form-control",
@@ -101,7 +113,6 @@ issueWildfireSmokeUI <- function(id) {
        
         hr(),
         
-        ## Add the download button here:
         downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
         
         hr(),
@@ -509,7 +520,8 @@ issueWildfireSmoke <- function(input, output, session){
                                                   smokeDuration = input$smokeDuration,
                                                   selRegionsIDs = selRegions$ids,
                                                   customMessage = input$smokeMessage,
-                                                  ice = "Issue"),
+                                                  ice = "Issue",
+                                                  location = input$location),
                             debug = FALSE)
       
       id <- showNotification("Markdown generation complete!", duration = NULL)

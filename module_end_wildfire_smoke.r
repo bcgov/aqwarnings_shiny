@@ -36,7 +36,7 @@ endWildfireSmokeUI <- function(id) {
           inputId = ns("sel_aqMet"),
           label = h5("Author:"),
           selected = "",
-          choices = c("", aq_mets$nickname),
+          choices = c("", aq_mets$fullname),
           width = "50%"
         ),
 
@@ -64,8 +64,20 @@ endWildfireSmokeUI <- function(id) {
           choices = unique(health_contact$authority)[unique(health_contact$authority) != "First Nations Health Authority"],   #exclude FNHA as a choice - exists on all bulletins
           width = "100%"
         ),
+        
+        h5("2. Select or create summary description of affected regions (for AQ Warnings Table)."),
+        
+        selectizeInput(
+          inputId = ns("location"),
+          label = h5("Describe regions affected:"),
+          selected = "",
+          choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
+          width = "100%",
+          options = list(create = TRUE)
+        ),
+        
 
-       h5("2. Generate Warning:"),
+       h5("3. Generate Warning:"),
        actionButton(
          inputId = ns("genWarning"),
          label = "Go!",
@@ -146,7 +158,8 @@ endWildfireSmoke <- function(input, output, session){
                                                   lastWarning = input$lastWarning,
                                                   customMessage = input$customMessage,
                                                   sel_healthAuth = input$sel_healthAuth,
-                                                  ice = "End"),
+                                                  ice = "End",
+                                                  location = input$location),
                             debug = FALSE)
       
       id <- showNotification("Markdown generation complete!", duration = NULL)
