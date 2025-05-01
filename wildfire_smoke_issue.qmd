@@ -169,7 +169,7 @@ n_logos <- length(logos_selected)
 logo_image_line <- c() # start with empty vector
 # Add each logo's insert line to the vector
 for(logo_name in names(logos_selected)) {
-   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](/assets/logo_", logos_selected[[logo_name]], ".png)\\"))
+   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](//assets/logo_", logos_selected[[logo_name]], ".png)\\"))
 }
 ```
 
