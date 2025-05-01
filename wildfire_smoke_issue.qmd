@@ -49,7 +49,7 @@ source(here::here("load_metadata.r"))
 
 #this may not be needed? test later
 ENVcontact <- aq_mets |>
-  filter(nickname == params$sel_aqMet) |>
+  filter(fullname == params$sel_aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
   pull(contact)
 
@@ -110,7 +110,7 @@ m <- leaflet() |>
         fillOpacity = 0.025,
         opacity = 0.75,
         color = "black",
-        fillColor = "#f7f7f7",
+        fillColor = "#FFF716",
         stroke = TRUE,
         weight = 1,
         smoothFactor = 0.2,
@@ -124,7 +124,7 @@ m <- leaflet() |>
                   opacity = 0.65,
                   color = "black",
                   weight = 1.75,
-                  fillColor = "#bdbdbd",
+                  fillColor = "#FFF716",
                   label = ~NAME,
                   labelOptions = labelOptions(textsize = "15px"))
 
@@ -274,13 +274,9 @@ People with pre-existing health conditions, respiratory infections such as COVID
 **For additional general information about wildfire smoke and your health:**
 
 <div class="bcds-card-wrapper"> 
-{{< card_start title="BC Centre for Disease Control" >}} Fact sheets on wildfire smoke and its health impacts.
+{{< card_start title="BC Centre for Disease Control" logo="/assets/logo_BCCDC.png" >}} Fact sheets on wildfire smoke and its health impacts.
 
-[Wildfire smoke](http://www.bccdc.ca/health-info/prevention-public-health/wildfire-smoke) {{< card_end >}}
-
-`r HA_text`
-
-{{< card_start title="First Nations Health Authority" logo="/assets/logo_FNHA_horizontal.png" >}} Information and resources to help you prepare.
+[Wildfire smoke](http://www.bccdc.ca/health-info/prevention-public-health/wildfire-smoke) {{< card_end >}}`r HA_text`{{< card_start title="First Nations Health Authority" logo="/assets/logo_FNHA_horizontal.png" >}} Information and resources to help you prepare.
 
 [Wildfire smoke health information](https://www.fnha.ca/about/news-and-events/news/wildfire-smoke-health-information) {{< card_end >}} {{< card_start title="HealthLink BC" logo="/assets/logo_BCID_HealthLinkBC_RGB_pos.png" >}} Learn and prepare for wildfires. Phone 8-1-1 for 24/7 health advice.
 

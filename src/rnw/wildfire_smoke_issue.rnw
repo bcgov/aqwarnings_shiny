@@ -84,7 +84,7 @@ library(dplyr)
 <<lookup, results="asis", strip.white=FALSE>>=
 #AQ Met Contact Info (based on user input)
 ENVcontact <- aq_mets |> 
-      filter(nickname == input$sel_aqMet) |> 
+      filter(fullname == input$sel_aqMet) |> 
       mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = ", ")
              ) |> 
       pull(contact)
@@ -138,7 +138,7 @@ logo_path <- paste0(here::here("data", "raw", "logos",logo), ".jpg")
 header <- logo_info |> filter(fname == logo) |> pull(chead_txt)
 header <- paste0(header, "{", logo_path, "}}")
 
-# retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
+# retrieve descriptions (data/eccc_descriptions.csv) for each affected region
 # descriptions included at end of the warning
 regions <- reg_description |> 
   filter(eccc %in% selRegions$ids) |> 
