@@ -1,10 +1,10 @@
-# Issue and publish an Air quality warning - Wildfire smoke
+# Issue and publish an Air Quality Warning - Wildfire smoke
 
-Before you begin, you should have access to the team channel with all resources and processes, your username and password for ShinyApps.io and GitHub. Speak to [] for any access and onboarding questions.
+Before you begin, you should have access to the Microsoft Teams channel [INSERT LINK] with all resources and processes, your username and password for ShinyApps.io and GitHub. Speak to Gail Roth, Sakshi Jain, or Donna Haga for any access and onboarding questions.
 
 ## Issue warnings (using ShinyApps.io)
 
-Once you are ready to **issue** an air quality warning here are the steps 
+Once you are ready to **issue** an air quality warning here are the steps: 
 
 1. Go to the AQ Warnings ShinyApp: https://bcgov-env.shinyapps.io/aqwarnings_shiny/ 
     - Select “Login”
@@ -13,20 +13,24 @@ Once you are ready to **issue** an air quality warning here are the steps
 2. Complete the fields, following the prompts in the application:
     - Select your name from the author dropdown
     - Confirm or edit the length of time wildfire smoke expected to last
-    - Confirm of select the date for next update
-    - Add a custom smoke outlook message
+    - Confirm or select the date for next update
+    - Add a custom smoke outlook message (optional)
 
 3. Select the impacted regions on the map:
     - Hover over regions with your cursor to see their names
-    - Click to select a region, once selected the region will be highlighted yellow
+    - Click to select/de-select a region, once selected the region will be highlighted yellow. If needed, you can de-select all the regions on the map using the "Reset Map" button above the map.
+    - Several layers can be overlaid on the map using the check-boxes in the legend in the upper right corner of the map window. These layers can be useful when informing your decision (for example, to see extent of smoke impact) 
 
-4. Select "Go!" to generate the air quality warning:
+4. [NEEDS REVISION] Select or create a description summarizing what areas of the province will be included in the Warning. This is useful when large areas are under Warning (for example, "Several regions in the Southern and Central Interior"). You can type in a description or pick one from the drop-down menu.
+
+5. Select "Go!" to generate the Air Quality Warning:
     - It may take some time to generate, you will see pop-up toasts in the lower right sidebar once it has finished
 
-5. Select "Download Files":
+6. Select "Download Files":
     - A system dialog box will open to ask where you want to save a compressed ZIP archive 
     - Select the location and press "Save"
     - At this stage you may want to open the archive and review the Air Quality Warning PDF to ensure the meteorologist, region, and smoke outlook message are correct
+    
 
 ## Publish warnings (via GitHub, Air Quality Subscription Service (AQSS), and Social Media)
 
