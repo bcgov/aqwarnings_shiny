@@ -2,6 +2,7 @@
 title: "Air Quality Warning - Wildfire Smoke"
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`"
+toc: true
 params:
   sel_aqMet: "Sakshi"
   smokeDuration: "`24-48 hours`"
