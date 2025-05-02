@@ -293,7 +293,7 @@ People with pre-existing health conditions, respiratory infections such as COVID
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CURRENT WARNING REGIONS
 \newpage
-\section{Regions included under the Air Quality Warning - Wildfire Smoke}
+\section{Regions included under this Air Quality Warning}
 \label{current_regions}
 
 \Sexpr{paste(paste(region, description, sep = " "), collapse = '\\\\\n')}\\
