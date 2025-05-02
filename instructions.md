@@ -1,6 +1,6 @@
 # Issue and publish an Air Quality Warning - Wildfire smoke
 
-Before you begin, you should have access to the Microsoft Teams channel [INSERT LINK] with all resources and processes, your username and password for ShinyApps.io and GitHub. Speak to Gail Roth, Sakshi Jain, or Donna Haga for any access and onboarding questions.
+Before you begin, you should have access to the [Wildfire channel](https://teams.microsoft.com/l/channel/19%3Adbcd68403ff248a5b85d86b3c0f2edfb%40thread.tacv2/Wildfire?groupId=08b39b07-19dc-4340-9e31-ecea7c416570&tenantId=6fdb5200-3d0d-4a8a-b036-d3685e359adc) in Microsoft Teams, your username and password for [ShinyApps.io](login.shinyapps.io) and [GitHub](github.com). Speak to Gail Roth, Sakshi Jain, or Donna Haga for any access and onboarding questions.
 
 ## Issue warnings (using ShinyApps.io)
 
@@ -8,7 +8,8 @@ Once you are ready to **issue** an air quality warning here are the steps:
 
 1. Go to the AQ Warnings ShinyApp: https://bcgov-env.shinyapps.io/aqwarnings_shiny/ 
     - Select “Login”
-    - Use the username and password you have been provided
+    - Use the username and password you have been provided.
+    - The ShinyApp should open
 
 2. Complete the fields, following the prompts in the application:
     - Select your name from the author drop-down
@@ -66,11 +67,11 @@ We will cover the method using GitHub desktop below.
 
 6. In GitHub Desktop you should see the files you added show up in the left sidebar under "Changes". Ensure the check-box beside their name is selected. Type a message in the summary box by your profile picture in the bottom of the left side bar, for example:
 
-  `20250502 aq warning issued` 
+   `20250502 aq warning issued` 
   
-   You don't need to enter anything into the bigger box that is below ("Description")
+    You don't need to enter anything into the bigger box that is below ("Description")
 
-   Press "Commit 2 files to <branch name>"
+    Press "Commit 2 files to [branch name]"
 
 7. Select "Publish Branch" in the top right bar.
 
@@ -78,7 +79,7 @@ We will cover the method using GitHub desktop below.
   - A window will pop up showing the two files (.md and .html) - ensure that both (all) the files have been added. 
   - Select “Create Pull Request” in the bottom right of this window. 
   - You may be prompted to re-authenticate your account.
-  - It should take a second, but you will be redirected to the [aqwarnings GitHub repository](https://github.com/bcgov/aqwarnings) in your browser that says "Open a pull request" at the top of the page. 
+  - It should take a second, but you will be redirected to the [aqwarnings GitHub repository](https://github.com/bcgov/aqwarnings) in your browser and it will say "Open a pull request" at the top of the page. 
   - The commit message you entered in GitHub desktop (above in 6.) will be the Pull Request message (under "Add a title"). You do not have to add a description.
   - Select “Create pull request”.
   
