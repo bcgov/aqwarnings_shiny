@@ -45,14 +45,6 @@ issueWildfireSmokeUI <- function(id) {
 
   tabItem(tabName = "issue",
     
-      # bslib::navset_card_underline(
-      #   
-      #   bslib::nav_panel("Generate Warning",#ouput the the things),
-      #   
-      #   bslib::nav_panel("Instructions",#output markdown)
-      #   
-      # )    
-          
       fluidRow(
 
       #
@@ -144,7 +136,14 @@ issueWildfireSmokeUI <- function(id) {
         hr(),
         leafletOutput(outputId = ns("map"), width = "100%", height = 750)
       
-      )
+      ),
+      
+      #
+      # instructions
+      #
+      box(width=9,
+          status="info",
+          includeMarkdown("instructions.md"))
 
     )
   )
