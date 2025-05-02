@@ -4,7 +4,7 @@ type: "wildfire_smoke"
 date: "`r Sys.Date()`"
 toc: true
 params:
-  sel_aqMet: "Sakshi"
+  sel_aqMet: "Sakshi Jain"
   smokeDuration: "`24-48 hours`"
   customMessage: "`Custom message.`"
   ice: "Issue"
