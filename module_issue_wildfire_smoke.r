@@ -44,7 +44,16 @@ issueWildfireSmokeUI <- function(id) {
   ns <- NS(id)
 
   tabItem(tabName = "issue",
-    fluidRow(
+    
+      # bslib::navset_card_underline(
+      #   
+      #   bslib::nav_panel("Generate Warning",#ouput the the things),
+      #   
+      #   bslib::nav_panel("Instructions",#output markdown)
+      #   
+      # )    
+          
+      fluidRow(
 
       #
       # sidebar
