@@ -300,6 +300,6 @@ People with pre-existing health conditions, respiratory infections such as COVID
 `r paste(HAcontact$contact, collapse = "<br />")`
 {{< card_end >}}
 
-## Regions included under the Air Quality Warning - Wildfire Smoke
+## Regions included under this Air Quality Warning
 
 `r paste(region_output)`
