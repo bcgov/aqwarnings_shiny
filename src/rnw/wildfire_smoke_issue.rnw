@@ -165,6 +165,7 @@ nextUpdateDateString <- format_datestring(input$nextUpdate)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% SMOKY SKIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% SMOKY SKIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 %\SweaveOpts{concordance=TRUE}
 
 \thispagestyle{firstpagestyle}
@@ -175,21 +176,23 @@ The Regions of BC highlighted on the map are being impacted or are likely to be 
 
 \Sexpr{input$smokeMessage}
 
-The next update will be available on \Sexpr{nextUpdateDateString}.
+During a wildfire, smoke conditions can change quickly over short distances and can vary considerably hour-by-hour.
 
-The Air Quality Warning for wildfire smoke can be accessed online at \url{gov.bc.ca/airqualityadvisories}.
+Monitor the situation for any wildfires near your area at \href{www.emergencyinfobc.gov.bc.ca}{EmergencyInfoBC}. Follow all emergency announcements relevant to your location.
+
+The next update will be available on \Sexpr{nextUpdateDateString} at and made available on the \href{https://aqwarnings.gov.bc.ca/}{Province's Air Quality Warning webpage}.
 
 \begin{minipage}[t]{0.38\textwidth}
-\section{Be informed}                          %%%%%% BE INFORMED
+\section{Actions you can take}                          %%%%%% ACTIONS YOU CAN TAKE
 \vspace{2ex}   % hack
 
-During a wildfire, smoke conditions can change quickly over short distances and can vary considerably hour-by-hour.
+As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
 \vspace{\baselineskip}
 
-Wildfire smoke is a natural part of our environment but it is important to be mindful that exposure to smoke may affect your health.
+People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. 
 \vspace{\baselineskip}
 
-People with pre-existing health conditions, respiratory infections such as COVID-19, older adults, pregnant women and infants, children, and sensitive individuals are more likely to experience health effects from smoke exposure.
+This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
 \end{minipage}%
 \hspace{0.022\textwidth}
 \begin{minipage}[t]{0.598\textwidth}       					     	%%%%%%% MAP OF SMOKY SKIES AREAS
@@ -198,52 +201,50 @@ People with pre-existing health conditions, respiratory infections such as COVID
  \includegraphics[width=\textwidth]{map.png}
  \begin{flushright}
  \vspace{-\baselineskip}
- \color{gray}{\footnotesize A description of Region(s) included in the Air Quality Warning for wildfire smoke is provided at the \hyperref[current_regions]{end of this document}. The Air Quality Warning for wildfire smoke does not include Metro Vancouver or the Fraser Valley Regional District.
+ \color{gray}{\footnotesize A description of Region(s) included in this Air Quality Warning is provided at the \hyperref[current_regions]{end of this document}. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the \hyperref[More information]{More information} section for a link to air quality notifications issued by Metro Vancouver.
  }
  \end{flushright}
 \end{minipage}
-
-\section{During smoky conditions}              %%%%%% DURING SMOKY CONDITIONS SECTION
 
 \subsection{Follow your common sense}				   %%%%%% FOLLOW COMMON SENSE
 \begin{itemize}
 \item Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
 \item Stay cool and drink plenty of fluids.
-\item If you have asthma or other chronic illness, carry any rescue (fast-acting) medications with you at all times and activate your personal care plan that has been designed with your family physician.
+\item Carry any rescue medications with you at all times.
 \item Make sure that children and others who cannot care for themselves follow the same advice.
 \end{itemize}
 
 \subsection{Monitor your symptoms}						  %%%%%% MONITOR YOUR SYMPTOMS
 \begin{itemize}
-\item People respond differently to smoke. Mild irritation and discomfort are common, and usually disappear when the smoke clears.
-%\item Exposure to wildfire smoke and the virus that causes COVID-19 can both result in respiratory symptoms such as a dry cough, sore throat, or difficulty breathing. Use the \href{https://bc.thrive.health/covid19/en}{BC COVID-19 Self-Assessment Tool} to help determine whether you need further assessment or testing for COVID-19. ##URL no longer exists##
+\item Different people have different responses to smoke.
+\item Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the smoke clears.
+\item More serious but less common symptoms include wheezing, chest pains or severe cough.
+\item People with asthma or other chronic illness should follow any personal care plans designed with their family physicians. 
 \item If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
-\item If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your health care provider, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
+\item If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
 \end{itemize}
 
 \subsection{Tips to reduce your smoke exposure}		%%%%% TIPS TO REDUCE EXPOSURE
 \begin{itemize}
 \item Smoke levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
-\item Running a commercially available HEPA (high efficiency particulate air) filter can improve indoor air quality in the room where the device is located.
-\item If you have a forced air heating/cooling system in your home, it may help to change the filter and set the fan to run continuously.
-\item Reduce indoor air pollution sources such as smoking, burning incense, and frying foods.
-\item Consider going to a library, community center, or shopping mall with cooler filtered air to get some relief from the smoke.
-\item If travelling in a car with air conditioning, keep the windows up and the ventilation set to recirculate.
-\item If you are very sensitive to smoke, consider moving to another location with cleaner air, but be aware that conditions can change rapidly.
-\item Maintaining good overall health is a good way to prevent health effects resulting from short-term exposure to air pollution.
+\item When indoors, keep windows and doors closed as much as possible.
+\item When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.
+\item Protect your indoor air from wildfire smoke. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles.
+\item If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to the fine particles in the smoke. Even though exposure may be reduced, there can still be risks to health.
+\item Check in on others who are in your care or live nearby who may be more likley to be impacted by wildfire smoke.
+\item Always follow guidance from local authorities.
 \end{itemize}
 %\input{resetHeader}		%%%%% resets fancyhf to have only footer w/no header. ENSURE THIS IS ON SECOND PAGE.
 <<reset-header, child = "resetHeader.rnw">>=
 @
 
-
 \section{More information}     %%%%%% MORE INFORMATION SECTION
 
 \subsection{For additional general information about wildfire smoke and air quality:}
 
-\subsubsection{Advisories for Metro Vancouver and the Fraser Valley Regional District}
+\subsubsection{Air quality notifications issued by Metro Vancouver}
 \begin{itemize}
-\item Metro Vancouver's Air Quality Data and Advisories page:\url{https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories}
+\item For air quality notifications issued by Metro Vancouver (\href{https://gis.metrovancouver.org/maps/Air}{map}), visit their \href{https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories}{Air Quality Data and Warnings page}
 \end{itemize}
 
 \subsubsection{Air Quality Data}
