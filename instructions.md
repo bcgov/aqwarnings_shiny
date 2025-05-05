@@ -82,30 +82,35 @@ We will cover the method using GitHub desktop below.
   - Select “Create Pull Request” in the bottom right of this window. 
   - You may be prompted to re-authenticate your account.
   - It should take a second, but you will be redirected to the [aqwarnings GitHub repository](https://github.com/bcgov/aqwarnings) in your browser and it will say "Open a pull request" at the top of the page. 
-  - The commit message you entered in GitHub desktop (above in 6.) will be the Pull Request message (under "Add a title"). You do not have to add a description.
+  - The commit message you entered in GitHub desktop (above in 6.) will be the PR message (under "Add a title"). You do not have to add a description.
   - Select “Create pull request”.
   
-
 10. Review your changes.
   - You will be redirected to a new page with the commit message at the top (eg. "20250502 aq warning issued #46")
-  - You may see a message under the pull request saying “Some checks haven’t completed yet”. When the checks have completed, a comment will show up “PR Preview Action” -> open the link below this (e.g. https://bcgov.github.io/aqwarnings/pr-preview/pr-46/) in a new tab to preview the page and Air Quality Warning.
+  - You may see a message under your comment in the PR saying “Some checks haven’t completed yet”. When the checks have completed, a new comment will show up “PR Preview Action”. Click to open the link below this to preview the page and Air Quality Warning (e.g. https://bcgov.github.io/aqwarnings/pr-preview/pr-XX/).
+  - Review the content at that link, what you are seeing is a complete new copy of the web site with the new warning included. You will have to view the actual warning to make sure the warning message and appearance are what you expected.
 
-11. If all looks good, go back to the Pull Request on GitHub.
-    NOTE: Will you want someone else to review before merging in a change?
-    [NEED TO ADD FINAL STEPS - MERGING INTO MAIN, DELETING BRANCH]
+11. (Optional) Have another member of your team review and approve changes.
+  - A number of Meteorologists will be automatically be assigned to review the issue.
+  - If you need to assign another reviewer, from the PR page:
+    - Select the gear in the right sidebar, beside "Reviewers"
+    - Type the github username of anyone you want to add, when you click out of that menu, you will see their name under reviewers, they will recieve an email.
 
-## Step 2: Air Quality Subscription Service 
-[TO BE ADDED LATER]
+11. Publish your changes by merging the pull request.
+  - Once your change have been reviewed, you are ready to publish your changes.
+  - From the PR page. Scroll down below your comment and select "Merge pull request". 
+  - The website will automatically be rebuilt with the new warning showing! Give it a few minutes and visit the site: https://aqwarnings.gov.bc.ca to confirm it is live before publishing.
+  
 
+## Step 2: Air Quality Subscription Service and on Social Media
 
-## Step 3: Post on Social Media 
-[TO BE ADDED LATER]
+This process has not changed from last year.
 
 #### Quick Links
 
-- ShinyApp (authenticated)
+- AQ Warnings ShinyApp (authenticated)
     - PROD: https://bcgov-env.shinyapps.io/aqwarnings_shiny/
-    - TEST: https://bcgov-env.shinyapps.io/aqwarnings_shiny_test/
+    - TEST: https://bcgov-env.shinyapps.io/aqwarnings_shiny_test/ 
 - AQ Warnings web site
     - PROD: https://aqwarnings.gov.bc.ca
     - TEST: Each Pull Request (PR) launches a "preview" to test changes before publishing by merging the PR
