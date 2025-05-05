@@ -207,6 +207,8 @@ As smoke levels increase, health risks increase. Limit time outdoors. Consider r
 
 People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
 
+## During smoky conditions
+
 {{< accordion_controls >}}
 
 {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
