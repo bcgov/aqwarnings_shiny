@@ -2,8 +2,9 @@
 title: "Air Quality Warning - Wildfire Smoke"
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`"
+toc: true
 params:
-  sel_aqMet: "Sakshi"
+  sel_aqMet: "Sakshi Jain"
   smokeDuration: "`24-48 hours`"
   customMessage: "`Custom message.`"
   ice: "Issue"
@@ -299,9 +300,6 @@ People with pre-existing health conditions, respiratory infections such as COVID
 `r paste(HAcontact$contact, collapse = "<br />")`
 {{< card_end >}}
 
-
-{{< accordion_start title="Regions included under the Air Quality Warning - Wildfire Smoke" headerClass="h2" >}}
+## Regions included under this Air Quality Warning
 
 `r paste(region_output)`
-
-{{< accordion_end >}}

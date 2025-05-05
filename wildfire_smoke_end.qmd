@@ -2,8 +2,9 @@
 title: "Air Quality Warning - Wildfire Smoke" 
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`" 
+toc: true
 params: 
-  sel_aqMet: "Sakshi" 
+  sel_aqMet: "Sakshi Jain" 
   lastWarning: "2025-02-10" 
   customMessage: "`Custom message.`" 
   location: "Multiple locations in B.C."
