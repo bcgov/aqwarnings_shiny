@@ -44,7 +44,8 @@ issueWildfireSmokeUI <- function(id) {
   ns <- NS(id)
 
   tabItem(tabName = "issue",
-    fluidRow(
+    
+      fluidRow(
 
       #
       # sidebar
@@ -135,7 +136,14 @@ issueWildfireSmokeUI <- function(id) {
         hr(),
         leafletOutput(outputId = ns("map"), width = "100%", height = 750)
       
-      )
+      ),
+      
+      #
+      # instructions
+      #
+      box(width=9,
+          status="info",
+          includeMarkdown("instructions.md"))
 
     )
   )
