@@ -194,19 +194,18 @@ The Regions of BC highlighted on the map are being impacted or are likely to be 
 
 `r params$customMessage`
 
-The next update will be available on `r format(as.Date(params$nextUpdate), '%B %d, %Y')`.
+During a wildfire, smoke conditions can change quickly over short distances and can vary considerably hour-by-hour.
 
-The Air Quality Warning for wildfire smoke can be accessed online at [https://bcgov.github.io/aqwarnings/](https://bcgov.github.io/aqwarnings/).
+Monitor the situation for any wildfires near your area at [EmergencyInfoBC](https://www.emergencyinfobc.gov.bc.ca/). Follow all emergency announcements relevant to your location.
+
+The next update will be available on `r format(as.Date(params$nextUpdate), '%B %d, %Y')` and made available on the Province's [Air Quality Warnings webpage](https://aqwarnings.gov.bc.ca/).
 
 ![A description of Region(s) included in this Air Quality Warning is provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map_html`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
 
-## Be informed
+## Actions you can take
+As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
 
-During a wildfire, smoke conditions can change quickly over short distances and can vary considerably hour-by-hour.
-
-Wildfire smoke is a natural part of our environment but it is important to be mindful that exposure to smoke may affect your health.
-
-People with pre-existing health conditions, respiratory infections such as COVID-19, older adults, pregnant women and infants, children, and sensitive individuals are more likely to experience health effects from smoke exposure.
+People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
 
 ## During smoky conditions
 
@@ -218,6 +217,10 @@ People with pre-existing health conditions, respiratory infections such as COVID
 
 -   Stay cool and drink plenty of fluids.
 
+-   Carry any rescue medications with you at all times.
+
+-   Make sure that children and others who cannot care for themselves follow the same advice.
+
 -   If you have asthma or other chronic illness, carry any rescue (fast-acting) medications with you at all times and activate your personal care plan that has been designed with your family physician.
 
 -   Make sure that children and others who cannot care for themselves follow the same advice.
@@ -226,11 +229,17 @@ People with pre-existing health conditions, respiratory infections such as COVID
 
 {{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
 
--   People respond differently to smoke. Mild irritation and discomfort are common, and usually disappear when the smoke clears.
+-   Different people have different responses to smoke.
+
+-   Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the smoke clears.
+
+-   More serious but less commmon symptoms include wheezing, chest pains or severe cough.
+
+-   People with asthma or other chronic illness should follow any personal care plans designed with their family physicians.
 
 -   If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
 
--   If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your health care provider, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
+-   If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
 
 {{< accordion_end >}}
 
@@ -238,19 +247,17 @@ People with pre-existing health conditions, respiratory infections such as COVID
 
 -   Smoke levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
 
--   Running a commercially available HEPA (high efficiency particulate air) filter can improve indoor air quality in the room where the device is located.
+-   When indoor, keep windows and doors closed as much as possible.
 
--   If you have a forced air heating/cooling system in your home, it may help to change the filter and set the fan to run continuously.
+-   When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.
 
--   Reduce indoor air pollution sources such as smoking, burning incense, and frying foods.
+-   Protect your indoor air from wildfire smoke. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. 
 
--   Consider going to a library, community center, or shopping mall with cooler filtered air to get some relief from the smoke.
+-   If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to the fine particles in the smoke. Even though exposure may be reduced, there can still be risks to health.
 
--   If travelling in a car with air conditioning, keep the windows up and the ventilation set to recirculate.
+-   Check on others who are in your care or live nearby who may be more likley to be impacted by wildfire smoke.
 
--   If you are very sensitive to smoke, consider moving to another location with cleaner air, but be aware that conditions can change rapidly.
-
--   Maintaining good overall health is a good way to prevent health effects resulting from short-term exposure to air pollution.
+-   Always follow guidance from local authorities. 
 
 {{< accordion_end >}}
 
@@ -269,7 +276,7 @@ People with pre-existing health conditions, respiratory infections such as COVID
 
 [Smoke forecasts](https://firesmoke.ca/forecasts/current/) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Advisories and map of air quality and weather data.
 
-[Air quality data and advisories](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
+[Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
 </div>
 
 **For additional general information about wildfire smoke and your health:**
