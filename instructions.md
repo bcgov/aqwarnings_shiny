@@ -55,7 +55,9 @@ We will cover the method using GitHub desktop below.
 
 1. Open GitHub Desktop, ensure the current repository is "aqwarnings". If you don't have this repository, clone it from [https://github.com/bcgov/aqwarnings](https://github.com/bcgov/aqwarnings).
 
-2. Ensure the Current branch is showing "main" and click "Fetch origin".
+2. Ensure the Current branch is showing "main" and click "Fetch origin" (tab along the top of the pane). The tab will say "Fetching Origin", and then "Refreshing Repository":
+    - if your local copy is up to date,  the tab will say "Fetch origin (Last fetched just now)".
+    - if changes need to be retrieved from GitHub, the will change to "Pull Origin" (this will also appear as a blue button in the main pane. Select "Pull Origin" in one of these two locations.
 
 3. Click "Current branch (main)", under branches select "New branch" and name it by the following convention:
 
