@@ -179,7 +179,7 @@ During a wildfire, smoke conditions can change quickly over short distances and 
 
 Monitor the situation for any wildfires near your area at \href{www.emergencyinfobc.gov.bc.ca}{EmergencyInfoBC}. Follow all emergency announcements relevant to your location.
 
-The next update will be available on \Sexpr{nextUpdateDateString} at and made available on the \href{https://aqwarnings.gov.bc.ca/}{Province's Air Quality Warning webpage}.
+The next update will be available on \Sexpr{nextUpdateDateString} and made available on the \href{https://aqwarnings.gov.bc.ca/}{Province's Air Quality Warning webpage}.
 
 \begin{minipage}[t]{0.38\textwidth}
 \section{Actions you can take}                          %%%%%% ACTIONS YOU CAN TAKE
