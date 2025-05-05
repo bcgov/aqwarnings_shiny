@@ -46,7 +46,7 @@ source(here::here("load_metadata.r"))
 #AQ met information
 
 ENVcontact <- aq_mets |>
-  filter(nickname == params$sel_aqMet) |>
+  filter(fullname == params$sel_aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
   pull(contact)
 
