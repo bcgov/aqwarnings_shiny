@@ -165,7 +165,6 @@ nextUpdateDateString <- format_datestring(input$nextUpdate)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% SMOKY SKIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% SMOKY SKIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-\SweaveOpts{concordance=TRUE}
 %\SweaveOpts{concordance=TRUE}
 
 \thispagestyle{firstpagestyle}
