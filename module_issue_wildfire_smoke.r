@@ -430,8 +430,11 @@ issueWildfireSmoke <- function(input, output, session){
       showNotification("No author selected; please select an author.", type = "error")
     } else if (length(selRegions$ids) == 0) {
       showNotification("No region selected; please select a region.", type = "error")
+    } else if (input$location == "") {
+        showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
 
+      
       ncomplete <- length(completeNotificationIDs)
       if (ncomplete > 0) {
         # remove the notification for completed steps if the genWarning
@@ -443,7 +446,8 @@ issueWildfireSmoke <- function(input, output, session){
         completeNotificationIDs <<- completeNotificationIDs[-c(seq(ncomplete))]
       }
       
-      showNotification("Rendering map...")
+      showNotification("Preparing files. Please wait for completion notification.",
+                       duration = 17)
       
       issueBasename <- "wildfire_smoke_issue"
       cliprect <- c(140, 147, 610, 480)  # top, left, width, height
@@ -504,21 +508,21 @@ issueWildfireSmoke <- function(input, output, session){
       
       writeLines(alttext, sprintf(here::here("outputs", "rnw", "%s_%s_map_alttext.txt"), currentDate, issueBasename))
       
-      id2 <- showNotification("Writing text files complete!", duration = NULL)
-      completeNotificationIDs <<- c(completeNotificationIDs, c(id, id2))
+      #id2 <- showNotification("Writing text files complete!", duration = NULL)
+      #completeNotificationIDs <<- c(completeNotificationIDs, c(id, id2))
 
       output$alttext <- renderText(alttext)
       
       
       # PDF
-      showNotification("Generating PDF...")
+     # showNotification("Generating PDF...")
       knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
                       output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, issueBasename))
 
-      id <- showNotification("PDF generation complete!", duration = NULL)
+     # id <- showNotification("PDF generation complete!", duration = NULL)
       
       # Quarto
-      showNotification("Generating Markdown...")
+    #  showNotification("Generating Markdown...")
       
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_format = "markdown",
@@ -532,7 +536,7 @@ issueWildfireSmoke <- function(input, output, session){
                                                   location = input$location),
                             debug = FALSE)
       
-      id <- showNotification("Markdown generation complete!", duration = NULL)
+     # id <- showNotification("Markdown generation complete!", duration = NULL)
       
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
@@ -540,7 +544,10 @@ issueWildfireSmoke <- function(input, output, session){
       map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs", "qmd"))
       
-      id <- showNotification("Markdown file moved to outputs/qmd directory.")
+      id <- showNotification("Processing complete. Files are ready for downloading.", 
+                       duration = NULL)
+      
+      completeNotificationIDs <<- c(completeNotificationIDs, c(id))
 
     } #end else
   }) #end observeEvent for generating report
@@ -564,5 +571,4 @@ issueWildfireSmoke <- function(input, output, session){
     },
     contentType = "application/zip"
   )
-  
 }
