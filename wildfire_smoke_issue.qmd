@@ -71,8 +71,11 @@ unique_HA <- unique_HA [! unique_HA %in% ""]
 
 # filter health authorities, always include FNHA
 HAcontact <- health_contact |> 
-   filter(authority %in% c("First Nations Health Authority", unique_HA)) |> 
-   mutate(authority = factor(authority))
+  filter(authority %in% c("First Nations Health Authority", unique_HA)) |> 
+  mutate(authority = factor(authority))|> 
+  select(authority, contact) |>
+  group_by(authority) |> 
+  summarise(html_string = paste(contact, collapse="<br />" ))
 
 # retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
@@ -303,7 +306,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 **Media questions regarding health implications of wildfires:**
 
 {{< card_start  width="wide" >}}
-`r paste(HAcontact$contact, collapse = "<br />")`
+`r paste(HAcontact$html_string)`
 {{< card_end >}}
 
 ## Regions included under this Air Quality Warning
