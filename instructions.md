@@ -56,6 +56,8 @@ We will only cover using GitHub.com below and encourage everyone to follow this 
 
 2. Go to the folder `frontend/warnings/` you will add all warnings to: [https://github.com/bcgov/aqwarnings/tree/main/frontend/warnings](https://github.com/bcgov/aqwarnings/tree/main/frontend/warnings)
 
+   ![File editor on github.com](github.PNG)
+
 3. Click "Add file", in the drop down select "Upload files".
 
 4. Select and move the Markdown (.md) and map (.html) files from the zip archive you downloaded to this page by dragging and dropping or clicking "choose your files" and selecting them in the system dialog box.
