@@ -1,15 +1,19 @@
-# Issue and publish an Air Quality Warning - Wildfire smoke
+# Issue an Air Quality Warning - Wildfire smoke
 
-Before you begin, you should have access to the [Wildfire channel](https://teams.microsoft.com/l/channel/19%3Adbcd68403ff248a5b85d86b3c0f2edfb%40thread.tacv2/Wildfire?groupId=08b39b07-19dc-4340-9e31-ecea7c416570&tenantId=6fdb5200-3d0d-4a8a-b036-d3685e359adc) in Microsoft Teams, your username and password for [ShinyApps.io](login.shinyapps.io) and [GitHub](github.com). Speak to Gail Roth, Sakshi Jain, or Donna Haga for any access and onboarding questions.
+Before you begin, you should have access to: 
+- the [Wildfire channel](https://teams.microsoft.com/l/channel/19%3Adbcd68403ff248a5b85d86b3c0f2edfb%40thread.tacv2/Wildfire?groupId=08b39b07-19dc-4340-9e31-ecea7c416570&tenantId=6fdb5200-3d0d-4a8a-b036-d3685e359adc) in Microsoft Teams, 
+- username and password for [ShinyApps.io](login.shinyapps.io), and 
+- be added to the [GitHub](github.com) `bcgov` organization. 
 
-## Issue warnings (using ShinyApps.io)
+Speak to Gail Roth, Sakshi Jain, or Donna Haga for any access and onboarding questions.
 
-Once you are ready to **issue** an air quality warning here are the steps: 
+## Issue warnings using ShinyApps.io
 
-1. Go to the AQ Warnings ShinyApp: https://bcgov-env.shinyapps.io/aqwarnings_shiny/ 
-    - Select “Login”
-    - Use the username and password you have been provided.
-    - The ShinyApp should open
+Here are the steps to **issue** an air quality warning: 
+
+1. Login to the AQ Warnings ShinyApp: https://bcgov-env.shinyapps.io/aqwarnings_shiny/ 
+    - You will see a message "Authorization Required. Access to this content is restricted."
+    - Select “Login”, enter the username and password you have been provided
 
 2. Complete the fields, following the prompts in the application:
     - Select your name from the author drop-down
@@ -33,60 +37,42 @@ Once you are ready to **issue** an air quality warning here are the steps:
     - A system dialog box may open to ask where you want to save a compressed ZIP archive->Select the location and press "Save".
     - In Chrome, the ZIP archive will automatically get saved to your "Downloads" folder. 
     - At this stage you may want to open the archive and review the Air Quality Warning PDF to ensure the meteorologist, region, and smoke outlook message are correct
-    
-7. [DO WE STILL NEED THIS STEP?] Select "clean dir" to delete auxillary files in the working directory.
-    
 
-## Publish warnings (via GitHub, Air Quality Subscription Service (AQSS), and Social Media)
+## Publish warnings via GitHub Pages
 
-Once you have the archive saved you are ready to publish it to [AQ Warnings](https://aqwarnings.gov.bc.ca/) web site, send it to AQSS subscribers, and publish to social media.
-
-## Step 1: AQ Warnings web site
+Once you have the archive saved you are ready to publish it to the [AQ Warnings](https://aqwarnings.gov.bc.ca/) web site.
 
 [AQ Warnings](https://aqwarnings.gov.bc.ca/) is hosted on GitHub pages. To add warnings you make a Pull Request (PR) on that site, which you can initiate from either:
+- In the browser at https://github.com
 - GitHub Desktop 
 - RStudio
 - the git command line interface
-- in the browser at https://github.com
 
-We will cover the method using GitHub desktop below.
+We will only cover using GitHub.com below and encourage everyone to follow this process.
 
-### Using Github Desktop
+### Using Github.com in the browser
 
-1. Open GitHub Desktop, ensure the current repository is "aqwarnings". If you don't have this repository, clone it from [https://github.com/bcgov/aqwarnings](https://github.com/bcgov/aqwarnings).
+1. Open the website repository at Github.com [https://github.com/bcgov/aqwarnings](https://github.com/bcgov/aqwarnings) and make sure you are logged in.
 
-2. Ensure the Current branch is showing "main" and click "Fetch origin" (tab along the top of the pane). The tab will say "Fetching Origin", and then "Refreshing Repository":
-    - if your local copy is up to date,  the tab will say "Fetch origin (Last fetched just now)".
-    - if changes need to be retrieved from GitHub, the will change to "Pull Origin" (this will also appear as a blue button in the main pane. Select "Pull Origin" in one of these two locations.
+2. Go to the folder `frontend/warnings/` you will add all warnings to: [https://github.com/bcgov/aqwarnings/tree/main/frontend/warnings](https://github.com/bcgov/aqwarnings/tree/main/frontend/warnings)
 
-3. Click "Current branch (main)", under branches select "New branch" and name it by the following convention:
+3. Click "Add file", in the drop down select "Upload files".
 
-   `20250502-aqwarning-issue`
+4. Select and move the Markdown (.md) and map (.html) files from the zip archive you downloaded to this page by dragging and dropping or clicking "choose your files" and selecting them in the system dialog box.
 
-4. From GitHub Desktop select "Show in Explorer" to view the repository locally on your computer. In Explorer, navigate to the "\frontend\warnings" subfolder. 
+5. Under the header "Propose changes" 
+    - Add a commit message and change the branch name from the default "<username>-patch-N", for both we use the following naming convention:
+      `YYYYMMDD-aqwarning-<status>`, for example: `20250502-aqwarning-issue`
+    - You don't need to enter anything into the bigger box (with the placeholder text "Add an optional extended description...")
+    - Select "Propose changes"
 
-5. Move the Markdown (.md) and map (.html) files from your zip to this folder either by dragging and dropping, or copy pasting. 
-
-6. In GitHub Desktop you should see the files you added show up in the left sidebar under "Changes". Ensure the check-box beside their name is selected. Type a message in the summary box by your profile picture in the bottom of the left side bar, for example:
-
-   `20250502 aq warning issued` 
-  
-    You don't need to enter anything into the bigger box that is below ("Description")
-
-    Press "Commit 2 files to [branch name]"
-
-7. Select "Publish Branch" in the top right bar.
-
-8. Select “Preview Pull Request”. 
-  - A window will pop up showing the two files (.md and .html) - ensure that both (all) the files have been added. 
-  - Select “Create Pull Request” in the bottom right of this window. 
-  - You may be prompted to re-authenticate your account.
-  - It should take a second, but you will be redirected to the [aqwarnings GitHub repository](https://github.com/bcgov/aqwarnings) in your browser and it will say "Open a pull request" at the top of the page. 
-  - The commit message you entered in GitHub desktop (above in 6.) will be the PR message (under "Add a title"). You do not have to add a description.
+6. You will go to a page to open a pull request, review the contents 
+  - The commit message you entered in GitHub desktop above will be the PR message under "Add a title"
+  - There will not be anything under "Add a description" and you do not have to add anything at this stage.
   - Select “Create pull request”.
   
-10. Review your changes.
-  - You will be redirected to a new page with the commit message at the top (eg. "20250502 aq warning issued #46")
+10. Wait for automated checks to run on the PR and review your changes.
+  - You will be redirected to a new page for the PR you just created, the title will be the commit message (eg. "20250502 aq warning issue #46")
   - You may see a message under your comment in the PR saying “Some checks haven’t completed yet”. When the checks have completed, a new comment will show up “PR Preview Action”. Click to open the link below this to preview the page and Air Quality Warning (e.g. https://bcgov.github.io/aqwarnings/pr-preview/pr-XX/).
   - Review the content at that link, what you are seeing is a complete new copy of the web site with the new warning included. You will have to view the actual warning to make sure the warning message and appearance are what you expected.
 
@@ -104,15 +90,4 @@ We will cover the method using GitHub desktop below.
 
 ## Step 2: Air Quality Subscription Service and on Social Media
 
-This process has not changed from last year.
-
-#### Quick Links
-
-- AQ Warnings ShinyApp (authenticated)
-    - PROD: https://bcgov-env.shinyapps.io/aqwarnings_shiny/
-    - TEST: https://bcgov-env.shinyapps.io/aqwarnings_shiny_test/ 
-- AQ Warnings web site
-    - PROD: https://aqwarnings.gov.bc.ca
-    - TEST: Each Pull Request (PR) launches a "preview" to test changes before publishing by merging the PR
-- GitHub Repo for AQ Warnings (authenticated)
-    - https://github.com/bcgov/aqwarnings/
+Once the changes are on [AQ Warnings](https://aqwarnings.gov.bc.ca/), you can notify AQSS subscribers and publish to social media. This process has not changed from last year.
