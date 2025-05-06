@@ -51,7 +51,8 @@ ENVcontact <- aq_mets |>
 
 HAcontact <- health_contact |>
   filter(authority %in% params$sel_healthAuth) |>
-  mutate(authority = factor(authority))|> select(authority, contact) |>
+  mutate(authority = factor(authority))|> 
+  select(authority, contact) |>
   group_by(authority) |> 
   summarise(html_string = paste(contact, collapse="<br />" ))
 ```
@@ -126,7 +127,6 @@ Real-time air quality information is available on the [BC Air Quality website](h
 
 {{< card_start width="wide" >}}
 
-<!-- `r paste(HAcontact$contact, collapse = "<br />")` -->
 `r paste(HAcontact$html_string)`
 
 {{< card_end >}}
