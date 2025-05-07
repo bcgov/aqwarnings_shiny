@@ -143,7 +143,7 @@ issueWildfireSmokeUI <- function(id) {
       #
       box(width=9,
           status="info",
-          includeMarkdown("instructions.md"))
+          includeMarkdown("docs/instructions.md"))
 
     )
   )
