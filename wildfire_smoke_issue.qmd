@@ -306,7 +306,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 **Media questions regarding health implications of wildfires:**
 
 {{< card_start  width="wide" >}}
-`r paste(HAcontact$html_string, collapse = "\n")`
+`r paste(HAcontact$html_string, collapse = "\n\n")`
 {{< card_end >}}
 
 ## Regions included under this Air Quality Warning
