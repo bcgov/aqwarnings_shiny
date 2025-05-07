@@ -75,7 +75,7 @@ HAcontact <- health_contact |>
   mutate(authority = factor(authority))|> 
   select(authority, contact) |>
   group_by(authority) |> 
-  summarise(html_string = paste(contact, collapse="\n" ))
+  summarise(html_string = paste(contact, collapse="<br />" ))
 
 # retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin

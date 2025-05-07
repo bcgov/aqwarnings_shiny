@@ -127,6 +127,6 @@ Real-time air quality information is available on the [BC Air Quality website](h
 
 {{< card_start width="wide" >}}
 
-`r paste(HAcontact$html_string, collapse = "<br />")`
+`r paste(HAcontact$html_string, collapse = "\n")`
 
 {{< card_end >}}
