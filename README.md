@@ -45,7 +45,6 @@ Here is high-level documentation on the development of applications, use of GitH
 
 - ["Working in github.com/bcgov" Cheatsheet](https://github.com/bcgov/BC-Policy-Framework-For-GitHub/blob/master/BC-Gov-Org-HowTo/Cheatsheet.md)
 - [DevHub DC Developer guide](https://developer.gov.bc.ca/docs/default/component/bc-developer-guide/)
-- [DevHub Openshift documentation](https://developer.gov.bc.ca/docs/default/component/platform-developer-docs)
 
 ### Running the application in local development environment
 
