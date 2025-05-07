@@ -75,7 +75,7 @@ HAcontact <- health_contact |>
   mutate(authority = factor(authority))|> 
   select(authority, contact) |>
   group_by(authority) |> 
-  summarise(html_string = paste(contact, collapse="<br />" ))
+  summarise(html_string = paste(contact, collapse="\n" ))
 
 # retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
@@ -306,7 +306,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 **Media questions regarding health implications of wildfires:**
 
 {{< card_start  width="wide" >}}
-`r paste(HAcontact$html_string, collapse = "<br />")`
+`r paste(HAcontact$html_string, collapse = "\n")`
 {{< card_end >}}
 
 ## Regions included under this Air Quality Warning
