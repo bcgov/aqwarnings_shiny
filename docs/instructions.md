@@ -20,24 +20,24 @@ Here are the steps to **issue** an air quality warning:
     - Confirm or edit the length of time wildfire smoke expected to last
     - Confirm or select the date for next update
     - Add a custom smoke outlook message (optional)
-
+![Step2](images/Step2Final.PNG){ width=100% }
 3. Select the impacted regions on the map:
     - Hover over regions with your cursor to see their names
     - Click to select/de-select a region, once selected the region will be highlighted yellow. If needed, you can de-select all the regions on the map using the "Reset Map" button above the map.
     - Several layers can be overlaid on the map using the check-boxes in the legend in the upper right corner of the map window. These layers can be useful when informing your decision (for example, to see extent of smoke impact) 
-
+![Step3](images/Step3.PNG){ width=100% }
 4. Select or create a description summarizing what areas of the province will be included in the Warning. Under "Describe regions affected", you can either:
     - select from pre-packaged descriptions using the drop down menu, or
     - type in a custom description in the field.
-
+![Step4](images/Step4.PNG){ width=100% }
 5. Select "Go!" to generate the Air Quality Warning:
     - It may take some time to generate, you will see pop-up toasts in the lower right sidebar once it has finished. You are looking for these messages: "PDF generation complete!" and "Markdown generation complete!".
-
+![Step5](images/Step5.PNG){ width=100% }
 6. Select "Download Files":
     - A system dialog box may open to ask where you want to save a compressed ZIP archive->Select the location and press "Save".
     - In Chrome, the ZIP archive will automatically get saved to your "Downloads" folder. 
     - At this stage you may want to open the archive and review the Air Quality Warning PDF to ensure the meteorologist, region, and smoke outlook message are correct
-
+![Step6](images/Step6.PNG){ width=100% }
 ## Publish warnings via GitHub Pages
 
 Once you have the archive saved you are ready to publish it to the [AQ Warnings](https://aqwarnings.gov.bc.ca/) web site.
