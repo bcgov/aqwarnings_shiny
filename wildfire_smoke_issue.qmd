@@ -71,8 +71,11 @@ unique_HA <- unique_HA [! unique_HA %in% ""]
 
 # filter health authorities, always include FNHA
 HAcontact <- health_contact |> 
-   filter(authority %in% c("First Nations Health Authority", unique_HA)) |> 
-   mutate(authority = factor(authority))
+  filter(authority %in% c("First Nations Health Authority", unique_HA)) |> 
+  mutate(authority = factor(authority))|> 
+  select(authority, contact) |>
+  group_by(authority) |> 
+  summarise(html_string = paste(contact, collapse="<br />" ))
 
 # retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
@@ -232,7 +235,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the smoke clears.
 
--   More serious but less commmon symptoms include wheezing, chest pains or severe cough.
+-   More serious but less common symptoms include wheezing, chest pains or severe cough.
 
 -   People with asthma or other chronic illness should follow any personal care plans designed with their family physicians.
 
@@ -254,7 +257,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to the fine particles in the smoke. Even though exposure may be reduced, there can still be risks to health.
 
--   Check on others who are in your care or live nearby who may be more likley to be impacted by wildfire smoke.
+-   Check on others who are in your care or live nearby who may be more likely to be impacted by wildfire smoke.
 
 -   Always follow guidance from local authorities. 
 
@@ -303,7 +306,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 **Media questions regarding health implications of wildfires:**
 
 {{< card_start  width="wide" >}}
-`r paste(HAcontact$contact, collapse = "<br />")`
+`r paste(HAcontact$html_string, collapse = "\n\n")`
 {{< card_end >}}
 
 ## Regions included under this Air Quality Warning

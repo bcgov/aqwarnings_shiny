@@ -2,7 +2,6 @@
 title: "Air Quality Warning - Wildfire Smoke" 
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`" 
-toc: true
 params: 
   sel_aqMet: "Sakshi Jain" 
   lastWarning: "2025-02-10" 
@@ -46,13 +45,16 @@ source(here::here("load_metadata.r"))
 #AQ met information
 
 ENVcontact <- aq_mets |>
-  filter(nickname == params$sel_aqMet) |>
+  filter(fullname == params$sel_aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
   pull(contact)
 
-HAcontact <- health_contact |> 
-   filter(authority %in% params$sel_healthAuth) |> 
-   mutate(authority = factor(authority))
+HAcontact <- health_contact |>
+  filter(authority %in% params$sel_healthAuth) |>
+  mutate(authority = factor(authority))|> 
+  select(authority, contact) |>
+  group_by(authority) |> 
+  summarise(html_string = paste(contact, collapse="<br />" ))
 ```
 
 ```{r}
@@ -125,6 +127,6 @@ Real-time air quality information is available on the [BC Air Quality website](h
 
 {{< card_start width="wide" >}}
 
-`r paste(HAcontact$contact, collapse = "<br />")`
+`r paste(HAcontact$html_string, collapse = "\n\n")`
 
 {{< card_end >}}
