@@ -56,10 +56,10 @@ Instructions are geared toward the following tools:
 1. Ensure R, RStudio, and Quarto are installed on the machine
 1. Clone this repository using GitHub Desktop
 1. Open project in RStudio
-1. Install required packages. 
-    Run `source("src/run_app_locally/install_packages.r")` in the console or select "Run" from RStudio's Source Pane.
-1. Make and required changes.
-1. Run the app locally to review.
+1. Install required packages 
+    Run `source("src/run_app_locally/install_packages.r")` in the console or select "Run" from RStudio's Source Pane
+1. Make and required changes
+1. Run the app locally to review
     Run `shiny::runApp()` or select "Run App" from RStudio's Source Pane
 
 ### Deploying
