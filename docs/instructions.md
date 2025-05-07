@@ -25,11 +25,11 @@ Here are the steps to **issue** an air quality warning:
     - Hover over regions with your cursor to see their names
     - Click to select/de-select a region, once selected the region will be highlighted yellow. If needed, you can de-select all the regions on the map using the "Reset Map" button above the map.
     - Several layers can be overlaid on the map using the check-boxes in the legend in the upper right corner of the map window. These layers can be useful when informing your decision (for example, to see extent of smoke impact) 
-![Step3](images/Step3.PNG){ width=100% }
+![Step 3 view](images/Step3.png){ width=100% }
 4. Select or create a description summarizing what areas of the province will be included in the Warning. Under "Describe regions affected", you can either:
     - select from pre-packaged descriptions using the drop down menu, or
     - type in a custom description in the field.
-![Step4](images/Step4.PNG){ width=100% }
+![Step 4 view](images/Step_4.png){ width=100% }
 5. Select "Go!" to generate the Air Quality Warning:
     - It may take some time to generate, you will see pop-up toasts in the lower right sidebar once it has finished. You are looking for these messages: "PDF generation complete!" and "Markdown generation complete!".
 ![Step5](images/Step5.PNG){ width=100% }
