@@ -208,7 +208,7 @@ issueWildfireSmoke <- function(input, output, session){
         opacity = 0.75,
         color = "black",
         weight = 2.5,
-        fillColor = "#FFF716",
+        fillColor = "grey",
         options = pathOptions(pane = "ames_polygons"),
         label = ~NAME,
         labelOptions = labelOptions(textsize = "15px"),
@@ -372,7 +372,7 @@ issueWildfireSmoke <- function(input, output, session){
                   opacity = 1,
                   color = "black",
                   weight = 1.75,
-                  fillColor = "#FFF716",
+                  fillColor = "grey",
                   options = pathOptions(pane = "ames_polygons"),
                   highlightOptions = highlightOptions(sendToBack = TRUE)) |> 
       addCircleMarkers(data = cities,
