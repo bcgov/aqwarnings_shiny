@@ -230,7 +230,7 @@ This includes people aged 65 and older, pregnant individuals, infants and young 
 \item When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.
 \item Protect your indoor air from wildfire smoke. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles.
 \item If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to the fine particles in the smoke. Even though exposure may be reduced, there can still be risks to health.
-\item Check in on others who are in your care or live nearby who may be more likley to be impacted by wildfire smoke.
+\item Check in on others who are in your care or live nearby who may be more likely to be impacted by wildfire smoke.
 \item Always follow guidance from local authorities.
 \end{itemize}
 %\input{resetHeader}		%%%%% resets fancyhf to have only footer w/no header. ENSURE THIS IS ON SECOND PAGE.
