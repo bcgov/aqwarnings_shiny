@@ -1,0 +1,257 @@
+---
+title: "Air Quality Warning"
+type: "other" 
+date: "`r Sys.Date()`"
+params:
+  sel_aqMet: "Sakshi Jain"
+  smokeDuration: "`24-48 hours`"
+  customMessage: "`Custom message.`"
+  ice: "Issue"
+  nextUpdate: "2025-02-10"
+  location: "Vanderhoof"
+  sel_contaminants:
+    - PM2.5
+    - PM10
+    - O3
+    - NO2
+ice: "`r params$ice`"
+author: "`r params$sel_aqMet`"
+customMessage: "`r params$customMessage`"
+location: "`r params$location`"
+---
+
+```{=html}
+<!--
+Copyright 2025 Province of British Columbia
+
+This work is licensed under the Creative Commons Attribution 4.0 International License.
+To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/.
+-->
+```
+
+```{r setup, echo=FALSE, include=FALSE, warning=FALSE, message=FALSE}
+
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      warning=FALSE)
+
+library(dplyr)
+
+#Import files in the quarto environment
+aq_mets <- read.csv(here::here("data", "raw", "aq_mets_contact.csv"))
+ha_contact_info <- read.csv(here::here("data", "raw", "health_auth_contact.csv"))
+city_metadata <- # tibble (to be written) that supports cross-referencing city, health authority and bylaw (as applicable)
+
+```
+
+```{r lookup, results="asis", strip.white=FALSE}
+#AQ met information
+
+env_contact <- aq_mets |>
+  filter(fullname == params$sel_aqMet) |>
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
+  pull(contact)
+
+# find health authority associated with city
+health_authority <- city_metadata |> 
+  filter(city %in% params$location) |> 
+  pull(authority)
+
+# look up health authority contact info
+ha_contact <- ha_contact_info |> 
+  filter(authority %in% c("First Nations Health Authority", health_authority)) |> 
+  mutate(authority = factor(authority))|> 
+  select(authority, contact) |>
+  group_by(authority) |> 
+  summarise(html_string = paste(contact, collapse="<br />" ))
+
+# bylaw  #not sure that this is needed? perhaps there is another way to reference files that contain info for individual bylaws?
+bylaw <- city_metadata |> 
+  filter(city %in% params$location) |> 
+  pull(bylaw)
+
+```
+
+```{r}
+# identify which contaminants to include
+
+contaminant_list <- tibble(
+  "fine particulate matter" = "PM2.5",
+  "coarse particulate matter" = "PM10",
+  "ozone" = "O3",
+  "nitrogen dioxide" = "NO2"
+)
+
+contaminant_names_selected <- names(purrr::keep(contaminant_list, ~ .x %in% params$sel_contaminants))
+
+# create custom text depending on the number and which contaminants are selected
+create_contaminant_text <- function(ncontaminants = length(contaminant_names_selected)) {
+if (ncontaminants == 1) {
+  
+  x <- contaminant_names_selected 
+  
+  } 
+
+if (ncontaminants == 2) {
+  
+  if(all(contaminant_names_selected == c("fine particulate matter", "coarse particulate matter"))) {
+  
+    x <- "fine and coarse particulate matter"
+  
+    } else {
+  
+      x <- paste(contaminant_names_selected, collapse = " and ")
+    
+    }}
+
+if (ncontaminants > 2){
+  
+  x <- cat(sub("(.*),", "\\1 and",paste(contaminant_names_selected, collapse = ", ")))
+}
+
+x
+
+}
+
+insert_contaminants_text <- create_contaminant_text()
+
+```
+```{r}
+# Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
+# This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
+logos_list <- list(
+  "Government of British Columbia" = "BCID_V_RGB_pos",
+  "First Nations Health Authority" = "FNHA",
+  "Interior Health Authority" = "IH", 
+  "Fraser Health Authority" = "FH", 
+  "Vancouver Coastal Health Authority" = "VCH", 
+  "Vancouver Island Health Authority" = "VIH", 
+  "Northern Health Authority" = "NH")
+
+# Logos selected by user and ordered as per logos_list
+logos_names_selected <- c("Government of British Columbia", "First Nations Health Authority",  health_authority[order(match(health_authority, names(logos_list)))]) # always select BC and FNHA and sort unique_HA to match logos_list
+logos_selected <- logos_list[logos_names_selected] # subset of logo_list
+
+# Count number of logos to display
+n_logos <- length(logos_selected)
+
+# Build a vector of quarto lines to insert image for each logo
+# It is more efficient to use `sapply` but this might be more readable
+logo_image_line <- c() # start with empty vector
+# Add each logo's insert line to the vector
+for(logo_name in names(logos_selected)) {
+   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](//assets/logo_", logos_selected[[logo_name]], ".png)\\"))
+}
+```
+
+<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov-->
+
+<!-- the trailing slash means the text in square brackets is alt text -->
+
+`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`
+
+```{r}
+#| results: asis
+# `cat` is used to avoid extra processing
+# `sep` argument adds the line break and then a new line as required
+cat(logo_image_line, sep="\n\n")
+```
+
+`r paste(":::")`
+
+The Ministry of Environment and Parks in collaboration with the First Nations Health Authority and `r health_authority` has issued and air quality warning for `r params$location` due to elevated levels of `r insert_contaminants_text`
+
+`r params$customMessage`  #create default custom msg "Current conditions are expected to persist until weather conditions change." ?create pre-defined options to include information about source of pollution (e.g. wood smoke, road dust, open burning)
+
+The next update will be available on `r format(as.Date(params$nextUpdate), '%B %d, %Y')` and made available on the Province's [Air Quality Warnings webpage](https://aqwarnings.gov.bc.ca/).
+
+
+## Actions you can take
+As air contaminant levels increase, health risks increase. Consider reducing or rescheduling outdoor sports, activities and events.
+
+People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
+
+## During the air quality warning
+
+{{< accordion_controls >}}
+
+{{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
+
+-   Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
+
+-   Carry any rescue medications with you at all times.
+
+-   Make sure that children and others who cannot care for themselves follow the same advice.
+
+{{< accordion_end >}}
+
+{{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
+
+-   Different people have different responses to air pollution.
+
+-   Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough may occur, and usually disappear when the pollution clears.
+
+-   More serious but less common symptoms include wheezing, chest pains or severe cough.
+
+-   People with asthma or other chronic illness should follow any personal care plans designed with their family physicians.
+
+-   If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
+
+-   If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
+
+{{< accordion_end >}}
+
+####EDIT accordian below: create conditional bullets for each case (consider pollutants, season, etc)
+{{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}  
+
+-   Pollution levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
+
+-   When indoors, keep windows and doors closed as much as possible.
+## EDIT conditional, if month == April - September
+-   When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.  
+
+-   Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. # conditional if PM2.5 or PM10
+
+## EDIT remove?
+-   If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to the fine particles in the smoke. Even though exposure may be reduced, there can still be risks to health. 
+
+{{< accordion_end >}}
+
+## Mandatory emission reduction actions
+- Facilities with air discharge authorizations under the Environmental Management Act are required to follow trigger actions within their permit related to air quality warnings and are encouraged to reduce any other emissions where possible.
+- <dynamically insert text related to local bylaw, as applicable>
+
+## Voluntary emission reduction actions
+- <if Oct - Apr and PM2.5 is included> Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air. <<is there a link to best practices we can include?>>
+- Reduce vehicle use where possible and avoid idling vehicles. 
+- <if PM10> Avoid roads with heavy vehicle traffic
+- <if PM10> Avoid driving on the road shoulder, where road traction material has accumulated
+- <if PM10> When cleaning driveways and parking lots, lightly wet the area before sweeping. Avoid using leaf blowers to clean up dirt during spring clean up.
+
+## More information
+
+**For additional information about air quality:**  #check this section - latest air quality data seems to reference data but text indicateed firework forecasts?
+
+<div class="bcds-card-wrapper"> 
+{{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
+
+[What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour. 
+
+[Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
+
+EDIT: Insert table - concentrations of affected community and surrounding communities when warning was issued - could/should we do this differently?
+
+## Contact
+
+**Media and public inquiries regarding air quality and the Air Quality Warning:**
+
+{{< card_start width="wide" >}}
+`r ENVcontact`
+{{< card_end >}}
+
+**Media questions regarding health implications poor air quality:**
+
+{{< card_start  width="wide" >}}
+`r paste(HAcontact$html_string, collapse = "\n\n")`  #NEEDS editing; should FNHA contact be provided here as well?
+{{< card_end >}}
+
