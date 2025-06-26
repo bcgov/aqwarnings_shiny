@@ -135,16 +135,19 @@ m <- leaflet() |>
                   label = ~NAME,
                   labelOptions = labelOptions(textsize = "15px"))
 
-map_html <- sprintf(file.path("%s_%s_map.html"), currentDate, issueBasename)
-map_png <- sprintf(file.path("%s_%s_map.png"), currentDate, issueBasename)
+map_html <- sprintf("%s_%s_map.html", currentDate, issueBasename)
+map_png <- sprintf("%s_%s_map.png", currentDate, issueBasename)
 m <- mapview::mapshot(m, url = map_html, cliprect = c(140, 147, 610, 480))
 
 output_format <- knitr::pandoc_to()
 
 if(output_format == "markdown") {
+  
   map <- map_html
-} else {
-  map <- map_png
+  
+  } else {
+    
+    map <- map_png
 }
 
 ```
@@ -152,6 +155,11 @@ if(output_format == "markdown") {
 ```{r}
 #| label: add-ha-info
 # Add in extra information if Interior Health Authority (IH) is present in contacts
+
+output_format <- knitr::pandoc_to()
+
+if(output_format == "markdown") {
+  
 HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
   "{{< card_start title=\"Interior Health Authority\" logo=\"/assets/logo_IH_horizontal.png\" >}}
 Steps to prepare and manage wildfire-related issues.
@@ -161,6 +169,14 @@ Steps to prepare and manage wildfire-related issues.
 } else {
   NULL
 }
+
+} else {
+
+HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
+  "Interior Health Authority: [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
+} else {
+  NULL
+}}
 
 ```
 
@@ -205,17 +221,17 @@ for(logo_name in names(logos_selected)) {
 
 <!-- the trailing slash means the text in square brackets is alt text -->
 
-[`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
+<!-- [`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"} -->
 
-```{r}
-#| label: print-logos
-#| results: asis
-# `cat` is used to avoid extra processing
-# `sep` argument adds the line break and then a new line as required
-cat(logo_image_line, sep="\n\n")
-```
+<!-- ```{r} -->
+<!-- #| label: print-logos -->
+<!-- #| results: asis -->
+<!-- # `cat` is used to avoid extra processing -->
+<!-- # `sep` argument adds the line break and then a new line as required -->
+<!-- cat(logo_image_line, sep="\n\n") -->
+<!-- ``` -->
 
-[`r paste(":::")`]{.content-visible when-format="markdown"}
+<!-- [`r paste(":::")`]{.content-visible when-format="markdown"} -->
 
 The Regions of BC highlighted on the map are being impacted or are likely to be impacted by wildfire smoke over the next `r params$smokeDuration`.
 
