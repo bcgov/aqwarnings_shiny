@@ -454,10 +454,10 @@ issueWildfireSmoke <- function(input, output, session){
       
       usermap <- user_created_map()
       
-      html_map <- sprintf(here::here("outputs", "rnw", "%s_%s_map.html"), currentDate, issueBasename)
+      html_map <- sprintf(here::here("outputs", "qmd", "%s_%s_map.html"), currentDate, issueBasename)
       htmlwidgets::saveWidget(usermap, html_map)
       
-      png_map <- here::here("outputs", "rnw", "map.png")
+      png_map <- sprintf(here::here("outputs", "qmd", "%s_%s_map.png"), currentDate, issueBasename)
       webshot(url = html_map,
               file = png_map,
               cliprect = cliprect
@@ -516,8 +516,8 @@ issueWildfireSmoke <- function(input, output, session){
       
       # PDF
      # showNotification("Generating PDF...")
-      knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
-                      output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, issueBasename))
+      # knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
+      #                 output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, issueBasename))
 
      # id <- showNotification("PDF generation complete!", duration = NULL)
       
@@ -525,8 +525,8 @@ issueWildfireSmoke <- function(input, output, session){
     #  showNotification("Generating Markdown...")
       
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
-                            output_format = "markdown",
                             output_file = sprintf("%s_%s.md", currentDate, issueBasename),
+                            output_format = "markdown",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
                                                   smokeDuration = input$smokeDuration,
@@ -536,15 +536,28 @@ issueWildfireSmoke <- function(input, output, session){
                                                   location = input$location),
                             debug = FALSE)
       
-     # id <- showNotification("Markdown generation complete!", duration = NULL)
-      
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
       
       map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs", "qmd"))
       
-      id <- showNotification("Processing complete. Files are ready for downloading.", 
+     #  quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
+     #                        output_file = sprintf("%s_%s.pdf", currentDate, issueBasename),
+     #                        output_format = "pdf",
+     #                        execute_params = list(sel_aqMet = input$sel_aqMet,
+     #                                              nextUpdate = as.character(input$nextUpdate),
+     #                                              smokeDuration = input$smokeDuration,
+     #                                              selRegionsIDs = selRegions$ids,
+     #                                              customMessage = input$smokeMessage,
+     #                                              ice = "Issue",
+     #                                              location = input$location),
+     #                        debug = FALSE)
+     # 
+     # pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, issueBasename), full.names = TRUE)
+     # fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
+      
+     id <- showNotification("Processing complete. Files are ready for downloading.", 
                        duration = NULL)
       
       completeNotificationIDs <<- c(completeNotificationIDs, c(id))
