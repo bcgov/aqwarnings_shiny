@@ -44,7 +44,10 @@ source(here::here("load_metadata.r"))
 
 ```
 
-```{r lookup, results="asis", strip.white=FALSE}
+```{r}
+#| label: lookup
+#| results: asis
+#| strip.white: false
 #AQ met information
 
 #this may not be needed? test later
@@ -97,6 +100,7 @@ region_output <- bulletin_regions |>
 ```
 
 ```{r}
+#| label: add-map
 #| results: asis
 
 initial_lat = 54.8
@@ -132,10 +136,21 @@ m <- leaflet() |>
                   labelOptions = labelOptions(textsize = "15px"))
 
 map_html <- sprintf(file.path("%s_%s_map.html"), currentDate, issueBasename)
+map_png <- sprintf(file.path("%s_%s_map.png"), currentDate, issueBasename)
 m <- mapview::mapshot(m, url = map_html, cliprect = c(140, 147, 610, 480))
+
+output_format <- knitr::pandoc_to()
+
+if(output_format == "markdown") {
+  map <- map_html
+} else {
+  map <- map_png
+}
+
 ```
 
 ```{r}
+#| label: add-ha-info
 # Add in extra information if Interior Health Authority (IH) is present in contacts
 HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
   "{{< card_start title=\"Interior Health Authority\" logo=\"/assets/logo_IH_horizontal.png\" >}}
@@ -150,6 +165,7 @@ Steps to prepare and manage wildfire-related issues.
 ```
 
 ```{r}
+#| label: create-logo-list
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
 # This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
 logos_list <- list(
@@ -168,29 +184,38 @@ logos_selected <- logos_list[logos_names_selected] # subset of logo_list
 # Count number of logos to display
 n_logos <- length(logos_selected)
 
+# set logo path based on output format... this doesn't work (yet); but keeping here for future work
+# output_format <- knitr::pandoc_to()
+# if(output_format == "PDF"){
+ #  logo_path <- " logo](https://github.com/bcgov/aqwarnings/tree/main/frontend/assets/logo_"
+# } else {
+   logo_path <- " logo](//assets/logo_"
+# }
+
 # Build a vector of quarto lines to insert image for each logo
 # It is more efficient to use `sapply` but this might be more readable
 logo_image_line <- c() # start with empty vector
 # Add each logo's insert line to the vector
 for(logo_name in names(logos_selected)) {
-   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](//assets/logo_", logos_selected[[logo_name]], ".png)\\"))
+   logo_image_line <- c(logo_image_line, paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png)\\"))
 }
 ```
 
-<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov-->
+<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
 
 <!-- the trailing slash means the text in square brackets is alt text -->
 
-`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`
+[`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
 ```{r}
+#| label: print-logos
 #| results: asis
 # `cat` is used to avoid extra processing
 # `sep` argument adds the line break and then a new line as required
 cat(logo_image_line, sep="\n\n")
 ```
 
-`r paste(":::")`
+[`r paste(":::")`]{.content-visible when-format="markdown"}
 
 The Regions of BC highlighted on the map are being impacted or are likely to be impacted by wildfire smoke over the next `r params$smokeDuration`.
 
@@ -202,7 +227,7 @@ Monitor the situation for any wildfires near your area at [EmergencyInfoBC](http
 
 The next update will be available on `r format(as.Date(params$nextUpdate), '%B %d, %Y')` and made available on the Province's [Air Quality Warnings webpage](https://aqwarnings.gov.bc.ca/).
 
-![A description of Region(s) included in this Air Quality Warning is provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map_html`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
+![A description of Region(s) included in this Air Quality Warning is provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
 
 ## Actions you can take
 As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
@@ -211,9 +236,13 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 ## During smoky conditions
 
+::: {.content-visible when-format="markdown"}
+
 {{< accordion_controls >}}
 
 {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
+
+:::
 
 -   Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
 
@@ -223,9 +252,13 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   Make sure that children and others who cannot care for themselves follow the same advice.
 
+::: {.content-visible when-format="markdown"}
+
 {{< accordion_end >}}
 
 {{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
+
+:::
 
 -   Different people have different responses to smoke.
 
@@ -239,9 +272,13 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
 
+::: {.content-visible when-format="markdown"}
+
 {{< accordion_end >}}
 
 {{< accordion_start title="Tips to reduce your smoke exposure" initiallyOpen="true" >}}
+
+:::
 
 -   Smoke levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
 
@@ -257,53 +294,95 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   Always follow guidance from local authorities. 
 
-{{< accordion_end >}}
+[{{< accordion_end >}}]{.content-visible when-format="markdown"}
 
 ## More information
 
 **For additional general information about wildfire smoke and air quality:**
 
+::: {.content-visible when-format="markdown"}
+
 <div class="bcds-card-wrapper"> 
 {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
 
-[What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+[What's the air like today?] {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
 
-[Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
+[Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
 
-[Air quality forecast maps](https://weather.gc.ca/firework/index_e.html) {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
+[Air quality forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
 
-[Smoke forecasts](https://firesmoke.ca/forecasts/current/) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Advisories and map of air quality and weather data.
+[Smoke forecasts] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Advisories and map of air quality and weather data.
 
-[Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
+[Air quality data and warnings] {{< card_end >}}
 </div>
 
+:::
+
+::: {.content-visible when-format="pdf"}
+
+- [Air Quality Health Index][What's the air like today?] - Provincial summary of latest index and forecast.
+- [Air Quality Map][Latest air quality data] - Provincial air quality data refreshed every hour.
+- [Environment and Climate Change Canada FireWork][Air quality forecast maps] - Air quality maps of next 72 hours.
+- [FireSmoke Canada][Smoke forecasts] - BlueSky Canada smoke forecasting system.
+- [Metro Vancouver Air Quality][Air quality data and warnings] - Air quality warnings including a map of air quality and weather data in Metro Vancouver and parts of the Lower Fraser Valley.
+
+:::
+
+[What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
+[Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
+[Air quality forecast maps]: https://weather.gc.ca/firework/index_e.html
+[Smoke forecasts]: https://firesmoke.ca/forecasts/current/
+[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
+
 **For additional general information about wildfire smoke and your health:**
+
+::: {.content-visible when-format="markdown"}
 
 <div class="bcds-card-wrapper"> 
 {{< card_start title="BC Centre for Disease Control" logo="/assets/logo_BCCDC.png" >}} Fact sheets on wildfire smoke and its health impacts.
 
-[Wildfire smoke](http://www.bccdc.ca/health-info/prevention-public-health/wildfire-smoke) {{< card_end >}}`r HA_text`{{< card_start title="First Nations Health Authority" logo="/assets/logo_FNHA_horizontal.png" >}} Information and resources to help you prepare.
+[Wildfire smoke] {{< card_end >}}`r HA_text`{{< card_start title="First Nations Health Authority" logo="/assets/logo_FNHA_horizontal.png" >}} Information and resources to help you prepare.
 
-[Wildfire smoke health information](https://www.fnha.ca/about/news-and-events/news/wildfire-smoke-health-information) {{< card_end >}} {{< card_start title="HealthLink BC" logo="/assets/logo_BCID_HealthLinkBC_RGB_pos.png" >}} Learn and prepare for wildfires. Phone 8-1-1 for 24/7 health advice.
+[Wildfire smoke health information] {{< card_end >}} {{< card_start title="HealthLink BC" logo="/assets/logo_BCID_HealthLinkBC_RGB_pos.png" >}} Learn and prepare for wildfires. Phone 8-1-1 for 24/7 health advice.
 
-[Wildfires and your health](https://www.healthlinkbc.ca/health-library/health-features/wildfires-and-your-health) {{< card_end >}} {{< card_start title="Worksafe BC" logo="/assets/logo_worksafebc.jpg" >}} Info on working outdoors during smoky conditions.
+[Wildfires and your health] {{< card_end >}} {{< card_start title="Worksafe BC" logo="/assets/logo_worksafebc.jpg" >}} Info on working outdoors during smoky conditions.
 
-[Wildfire FAQ](https://www.worksafebc.com/en/resources/health-safety/information-sheets/wildfire-smoke-frequently-asked-questions-faq) {{< card_end >}}
+[Wildfire FAQ] {{< card_end >}}
 </div>
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+BC Centre for Disease Control 
+- [Fact sheets][Wildfire smoke] on wildfire smoke and its health impacts
+ 
+Provincal Health Authorities
+- First Nations Health Authority: [Wildfire smoke health information]
+-`r HA_text`
+
+HealthLink BC
+- Learn and prepare for wildfires. Phone 8-1-1 for 24/7 health advice: [Wildfires and your health]
+
+Worksafe BC
+- Info on working outdoors during smoky conditions: [Wildfire FAQ]
+
+:::
+
+[Wildfire smoke]: http://www.bccdc.ca/health-info/prevention-public-health/wildfire-smoke
+[Wildfire smoke health information]: https://www.fnha.ca/about/news-and-events/news/wildfire-smoke-health-information
+[Wildfires and your health]: https://www.healthlinkbc.ca/health-library/health-features/wildfires-and-your-health
+[Wildfire FAQ]: https://www.worksafebc.com/en/resources/health-safety/information-sheets/wildfire-smoke-frequently-asked-questions-faq
 
 ## Contact
 
 **Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
 
-{{< card_start width="wide" >}}
-`r ENVcontact`
-{{< card_end >}}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"} `r ENVcontact` [{{< card_end >}}]{.content-visible when-format="markdown"}
 
 **Media questions regarding health implications of wildfires:**
 
-{{< card_start  width="wide" >}}
-`r paste(HAcontact$html_string, collapse = "\n\n")`
-{{< card_end >}}
+[{{< card_start  width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
 
 ## Regions included under this Air Quality Warning
 
