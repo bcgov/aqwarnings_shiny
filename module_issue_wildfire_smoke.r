@@ -454,10 +454,10 @@ issueWildfireSmoke <- function(input, output, session){
       
       usermap <- user_created_map()
       
-      html_map <- sprintf(here::here("outputs", "qmd", "%s_%s_map.html"), currentDate, issueBasename)
+      html_map <- sprintf("%s_%s_map.html", currentDate, issueBasename)
       htmlwidgets::saveWidget(usermap, html_map)
       
-      png_map <- sprintf(here::here("outputs", "qmd", "%s_%s_map.png"), currentDate, issueBasename)
+      png_map <- sprintf("%s_%s_map.png", currentDate, issueBasename)
       webshot(url = html_map,
               file = png_map,
               cliprect = cliprect
@@ -542,20 +542,20 @@ issueWildfireSmoke <- function(input, output, session){
       map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs", "qmd"))
       
-     #  quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
-     #                        output_file = sprintf("%s_%s.pdf", currentDate, issueBasename),
-     #                        output_format = "pdf",
-     #                        execute_params = list(sel_aqMet = input$sel_aqMet,
-     #                                              nextUpdate = as.character(input$nextUpdate),
-     #                                              smokeDuration = input$smokeDuration,
-     #                                              selRegionsIDs = selRegions$ids,
-     #                                              customMessage = input$smokeMessage,
-     #                                              ice = "Issue",
-     #                                              location = input$location),
-     #                        debug = FALSE)
-     # 
-     # pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, issueBasename), full.names = TRUE)
-     # fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
+      quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
+                            output_file = sprintf("%s_%s.pdf", currentDate, issueBasename),
+                            output_format = "pdf",
+                            execute_params = list(sel_aqMet = input$sel_aqMet,
+                                                  nextUpdate = as.character(input$nextUpdate),
+                                                  smokeDuration = input$smokeDuration,
+                                                  selRegionsIDs = selRegions$ids,
+                                                  customMessage = input$smokeMessage,
+                                                  ice = "Issue",
+                                                  location = input$location),
+                            debug = FALSE)
+
+     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, issueBasename), full.names = TRUE)
+     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs", "qmd"))
       
      id <- showNotification("Processing complete. Files are ready for downloading.", 
                        duration = NULL)
