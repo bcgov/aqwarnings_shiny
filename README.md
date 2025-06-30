@@ -14,7 +14,7 @@ An interactive app to issue or end Air Quality Warnings built using [RStudio's](
 
 ### Technologies used
 
-- [R](https://cran.rstudio.com/) 4.4.X
+- [R](https://cran.rstudio.com/), minimum version 4.4.3 (Note: Earlier versions of R [may not process qmd files correctly when testing locally](https://github.com/bcgov/aqwarnings_shiny/issues/30)) 
 - [Quarto](https://quarto.org/docs/get-started/) 1.4.X
 - [Shiny](https://shiny.posit.co/r/getstarted/shiny-basics/lesson1/) 1.10.X
 
@@ -27,7 +27,7 @@ here
 htmlwidgets
 knitr
 leaflet
-leaflet.esri
+leaflet.esri  # note: this package has been removed from the CRAN repo an is unmaintained
 mapview
 sf
 shiny
