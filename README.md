@@ -27,7 +27,7 @@ here
 htmlwidgets
 knitr
 leaflet
-leaflet.esri  # note: this package has been removed from the CRAN repo an is unmaintained
+leaflet.esri  # note: this package has been removed from the CRAN repo and is unmaintained
 mapview
 sf
 shiny
