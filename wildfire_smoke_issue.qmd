@@ -203,9 +203,10 @@ n_logos <- length(logos_selected)
 # set logo path based on output format... this doesn't work (yet); but keeping here for future work
 # output_format <- knitr::pandoc_to()
 # if(output_format == "PDF"){
- #  logo_path <- " logo](https://github.com/bcgov/aqwarnings/tree/main/frontend/assets/logo_"
+  # logo_path <- " logo](https://github.com/bcgov/aqwarnings/tree/main/frontend/assets/logo_" # DOES NOT WORK, PDF WON'T COMPILE
+  logo_path<-" logo](C:/HagaR/aqwarnings/frontend/assets/logo_" #PDF WILL COMPILE WHEN LOCAL PATH IS USED
 # } else {
-   logo_path <- " logo](//assets/logo_"
+   # logo_path <- " logo](//assets/logo_" # DOES NOT WORK PDF WON'T COMPILE
 # }
 
 # Build a vector of quarto lines to insert image for each logo
@@ -221,17 +222,17 @@ for(logo_name in names(logos_selected)) {
 
 <!-- the trailing slash means the text in square brackets is alt text -->
 
-<!-- [`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"} -->
+[`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
-<!-- ```{r} -->
-<!-- #| label: print-logos -->
-<!-- #| results: asis -->
-<!-- # `cat` is used to avoid extra processing -->
-<!-- # `sep` argument adds the line break and then a new line as required -->
-<!-- cat(logo_image_line, sep="\n\n") -->
-<!-- ``` -->
+```{r}
+#| label: print-logos
+#| results: asis
+# `cat` is used to avoid extra processing
+# `sep` argument adds the line break and then a new line as required
+cat(logo_image_line, sep="\n\n")
+```
 
-<!-- [`r paste(":::")`]{.content-visible when-format="markdown"} -->
+[`r paste(":::")`]{.content-visible when-format="markdown"}
 
 The Regions of BC highlighted on the map are being impacted or are likely to be impacted by wildfire smoke over the next `r params$smokeDuration`.
 
