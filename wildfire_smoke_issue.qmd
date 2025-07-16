@@ -9,6 +9,7 @@ params:
   ice: "Issue"
   nextUpdate: "2025-02-10"
   location: "Multiple locations in B.C."
+  outputFormat: "markdown"
   selRegionsIDs:
     - Watson Lake
     - Prince George
@@ -19,6 +20,7 @@ author: "`r params$sel_aqMet`"
 smokeDuration: "`r params$smokeDuration`"
 customMessage: "`r params$customMessage`"
 location: "`r params$location`"
+outputFormat: "`r params$outputFormat`" 
 ---
 
 ```{=html}
@@ -139,13 +141,11 @@ map_html <- sprintf("%s_%s_map.html", currentDate, issueBasename)
 map_png <- sprintf("%s_%s_map.png", currentDate, issueBasename)
 m <- mapview::mapshot(m, url = map_html, cliprect = c(140, 147, 610, 480))
 
-output_format <- knitr::pandoc_to()
-
-if(output_format == "markdown") {
+if(params$outputFormat == "markdown") {
   
   map <- map_html
   
-  } else {
+  } else { #if params$outputFormat == "pdf"
     
     map <- map_png
 }
@@ -156,9 +156,7 @@ if(output_format == "markdown") {
 #| label: add-ha-info
 # Add in extra information if Interior Health Authority (IH) is present in contacts
 
-output_format <- knitr::pandoc_to()
-
-if(output_format == "markdown") {
+if(params$outputFormat == "markdown") {
   
 HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
   "{{< card_start title=\"Interior Health Authority\" logo=\"/assets/logo_IH_horizontal.png\" >}}
@@ -166,16 +164,11 @@ Steps to prepare and manage wildfire-related issues.
 
 [Wildfire public information](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)
 {{< card_end >}}"
-} else {
-  NULL
-}
 
-} else {
-
-HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
-  "Interior Health Authority: [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
-} else {
-  NULL
+  }} else { #if params$outputFormat == "pdf"
+    
+    HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
+      "Interior Health Authority: [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
 }}
 
 ```
