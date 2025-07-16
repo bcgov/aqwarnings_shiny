@@ -188,27 +188,40 @@ logos_list <- list(
 
 # Logos selected by user and ordered as per logos_list
 logos_names_selected <- c("Government of British Columbia", "First Nations Health Authority",  unique_HA[order(match(unique_HA, names(logos_list)))]) # always select BC and FNHA and sort unique_HA to match logos_list
-logos_selected <- logos_list[logos_names_selected] # subset of logo_list
+logos_selected <- logos_list[logos_names_selected] # subset logo_list
 
 # Count number of logos to display
 n_logos <- length(logos_selected)
 
-# set logo path based on output format... this doesn't work (yet); but keeping here for future work
-# output_format <- knitr::pandoc_to()
-# if(output_format == "PDF"){
-  # logo_path <- " logo](https://github.com/bcgov/aqwarnings/tree/main/frontend/assets/logo_" # DOES NOT WORK, PDF WON'T COMPILE
-  logo_path<-" logo](C:/HagaR/aqwarnings/frontend/assets/logo_" #PDF WILL COMPILE WHEN LOCAL PATH IS USED
-# } else {
-   # logo_path <- " logo](//assets/logo_" # DOES NOT WORK PDF WON'T COMPILE
-# }
+# set logo path based on output format
+if(params$outputFormat == "markdown"){
+  
+        logo_path <- " logo](//assets/logo_"
+        #logo_path<-" logo](C:/HagaR/aqwarnings/frontend/assets/logo_" #PDF WILL COMPILE WHEN LOCAL PATH IS USED
 
-# Build a vector of quarto lines to insert image for each logo
-# It is more efficient to use `sapply` but this might be more readable
-logo_image_line <- c() # start with empty vector
-# Add each logo's insert line to the vector
-for(logo_name in names(logos_selected)) {
-   logo_image_line <- c(logo_image_line, paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png)\\"))
-}
+      # Build a vector of quarto lines to insert image for each logo
+      # It is more efficient to use `sapply` but this might be more readable
+      logo_image_line <- c() # start with empty vector
+      
+      # Add each logo's insert line to the vector
+      for(logo_name in names(logos_selected)) {
+        
+        logo_image_line <- c(logo_image_line, paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png)\\"))
+        
+      }} else { #if params$outputFormat == "pdf"
+        
+        logo_path <- "logo](https://github.com/bcgov/aqwarnings/blob/main/frontend/assets/logo_"
+        
+        # Build a vector of quarto lines to insert image for each logo
+        # It is more efficient to use `sapply` but this might be more readable
+        logo_image_line <- c()
+        
+        # Add each logo's insert line to the vector
+        for(logo_name in names(logos_selected)) {
+          
+          logo_image_line <- c(logo_image_line, paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png?raw=true)"))
+          
+          }}
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
