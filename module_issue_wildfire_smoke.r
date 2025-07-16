@@ -514,16 +514,14 @@ issueWildfireSmoke <- function(input, output, session){
       output$alttext <- renderText(alttext)
       
       
-      # PDF
-     # showNotification("Generating PDF...")
+      # PDF generated via .rnw - DELETE once there is comfort around PDF generation via .qmd
+      # showNotification("Generating PDF...")
       # knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
       #                 output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, issueBasename))
 
-     # id <- showNotification("PDF generation complete!", duration = NULL)
+      # id <- showNotification("PDF generation complete!", duration = NULL)
       
-      # Quarto
-    #  showNotification("Generating Markdown...")
-      
+      # generate markdown via Quarto
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.md", currentDate, issueBasename),
                             output_format = "markdown",
@@ -533,7 +531,8 @@ issueWildfireSmoke <- function(input, output, session){
                                                   selRegionsIDs = selRegions$ids,
                                                   customMessage = input$smokeMessage,
                                                   ice = "Issue",
-                                                  location = input$location),
+                                                  location = input$location,
+                                                  outputFormat = "markdown"),
                             debug = FALSE)
       
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
@@ -542,6 +541,7 @@ issueWildfireSmoke <- function(input, output, session){
       map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs", "qmd"))
       
+      # generate pdf via Quarto 
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.pdf", currentDate, issueBasename),
                             output_format = "pdf",
@@ -551,7 +551,8 @@ issueWildfireSmoke <- function(input, output, session){
                                                   selRegionsIDs = selRegions$ids,
                                                   customMessage = input$smokeMessage,
                                                   ice = "Issue",
-                                                  location = input$location),
+                                                  location = input$location,
+                                                  outputFormat = "pdf"),
                             debug = FALSE)
 
      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, issueBasename), full.names = TRUE)
@@ -575,7 +576,7 @@ issueWildfireSmoke <- function(input, output, session){
       # Build file paths correctly using sprintf()
       files_to_zip <- c(
         file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue.md", Sys.Date())),
-        file.path("outputs", "rnw", sprintf("%s_wildfire_smoke_issue.pdf", Sys.Date())),
+        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue.pdf", Sys.Date())),
         file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue_map.html", Sys.Date()))
       )
       
