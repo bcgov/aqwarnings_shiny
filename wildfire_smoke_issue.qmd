@@ -32,16 +32,26 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0
 -->
 ```
 
-```{r setup, echo=FALSE, include=FALSE, warning=FALSE, message=FALSE}
+```{r}
+#| label: setup
+#| echo: FALSE
+#| include: FALSE
+#| warning: FALSE
+#| message: FALSE
 
-knitr::opts_chunk$set(echo=FALSE,
-                      message=FALSE,
-                      warning=FALSE)
+# Set options globally
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
 
+# Load packages
 library(dplyr)
 library(leaflet)
+library(magick)
 
-#Import files in the quarto environment
+# Import files in the quarto environment
 source(here::here("load_metadata.r"))
 
 ```
@@ -50,9 +60,8 @@ source(here::here("load_metadata.r"))
 #| label: lookup
 #| results: asis
 #| strip.white: false
-#AQ met information
 
-#this may not be needed? test later
+# AQ met information
 ENVcontact <- aq_mets |>
   filter(fullname == params$sel_aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
@@ -70,11 +79,11 @@ b <-  match_eccc_health |>
   distinct(healthAuth2) |> 
   pull(healthAuth2)
 
-# find unique health authorities between a and b; drop empty cases (""")
+# Find unique health authorities between a and b; drop empty cases (" ")
 unique_HA <- unique(c(a,b))
 unique_HA <- unique_HA [! unique_HA %in% ""]
 
-# filter health authorities, always include FNHA
+# Filter health authorities, always include FNHA
 HAcontact <- health_contact |> 
   filter(authority %in% c("First Nations Health Authority", unique_HA)) |> 
   mutate(authority = factor(authority))|> 
@@ -82,7 +91,7 @@ HAcontact <- health_contact |>
   group_by(authority) |> 
   summarise(html_string = paste(contact, collapse="<br />" ))
 
-# retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
+# Retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
 bulletin_regions <- reg_description |> 
   filter(eccc %in% params$selRegionsIDs) |> 
