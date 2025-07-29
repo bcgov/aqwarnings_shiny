@@ -1,7 +1,8 @@
 ---
-title: "Air Quality Warning - Wildfire Smoke"
+title: "Air Quality Warning"
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`"
+date-format: long
 params:
   sel_aqMet: "Sakshi Jain"
   smokeDuration: "`24-48 hours`"
@@ -21,6 +22,17 @@ smokeDuration: "`r params$smokeDuration`"
 customMessage: "`r params$customMessage`"
 location: "`r params$location`"
 outputFormat: "`r params$outputFormat`" 
+format:
+  markdown: default
+  pdf:
+    include-in-header: 
+      - src/header.tex
+    mainfont: BCSans-Regular
+    mainfontoptions:
+      - Boldfont = BCSans-Bold
+      - ItalicFont = BCSans-Italic
+    fontsize: "11pt"
+    urlcolor: bcblue
 ---
 
 ```{=html}
