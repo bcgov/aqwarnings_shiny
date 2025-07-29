@@ -178,7 +178,9 @@ Steps to prepare and manage wildfire-related issues.
 
 [Wildfire public information](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)
 {{< card_end >}}"
-    }} else { #if params$outputFormat == "pdf"
+    }}
+
+if (params$outputFormat == "pdf") {
       HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
       "Interior Health Authority: [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
 }}
@@ -250,7 +252,7 @@ logos <- image_read(logo_urls) |>
 
 # Combine logos into single image and scale
 logos_combined <- image_append(logos) |> 
-  image_write(format = "pdf", path = "_extensions/aqwarningPDF/logo.pdf")
+  image_write(path = "logo.png")
 }
 ```
 
@@ -266,8 +268,8 @@ logos_combined <- image_append(logos) |>
 # `cat` is used to avoid extra processing
 # `sep` argument adds the line break and then a new line as required
 if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
-if (params$outputFormat == "pdf") knitr::include_graphics(path = "_extensions/aqwarningPDF/logo.pdf", auto_pdf = TRUE)
-  }
+#if (params$outputFormat == "pdf") knitr::include_graphics(path = "_extensions/aqwarningPDF/logo.png")
+
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
