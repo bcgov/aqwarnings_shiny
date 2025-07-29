@@ -12,3 +12,8 @@ outputs/qmd/*
 !outputs/qmd/.gitkeep
 outputs/rnw/*
 !outputs/rnw/.gitkeep
+
+# temporary files in main project directory
+logo.png
+*map.html
+*map.png
