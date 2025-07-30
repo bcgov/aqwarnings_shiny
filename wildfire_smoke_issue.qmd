@@ -268,8 +268,6 @@ logos_combined <- image_append(logos) |>
 # `cat` is used to avoid extra processing
 # `sep` argument adds the line break and then a new line as required
 if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
-#if (params$outputFormat == "pdf") knitr::include_graphics(path = "_extensions/aqwarningPDF/logo.png")
-
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
