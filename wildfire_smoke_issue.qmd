@@ -182,7 +182,7 @@ Steps to prepare and manage wildfire-related issues.
 
 if (params$outputFormat == "pdf") {
       HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
-      "* Interior Health Authority: [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
+      "* Interior Health Authority - [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
 }}
 
 ```
@@ -432,7 +432,7 @@ Provincial Health Authorities
 
 HealthLink BC
 
-- Learn and prepare for wildfires - [Wildfires and your health resource][Wildfires and your health]
+- Learn about and prepare for wildfires - [Wildfires and your health resource][Wildfires and your health]
 
 - Phone 8-1-1 for 24/7 health advice 
 
