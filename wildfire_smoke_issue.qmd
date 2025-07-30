@@ -73,11 +73,13 @@ source(here::here("load_metadata.r"))
 #| results: asis
 #| strip.white: false
 
-# AQ met information
-ENVcontact <- aq_mets |>
-  filter(fullname == params$sel_aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
-  pull(contact)
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+
+  # AQ met information
+  ENVcontact <- aq_mets |>
+    filter(fullname == params$sel_aqMet) |>
+    mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
+    pull(contact) 
 
 # Check for first health authority
 a <- match_eccc_health |> 
@@ -101,7 +103,7 @@ HAcontact <- health_contact |>
   mutate(authority = factor(authority))|> 
   select(authority, contact) |>
   group_by(authority) |> 
-  summarise(html_string = paste(contact, collapse="<br />" ))
+  summarise(html_string = paste(contact, collapse = sep_type))
 
 # Retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
