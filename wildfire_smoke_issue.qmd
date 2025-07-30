@@ -182,7 +182,7 @@ Steps to prepare and manage wildfire-related issues.
 
 if (params$outputFormat == "pdf") {
       HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
-      "Interior Health Authority: [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
+      "* Interior Health Authority: [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
 }}
 
 ```
