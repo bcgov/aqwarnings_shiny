@@ -364,9 +364,9 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 [Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
 
-[Air quality forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
+[Smoke forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
 
-[Smoke forecasts] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Advisories and map of air quality and weather data.
+[Smoke forecast map] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Advisories and map of air quality and weather data.
 
 [Air quality data and warnings] {{< card_end >}}
 </div>
@@ -375,19 +375,30 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 ::: {.content-visible when-format="pdf"}
 
-- [Air Quality Health Index][What's the air like today?] - Provincial summary of latest index and forecast.
-- [Air Quality Map][Latest air quality data] - Provincial air quality data refreshed every hour.
-- [Environment and Climate Change Canada FireWork][Air quality forecast maps] - Air quality maps of next 72 hours.
-- [FireSmoke Canada][Smoke forecasts] - BlueSky Canada smoke forecasting system.
-- [Metro Vancouver Air Quality][Air quality data and warnings] - Air quality warnings including a map of air quality and weather data in Metro Vancouver and parts of the Lower Fraser Valley.
+- Air quality notifications issued by Metro Vancouver
+
+- Visit Metro Vancouver's [air quality data and warnings page][Air quality data and warnings]
+
+Air quality data
+
+- View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
+
+- Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
+
+Wildfire smoke forecasts
+
+- Environment and Climate Change Canada smoke forecasts - [FireWork][Smoke forecast maps]
+
+- BlueSky Canada smoke forecasts - [FireSmoke Canada][Smoke forecast map]
 
 :::
 
+[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
 [What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
 [Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
-[Air quality forecast maps]: https://weather.gc.ca/firework/index_e.html
-[Smoke forecasts]: https://firesmoke.ca/forecasts/current/
-[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
+[Smoke forecast maps]: https://weather.gc.ca/firework/index_e.html
+[Smoke forecast map]: https://firesmoke.ca/forecasts/current/
+
 
 **For additional general information about wildfire smoke and your health:**
 
@@ -409,18 +420,25 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 ::: {.content-visible when-format="pdf"}
 
-BC Centre for Disease Control 
-- [Fact sheets][Wildfire smoke] on wildfire smoke and its health impacts
+BC Centre for Disease Control
+
+- Wildfire smoke and its health impacts - [Fact sheet][Wildfire smoke]
  
-Provincal Health Authorities
-- First Nations Health Authority: [Wildfire smoke health information]
--`r HA_text`
+Provincial Health Authorities
+
+- First Nations Health Authority - [Wildfire smoke health information][Wildfire smoke health information]
+
+`r HA_text`
 
 HealthLink BC
-- Learn and prepare for wildfires. Phone 8-1-1 for 24/7 health advice: [Wildfires and your health]
+
+- Learn and prepare for wildfires - [Wildfires and your health resource][Wildfires and your health]
+
+- Phone 8-1-1 for 24/7 health advice 
 
 Worksafe BC
-- Info on working outdoors during smoky conditions: [Wildfire FAQ]
+
+- Working outdoors during smoky conditions - [Wildfires smoke FAQ][Wildfire FAQ]
 
 :::
 
