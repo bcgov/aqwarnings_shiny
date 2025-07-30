@@ -461,4 +461,4 @@ Worksafe BC
 
 ## Regions included under this Air Quality Warning
 
-`r paste(region_output)`
+`r region_output`
