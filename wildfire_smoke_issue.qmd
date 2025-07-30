@@ -116,7 +116,7 @@ description <- paste(bulletin_regions$description, collapse = "; ")
 
 region_output <- bulletin_regions |> 
   distinct(region_name, description) |> 
-  mutate(output_line = paste0("* ", region_name, ": ", description)) |> 
+  mutate(output_line = paste0("* **", region_name, ":** ", description)) |> 
   pull(output_line) |> 
   paste(collapse = "\n")
 
