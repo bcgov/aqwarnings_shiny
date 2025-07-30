@@ -282,7 +282,7 @@ Monitor the situation for any wildfires near your area at [EmergencyInfoBC](http
 
 The next update will be available on `r format(as.Date(params$nextUpdate), '%B %d, %Y')` and made available on the Province's [Air Quality Warnings webpage](https://aqwarnings.gov.bc.ca/).
 
-![A description of Region(s) included in this Air Quality Warning is provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
+![A description of region(s) included in this Air Quality Warning is provided at the end of this warning. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
 
 ## Actions you can take
 As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
