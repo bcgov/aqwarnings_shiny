@@ -274,7 +274,21 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
+
 The Regions of BC highlighted on the map are being impacted or are likely to be impacted by wildfire smoke over the next `r params$smokeDuration`.
+
+::: {.content-visible when-format="pdf"}
+
+\begin{wrapfigure}{r, t}{0.5\textwidth}
+\centering
+\vspace{-0.5cm}
+\includegraphics[width= 0.55\textwidth]{`r map`}
+\captionsetup{width = 0.45\textwidth}
+\caption*{Descriptions of affected region(s) are provided at the end of this document. This Air Quality Warning excludes the area managed by Metro Vancouver. For air quality notifications issued by Metro Vancouver refer to Metro Vancouver's \href{https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories}{air quality data and warnings page}.}
+\vspace*{-1.2cm}
+\end{wrapfigure}
+
+:::
 
 `r params$customMessage`
 
@@ -284,7 +298,11 @@ Monitor the situation for any wildfires near your area at [EmergencyInfoBC](http
 
 The next update will be available on `r format(as.Date(params$nextUpdate), '%B %d, %Y')` and made available on the Province's [Air Quality Warnings webpage](https://aqwarnings.gov.bc.ca/).
 
-![A description of region(s) included in this Air Quality Warning is provided at the end of this warning. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
+::: {.content-visible when-format="markdown"}
+
+![Descriptions of affected region(s) are provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map_html`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
+
+:::
 
 ## Actions you can take
 As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
