@@ -1,5 +1,5 @@
 
-\usepackage{graphicx} % for images
+% set custom color: bcblue
 \usepackage{xcolor}	% colours for title page and hyperlinks
 \definecolor{bcblue}{RGB}{0,0,128} % blue
 
@@ -8,12 +8,30 @@
 \addtokomafont{subsection}{\color{bcblue}}
 \addtokomafont{subsection}{\color{bcblue}}
 
+\usepackage{graphicx} % for images
+
+% page numbers
+\usepackage{lastpage} % for referencing the total number of pages
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} % Clear all header and footer fields
+\renewcommand{\headrulewidth}{0pt} % remove top horizontal rule
+\fancyfoot[R]{Page \thepage\ of \pageref*{LastPage}} % bottom right:X of Y
+
 % format header: insert logo, left align and title and date
 \makeatletter
 \renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
 \includegraphics[width = 1\textwidth]{logo.png}\\[\bigskipamount]
+\vspace{-0.4cm} % reduce vertical space between logos and title
 \begin{flushleft}
 {\color{bcblue}\huge\textbf{\@title} - \textbf{\@date}} \vspace{0.3cm} \newline
+\noindent\textcolor{bcblue}{\rule{\textwidth}{0.4pt}} % add line under title
 \end{flushleft}\egroup
 }
 \makeatother
+
+\usepackage[none]{hyphenat} % no hyphenation at end of line
+
+\usepackage{float}
+\usepackage{wrapfig} % to wrap text around map
+\usepackage[font = footnotesize, width=0.4\textwidth]{caption} % font size for map caption
