@@ -3,15 +3,13 @@
 .RData
 .Ruserdata
 
-data/raw/logos
-
 rsconnect/
 
-# ignore all outputs but keep the folders
-outputs/qmd/*
-!outputs/qmd/.gitkeep
-outputs/rnw/*
-!outputs/rnw/.gitkeep
+# ignore all outputs but keep the folder
+outputs/*
+!outputs/.gitkeep
 
-# temporary files in main project directory
+# ignore temporary files in main project directory
 logo.png
+*map.html
+*map.png
