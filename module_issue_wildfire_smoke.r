@@ -292,27 +292,21 @@ issueWildfireSmoke <- function(input, output, session){
   # create a vector of reactive values to store the the selected polygons
   selRegions <- reactiveValues(ids = vector())
   
-  # Remove
+  # clean up directories
   observeEvent(input$cleanupdir, {
-    rnw_dirs <- list.dirs(path = here::here("outputs", "rnw"), recursive = FALSE, full.names = TRUE)
-    rnw_files <- list.files(path = here::here("outputs", "rnw"), full.names = TRUE)
-    qmd_dirs <- list.dirs(path = here::here("outputs", "qmd"), recursive = FALSE, full.names = TRUE)
-    qmd_files <- dir(path = here::here("outputs", "qmd"), full.names = TRUE)
+    output_files <- dir(path = here::here("outputs"), full.names = TRUE)
+    temp_files <- dir(full.names = TRUE, pattern = ".png|.html")
     
-    dirsToRemove <- c(rnw_dirs, qmd_dirs)
-    files <- c(rnw_files, qmd_files)
-    filesToRemove <- setdiff(files, dirsToRemove)
+    filesToRemove <- c(output_files, temp_files)
     
     nfiles <- length(filesToRemove)
-    ndirs <- length(dirsToRemove)
-    if (nfiles == 0 & ndirs == 0) {
+    if (nfiles == 0) {
       showNotification("No files or directories to remove", type = "message")
     } else {
       
-      fs::dir_delete(dirsToRemove)
       file.remove(filesToRemove)
       
-      showNotification(paste("Directories removed:", ndirs, ". ", "Files removed:", nfiles, "."), type = "message")  
+      showNotification(paste("Files removed:", nfiles, "."), type = "message")  
     }
   })
 
