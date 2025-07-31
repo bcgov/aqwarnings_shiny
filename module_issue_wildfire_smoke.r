@@ -107,13 +107,6 @@ issueWildfireSmokeUI <- function(id) {
        
         hr(),
         
-        h5("alt-text:"),
-        div(textOutput(ns("alttext")),
-            class = "form-control",
-            style = "width: 100%; min-height: 40px; height: auto;"),
-       
-        hr(),
-        
         downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
         
         hr(),
