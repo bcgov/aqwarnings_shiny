@@ -436,6 +436,7 @@ issueWildfireSmoke <- function(input, output, session){
       showNotification("Preparing files. Please wait for completion notification.",
                        duration = 17)
       
+      # prep image for PDF output
       issueBasename <- "wildfire_smoke_issue"
       cliprect <- c(140, 147, 610, 480)  # top, left, width, height
       
@@ -443,71 +444,13 @@ issueWildfireSmoke <- function(input, output, session){
       
       html_map <- sprintf("%s_%s_map.html", currentDate, issueBasename)
       htmlwidgets::saveWidget(usermap, html_map)
-      
+
       png_map <- sprintf("%s_%s_map.png", currentDate, issueBasename)
       webshot(url = html_map,
               file = png_map,
               cliprect = cliprect
       )
 
-      usermapForWebsite <- usermap |> 
-        addLabelOnlyMarkers(lng = -137.25, lat = 56.25,
-                          label = HTML(paste0("Updated:<br/>", currentDate)),
-                          group = "labels",
-                          options = pathOptions(pane = "ames_cities"),
-                          labelOptions = labelOptions(
-                            direction = "right",
-                            noHide = TRUE,
-                            textOnly = TRUE,
-                            textsize = "15px",
-                            crs = "+init=epsg:4326",
-                            style = list("color" = "#5c5c5c")))
-      
-      html_map_for_web <- here::here("outputs", "rnw", "usermapForWebsite.html")
-      htmlwidgets::saveWidget(usermapForWebsite, file = html_map_for_web)
-      
-      png_map_for_web <- sprintf(here::here("outputs", "rnw", "%s_%s_map.png"), currentDate, issueBasename)
-      webshot(url = html_map_for_web,
-              file = png_map_for_web,
-              cliprect = cliprect
-      )
-      
-      # Write selected polygon IDs to CSV file
-      regionsOut <- eccc_map_bc |> 
-        mutate(STATE = case_when(
-                  NAME %in% selRegions$ids ~ as.integer(1),
-                  OBJECTID %in% eccc_zones_lm ~ as.integer(NA),  #could eccc_map_env be used to remove this line?
-                  TRUE ~ as.integer(0)
-                  ),
-              DATE = currentDate
-              ) |> 
-        select(OBJECTID, NAME, STATE, DATE) |> 
-        arrange(OBJECTID) |> 
-        sf::st_drop_geometry()
-
-      write.csv(regionsOut, file = sprintf(here::here("outputs", "rnw", "%s_issued_regions.csv"), currentDate), row.names = FALSE)
-
-      # Note: text update is after the PDF is generated, so there is a
-      # delay in the appearance on the UI. For now, this is by design.
-      alttext <- sprintf("Air Quality Warning - Wildfire Smoke Regions for %s: %s.",
-                         currentDate,
-                         paste(sort(selRegions$ids), sep = "", collapse = ", "))
-      
-      writeLines(alttext, sprintf(here::here("outputs", "rnw", "%s_%s_map_alttext.txt"), currentDate, issueBasename))
-      
-      #id2 <- showNotification("Writing text files complete!", duration = NULL)
-      #completeNotificationIDs <<- c(completeNotificationIDs, c(id, id2))
-
-      output$alttext <- renderText(alttext)
-      
-      
-      # PDF generated via .rnw - DELETE once there is comfort around PDF generation via .qmd
-      # showNotification("Generating PDF...")
-      # knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
-      #                 output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, issueBasename))
-
-      # id <- showNotification("PDF generation complete!", duration = NULL)
-      
       # generate markdown via Quarto
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.md", currentDate, issueBasename),
