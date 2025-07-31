@@ -15,5 +15,3 @@ outputs/rnw/*
 
 # temporary files in main project directory
 logo.png
-*map.html
-*map.png
