@@ -410,7 +410,6 @@ issueWildfireSmoke <- function(input, output, session){
 
 
 # Generate report
-# Automatically generate map and then create the PDF
   observeEvent(input$genWarning, {
     
     if (input$sel_aqMet == "") {
@@ -421,7 +420,6 @@ issueWildfireSmoke <- function(input, output, session){
         showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
 
-      
       ncomplete <- length(completeNotificationIDs)
       if (ncomplete > 0) {
         # remove the notification for completed steps if the genWarning
@@ -465,11 +463,13 @@ issueWildfireSmoke <- function(input, output, session){
                                                   outputFormat = "markdown"),
                             debug = FALSE)
       
+      # move the .md and .html to outputs/
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
-      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
+      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
       map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
-      fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs", "qmd"))
+      fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs"))
       
       # generate pdf via Quarto 
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
@@ -484,9 +484,10 @@ issueWildfireSmoke <- function(input, output, session){
                                                   location = input$location,
                                                   outputFormat = "pdf"),
                             debug = FALSE)
-
+     # move the .pdf to outputs/
+     # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, issueBasename), full.names = TRUE)
-     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs", "qmd"))
+     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
      id <- showNotification("Processing complete. Files are ready for downloading.", 
                        duration = NULL)
@@ -494,7 +495,7 @@ issueWildfireSmoke <- function(input, output, session){
       completeNotificationIDs <<- c(completeNotificationIDs, c(id))
 
     } #end else
-  }) #end observeEvent for generating report
+    }) #end observeEvent for generating report
 
 ## Download files
 
@@ -505,9 +506,9 @@ issueWildfireSmoke <- function(input, output, session){
     content = function(file) {
       # Build file paths correctly using sprintf()
       files_to_zip <- c(
-        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue.md", Sys.Date())),
-        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue.pdf", Sys.Date())),
-        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue_map.html", Sys.Date()))
+        file.path("outputs", sprintf("%s_wildfire_smoke_issue.md", Sys.Date())),
+        file.path("outputs", sprintf("%s_wildfire_smoke_issue.pdf", Sys.Date())),
+        file.path("outputs", sprintf("%s_wildfire_smoke_issue_map.html", Sys.Date()))
       )
       
       # Zip the files into the download target
