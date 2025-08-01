@@ -31,10 +31,6 @@ fireIcons <- awesomeIconList(
 )
 fireIconFactorPalette <-  colorFactor(as.vector(sapply(fireIcons, get, x = "markerColor")), levels = names(fireIcons), ordered = TRUE)
 
-format_datestring <- function(date) {
-  sprintf("%s %i, %d", format(as.Date(date), "%B"), lubridate::day(date), lubridate::year(date))
-}
-
 #--------------------------------------------------
 # UI
 #--------------------------------------------------
@@ -156,7 +152,6 @@ issueWildfireSmoke <- function(input, output, session){
   completeNotificationIDs <- character(0)
   
   currentDate <- Sys.Date()
-  currentDateString <- format_datestring(currentDate)
 
   map_reactive <- reactive({
     leaflet(options = leafletOptions(zoomControl = TRUE, dragging = TRUE)) |> 
