@@ -60,8 +60,6 @@ knitr::opts_chunk$set(
 
 # Load packages
 library(dplyr)
-library(leaflet)
-library(magick)
 
 # Import files in the quarto environment
 source(here::here("load_metadata.r"))
@@ -88,7 +86,7 @@ a <- match_eccc_health |>
   pull(healthAuth1)
 
 # Check for second health authority
-b <-  match_eccc_health |> 
+b <- match_eccc_health |> 
   filter(eccc %in% params$selRegionsIDs) |> 
   distinct(healthAuth2) |> 
   pull(healthAuth2)
@@ -135,9 +133,9 @@ currentDate <- Sys.Date()
 issueBasename <- "wildfire_smoke_issue"
 
 # Add dynamic map to quarto environment using area boundaries from ECCC. 
-m <- leaflet() |>
-  addTiles() |>
-  addPolygons(
+m <- leaflet::leaflet() |>
+  leaflet::addTiles() |>
+  leaflet::addPolygons(
     data = eccc_map_env,
     fillOpacity = 0.025,
     opacity = 0.75,
@@ -149,9 +147,9 @@ m <- leaflet() |>
     layerId = ~ NAME,
     group = "regions",
     label = ~ NAME,
-    labelOptions = labelOptions(textsize = "15px"),
+    labelOptions = leaflet::labelOptions(textsize = "15px"),
   ) |>
-  addPolygons(
+  leaflet::addPolygons(
     data = eccc_map_env[which(eccc_map_env$NAME %in% params$selRegionsIDs), ],
     fillOpacity = 0.65,
     opacity = 0.65,
@@ -159,7 +157,7 @@ m <- leaflet() |>
     weight = 1.75,
     fillColor = "grey",
     label = ~ NAME,
-    labelOptions = labelOptions(textsize = "15px")
+    labelOptions = leaflet::labelOptions(textsize = "15px")
   )
 
 map_html <- sprintf("%s_%s_map.html", currentDate, issueBasename)
@@ -247,15 +245,16 @@ if (params$outputFormat == "pdf") {
   }
 
 # format logos
-logos <- image_read(logo_urls) |> 
-  image_trim() |> # remove all white space
-  image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
-  image_scale("x200") # rescale
+logos <- magick::image_read(logo_urls) |> 
+  magick::image_trim() |> # remove all white space
+  magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
+  magick::image_scale("x200") # scale
 
 # Combine logos into single image and scale
-logos_combined <- image_append(logos) |> 
-  image_write(path = "logo.png")
+logos_combined <- magick::image_append(logos) |> 
+  magick::image_write(path = "logo.png")
 }
+
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
@@ -273,7 +272,6 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
-
 
 The Regions of BC highlighted on the map are being impacted or are likely to be impacted by wildfire smoke over the next `r params$smokeDuration`.
 
