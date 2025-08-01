@@ -31,10 +31,6 @@ fireIcons <- awesomeIconList(
 )
 fireIconFactorPalette <-  colorFactor(as.vector(sapply(fireIcons, get, x = "markerColor")), levels = names(fireIcons), ordered = TRUE)
 
-format_datestring <- function(date) {
-  sprintf("%s %i, %d", format(as.Date(date), "%B"), lubridate::day(date), lubridate::year(date))
-}
-
 #--------------------------------------------------
 # UI
 #--------------------------------------------------
@@ -107,13 +103,6 @@ issueWildfireSmokeUI <- function(id) {
        
         hr(),
         
-        h5("alt-text:"),
-        div(textOutput(ns("alttext")),
-            class = "form-control",
-            style = "width: 100%; min-height: 40px; height: auto;"),
-       
-        hr(),
-        
         downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
         
         hr(),
@@ -163,7 +152,6 @@ issueWildfireSmoke <- function(input, output, session){
   completeNotificationIDs <- character(0)
   
   currentDate <- Sys.Date()
-  currentDateString <- format_datestring(currentDate)
 
   map_reactive <- reactive({
     leaflet(options = leafletOptions(zoomControl = TRUE, dragging = TRUE)) |> 
@@ -299,27 +287,21 @@ issueWildfireSmoke <- function(input, output, session){
   # create a vector of reactive values to store the the selected polygons
   selRegions <- reactiveValues(ids = vector())
   
-  # Remove
+  # clean up directories
   observeEvent(input$cleanupdir, {
-    rnw_dirs <- list.dirs(path = here::here("outputs", "rnw"), recursive = FALSE, full.names = TRUE)
-    rnw_files <- list.files(path = here::here("outputs", "rnw"), full.names = TRUE)
-    qmd_dirs <- list.dirs(path = here::here("outputs", "qmd"), recursive = FALSE, full.names = TRUE)
-    qmd_files <- dir(path = here::here("outputs", "qmd"), full.names = TRUE)
+    output_files <- dir(path = here::here("outputs"), full.names = TRUE)
+    temp_files <- dir(full.names = TRUE, pattern = ".png|.html")
     
-    dirsToRemove <- c(rnw_dirs, qmd_dirs)
-    files <- c(rnw_files, qmd_files)
-    filesToRemove <- setdiff(files, dirsToRemove)
+    filesToRemove <- c(output_files, temp_files)
     
     nfiles <- length(filesToRemove)
-    ndirs <- length(dirsToRemove)
-    if (nfiles == 0 & ndirs == 0) {
+    if (nfiles == 0) {
       showNotification("No files or directories to remove", type = "message")
     } else {
       
-      fs::dir_delete(dirsToRemove)
       file.remove(filesToRemove)
       
-      showNotification(paste("Directories removed:", ndirs, ". ", "Files removed:", nfiles, "."), type = "message")  
+      showNotification(paste("Files removed:", nfiles, "."), type = "message")  
     }
   })
 
@@ -423,7 +405,6 @@ issueWildfireSmoke <- function(input, output, session){
 
 
 # Generate report
-# Automatically generate map and then create the PDF
   observeEvent(input$genWarning, {
     
     if (input$sel_aqMet == "") {
@@ -434,7 +415,6 @@ issueWildfireSmoke <- function(input, output, session){
         showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
 
-      
       ncomplete <- length(completeNotificationIDs)
       if (ncomplete > 0) {
         # remove the notification for completed steps if the genWarning
@@ -449,108 +429,68 @@ issueWildfireSmoke <- function(input, output, session){
       showNotification("Preparing files. Please wait for completion notification.",
                        duration = 17)
       
+      # prep image for PDF output
       issueBasename <- "wildfire_smoke_issue"
       cliprect <- c(140, 147, 610, 480)  # top, left, width, height
       
       usermap <- user_created_map()
       
-      html_map <- sprintf(here::here("outputs", "rnw", "%s_%s_map.html"), currentDate, issueBasename)
+      html_map <- sprintf("%s_%s_map.html", currentDate, issueBasename)
       htmlwidgets::saveWidget(usermap, html_map)
-      
-      png_map <- here::here("outputs", "rnw", "map.png")
+
+      png_map <- sprintf("%s_%s_map.png", currentDate, issueBasename)
       webshot(url = html_map,
               file = png_map,
               cliprect = cliprect
       )
 
-      usermapForWebsite <- usermap |> 
-        addLabelOnlyMarkers(lng = -137.25, lat = 56.25,
-                          label = HTML(paste0("Updated:<br/>", currentDate)),
-                          group = "labels",
-                          options = pathOptions(pane = "ames_cities"),
-                          labelOptions = labelOptions(
-                            direction = "right",
-                            noHide = TRUE,
-                            textOnly = TRUE,
-                            textsize = "15px",
-                            crs = "+init=epsg:4326",
-                            style = list("color" = "#5c5c5c")))
-      
-      html_map_for_web <- here::here("outputs", "rnw", "usermapForWebsite.html")
-      htmlwidgets::saveWidget(usermapForWebsite, file = html_map_for_web)
-      
-      png_map_for_web <- sprintf(here::here("outputs", "rnw", "%s_%s_map.png"), currentDate, issueBasename)
-      webshot(url = html_map_for_web,
-              file = png_map_for_web,
-              cliprect = cliprect
-      )
-      
-      # Write selected polygon IDs to CSV file
-      regionsOut <- eccc_map_bc |> 
-        mutate(STATE = case_when(
-                  NAME %in% selRegions$ids ~ as.integer(1),
-                  OBJECTID %in% eccc_zones_lm ~ as.integer(NA),  #could eccc_map_env be used to remove this line?
-                  TRUE ~ as.integer(0)
-                  ),
-              DATE = currentDate
-              ) |> 
-        select(OBJECTID, NAME, STATE, DATE) |> 
-        arrange(OBJECTID) |> 
-        sf::st_drop_geometry()
-
-      write.csv(regionsOut, file = sprintf(here::here("outputs", "rnw", "%s_issued_regions.csv"), currentDate), row.names = FALSE)
-
-      # Note: text update is after the PDF is generated, so there is a
-      # delay in the appearance on the UI. For now, this is by design.
-      alttext <- sprintf("Air Quality Warning - Wildfire Smoke Regions for %s: %s.",
-                         currentDate,
-                         paste(sort(selRegions$ids), sep = "", collapse = ", "))
-      
-      writeLines(alttext, sprintf(here::here("outputs", "rnw", "%s_%s_map_alttext.txt"), currentDate, issueBasename))
-      
-      #id2 <- showNotification("Writing text files complete!", duration = NULL)
-      #completeNotificationIDs <<- c(completeNotificationIDs, c(id, id2))
-
-      output$alttext <- renderText(alttext)
-      
-      
-      # PDF
-     # showNotification("Generating PDF...")
-      knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), issueBasename), clean = TRUE,
-                      output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, issueBasename))
-
-     # id <- showNotification("PDF generation complete!", duration = NULL)
-      
-      # Quarto
-    #  showNotification("Generating Markdown...")
-      
+      # generate markdown via Quarto
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
-                            output_format = "markdown",
                             output_file = sprintf("%s_%s.md", currentDate, issueBasename),
+                            output_format = "markdown",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
                                                   smokeDuration = input$smokeDuration,
                                                   selRegionsIDs = selRegions$ids,
                                                   customMessage = input$smokeMessage,
                                                   ice = "Issue",
-                                                  location = input$location),
+                                                  location = input$location,
+                                                  outputFormat = "markdown"),
                             debug = FALSE)
       
-     # id <- showNotification("Markdown generation complete!", duration = NULL)
-      
+      # move the .md and .html to outputs/
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
-      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
+      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
       map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
-      fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs", "qmd"))
+      fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs"))
       
-      id <- showNotification("Processing complete. Files are ready for downloading.", 
+      # generate pdf via Quarto 
+      quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
+                            output_file = sprintf("%s_%s.pdf", currentDate, issueBasename),
+                            output_format = "pdf",
+                            execute_params = list(sel_aqMet = input$sel_aqMet,
+                                                  nextUpdate = as.character(input$nextUpdate),
+                                                  smokeDuration = input$smokeDuration,
+                                                  selRegionsIDs = selRegions$ids,
+                                                  customMessage = input$smokeMessage,
+                                                  ice = "Issue",
+                                                  location = input$location,
+                                                  outputFormat = "pdf"),
+                            debug = FALSE)
+     # move the .pdf to outputs/
+     # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, issueBasename), full.names = TRUE)
+     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
+      
+     id <- showNotification("Processing complete. Files are ready for downloading.", 
                        duration = NULL)
       
       completeNotificationIDs <<- c(completeNotificationIDs, c(id))
 
     } #end else
-  }) #end observeEvent for generating report
+    }) #end observeEvent for generating report
 
 ## Download files
 
@@ -561,9 +501,9 @@ issueWildfireSmoke <- function(input, output, session){
     content = function(file) {
       # Build file paths correctly using sprintf()
       files_to_zip <- c(
-        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue.md", Sys.Date())),
-        file.path("outputs", "rnw", sprintf("%s_wildfire_smoke_issue.pdf", Sys.Date())),
-        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_issue_map.html", Sys.Date()))
+        file.path("outputs", sprintf("%s_wildfire_smoke_issue.md", Sys.Date())),
+        file.path("outputs", sprintf("%s_wildfire_smoke_issue.pdf", Sys.Date())),
+        file.path("outputs", sprintf("%s_wildfire_smoke_issue_map.html", Sys.Date()))
       )
       
       # Zip the files into the download target

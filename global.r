@@ -18,4 +18,3 @@ source(file.path("load_metadata.r"))
 # Load  modules
 source(file.path("module_issue_wildfire_smoke.r"))
 source(file.path("module_end_wildfire_smoke.r"))
-
