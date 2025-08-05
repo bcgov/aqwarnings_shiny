@@ -27,10 +27,6 @@ format:
     date-format: long
     include-in-header: 
       - src/header.tex
-    mainfont: BCSans-Regular
-    mainfontoptions:
-      - Boldfont = BCSans-Bold
-      - ItalicFont = BCSans-Italic
     fontsize: "11pt"
     urlcolor: bcblue
 ---
