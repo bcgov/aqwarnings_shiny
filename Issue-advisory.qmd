@@ -26,13 +26,13 @@ library(lubridate)
 library(readr)
 library(xtable)
 
-aq_mets <- fread(file.path("contacts", "aq_mets_contact.csv"))
+aq_mets <- fread(file.path("data", "raw", "aq_mets_contact.csv"))
 
-healthAuth <- fread(file.path("contacts", "health_auth_contact.csv"))
+healthAuth <- fread(file.path("data", "raw", "health_auth_contact.csv"))
 
-buddy_stations <- fread(file.path("utility", "buddy_stations.csv"))
+buddy_stations <- fread(file.path("data", "raw", "buddy_stations.csv"))
 
-Health_Authority <- fread(file.path("utility", "Health_Authority.csv"))
+Health_Authority <- fread(file.path("data", "raw", "Health_Authority.csv"))
 ```
 
 ```{r health_tips, include=FALSE}
@@ -117,19 +117,16 @@ voluntary_reduction_O3 <- paste0(
 
 ```{r HAcontact, include=FALSE}
 
-station_HAcontact <- Health_Authority %>%
+HAauth <- Health_Authority %>%
   filter(Station == params$station) %>%
   pull(Health_authority)
 
-HAauth <- healthAuth |>
-       filter(nickname == station_HAcontact) |>
-       mutate(station_HAcontact = paste(authority)) |>
-       pull(station_HAcontact)
-
 HAcontact <- healthAuth |>
-       filter(nickname == station_HAcontact) |>
-       mutate(station_HAcontact = paste(authority, primary_contact, secondary_contact, tertiary_contact, sep = "<br />")) |>
-       pull(station_HAcontact)
+    filter(authority == HAauth) |>
+    select(authority, contact) |>
+    group_by(authority) |>
+    summarise(html_string = paste(contact, collapse = "<br />"))
+
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -560,4 +557,4 @@ kable(final_table, row.names = FALSE)
 
 `r ENVcontact`
 
-`r HAcontact`
+`r HAcontact$html_string`
