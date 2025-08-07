@@ -136,7 +136,7 @@ nonWildfireSmoke <- function(input, output, session){
       
       showNotification("Preparing files. Please wait for completion notification.")
       
-      qmd_file <- if (input$ice == "End") "module_end_nonwildfire_advisory.qmd" else "module_issue_nonwildfire_advisory.qmd"
+      qmd_file <- if (input$ice == "End") "non-wildfire_smoke_end.qmd" else "non-wildfire_smoke_issue.qmd"
       
       # Clean station name for file name
       station_clean <- gsub("\\s+", "_", input$station)
