@@ -1,14 +1,27 @@
 ---
 date: "`r Sys.Date()`"
-format: html
 params: 
   ice: Continue
   date: "`r Sys.Date()`"
   pollutant: PM25
   burnRestrictions: "Yes - Ben"
   sel_aqMet: "Sakshi"
-  station: Smithers
+  station: "Smithers"
   issuedate: "2025-07-20"
+  HAauth: ""
+  outputFormat: ""
+format:
+  markdown: default
+  pdf:
+    date-format: long
+    include-in-header: 
+      - src/header.tex
+    mainfont: BCSans-Regular
+    mainfontoptions:
+      - Boldfont = BCSans-Bold
+      - ItalicFont = BCSans-Italic
+    fontsize: "11pt"
+    urlcolor: bcblue
 ---
 
 ```{r setup, echo=FALSE, include=FALSE, warning=FALSE, message=FALSE}
@@ -26,13 +39,7 @@ library(lubridate)
 library(readr)
 library(xtable)
 
-aq_mets <- fread(file.path("data", "raw", "aq_mets_contact.csv"))
-
-healthAuth <- fread(file.path("data", "raw", "health_auth_contact.csv"))
-
-buddy_stations <- fread(file.path("data", "raw", "buddy_stations.csv"))
-
-Health_Authority <- fread(file.path("data", "raw", "Health_Authority.csv"))
+source(here::here("load_metadata.r"))
 ```
 
 ```{r health_tips, include=FALSE}
@@ -121,7 +128,7 @@ HAauth <- Health_Authority %>%
   filter(Station == params$station) %>%
   pull(Health_authority)
 
-HAcontact <- healthAuth |>
+HAcontact <- health_contact |>
     filter(authority == HAauth) |>
     select(authority, contact) |>
     group_by(authority) |>

@@ -35,7 +35,12 @@ sidebar <- dashboardSidebar(
       "End Warning",
       icon = icon("pencil"),
       tabName = "end"
-      )
+      ),
+    menuItem(
+      "Non-wildfire Warning",
+      icon = icon("pencil"),
+      tabName = "non-wildfire"
+    )
     )
   )
 
@@ -44,10 +49,11 @@ body <- dashboardBody(
   tags$head(
     tags$style(HTML(".leaflet-container { background: white; }"))
     ), 
- tabItems(
-   issueWildfireSmokeUI("issue_wildfire_smoke"),
-   endWildfireSmokeUI("end_wildfire_smoke")
-   )
+  tabItems(
+    tabItem(tabName = "issue", issueWildfireSmokeUI("issue_wildfire_smoke")),
+    tabItem(tabName = "end", endWildfireSmokeUI("end_wildfire_smoke")),
+    tabItem(tabName = "non-wildfire", nonWildfireSmokeUI("non_wildfire_smoke"))
+  )
  )
 
 shinyUI(dashboardPage(header, sidebar, body))
