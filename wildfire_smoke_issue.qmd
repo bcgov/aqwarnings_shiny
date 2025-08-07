@@ -92,11 +92,12 @@ unique_HA <- unique(c(a,b))
 unique_HA <- unique_HA [! unique_HA %in% ""]
 
 # Filter health authorities, always include FNHA
-HAcontact <- healthAuth |>
-    filter(authority == "Interior Health Authority") |>
-    select(authority, contact) |>
-    group_by(authority) |>
-    summarise(html_string = paste(contact, collapse = "<br />"), .groups = "drop")
+HAcontact <- health_contact |> 
+  filter(authority %in% c("First Nations Health Authority", unique_HA)) |> 
+  mutate(authority = factor(authority))|> 
+  select(authority, contact) |>
+  group_by(authority) |> 
+  summarise(html_string = paste(contact, collapse = sep_type))
 
 # Retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
