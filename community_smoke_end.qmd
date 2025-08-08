@@ -5,7 +5,7 @@ params:
   date: "`r Sys.Date()`"
   pollutant: PM25
   burnRestrictions: "Yes"
-  sel_aqMet: "Sakshi"
+  sel_aqMet: "Sakshi Jain"
   station: "Whistler"
   nextBulletin: "2025-05-08"
   issuedate: "2025-07-09"

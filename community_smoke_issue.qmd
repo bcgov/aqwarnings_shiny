@@ -5,7 +5,7 @@ params:
   date: "`r Sys.Date()`"
   pollutant: PM25
   burnRestrictions: "Yes - Ben"
-  sel_aqMet: "Sakshi"
+  sel_aqMet: "Sakshi Jain"
   station: "Smithers"
   issuedate: "2025-07-20"
   HAauth: ""
@@ -490,7 +490,6 @@ final_table <- pt4 %>%
 ```
 
 ```{r ENVcontact, include=FALSE}
-
 
 ENVcontact <- aq_mets |>
   filter(nickname == params$sel_aqMet) |>

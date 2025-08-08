@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## Air Quality Warning - Wildfire Smoke UI
+## Air Quality Warning - Wildfire Smoke and community smoke UI
 
 library(shiny)
 library(shinydashboard)
@@ -37,9 +37,9 @@ sidebar <- dashboardSidebar(
       tabName = "end"
       ),
     menuItem(
-      "Non-wildfire Warning",
+      "Community Warning",
       icon = icon("pencil"),
-      tabName = "non-wildfire"
+      tabName = "community"
     )
     )
   )
@@ -52,7 +52,7 @@ body <- dashboardBody(
   tabItems(
     tabItem(tabName = "issue", issueWildfireSmokeUI("issue_wildfire_smoke")),
     tabItem(tabName = "end", endWildfireSmokeUI("end_wildfire_smoke")),
-    tabItem(tabName = "non-wildfire", nonWildfireSmokeUI("non_wildfire_smoke"))
+    tabItem(tabName = "community", communitySmokeUI("community_smoke"))
   )
  )
 

@@ -23,7 +23,7 @@ source(here::here("load_metadata.r"))
 # UI
 #--------------------------------------------------
 
-nonWildfireSmokeUI <- function(id) {
+communitySmokeUI <- function(id) {
   ns <- NS(id)
   tabItem(tabName = "end",
           fluidRow(
@@ -38,7 +38,7 @@ nonWildfireSmokeUI <- function(id) {
                 inputId = ns("sel_aqMet"),
                 label = h5("Author:"),
                 selected = "",
-                choices = c("", aq_mets$fullname),
+                choices = c("", aq_mets$nickname),
                 width = "50%"
               ),
               
@@ -106,7 +106,7 @@ nonWildfireSmokeUI <- function(id) {
 # Server
 #--------------------------------------------------
 
-nonWildfireSmoke <- function(input, output, session){
+communitySmoke <- function(input, output, session){
   
   completeNotificationIDs <- character(0)
   today <- format(Sys.Date(), "%Y-%m-%d")
@@ -136,13 +136,13 @@ nonWildfireSmoke <- function(input, output, session){
       
       showNotification("Preparing files. Please wait for completion notification.")
       
-      qmd_file <- if (input$ice == "End") "non-wildfire_smoke_end.qmd" else "non-wildfire_smoke_issue.qmd"
+      qmd_file <- if (input$ice == "End") "community_smoke_end.qmd" else "community_smoke_issue.qmd"
       
       # Clean station name for file name
       station_clean <- gsub("\\s+", "_", input$station)
       
       # Set output file name
-      output_file_name <- sprintf("%s_non-wildfire_smoke_%s_%s_%s", today, input$ice, input$pollutant, station_clean)
+      output_file_name <- sprintf("%s_community_smoke_%s_%s_%s", today, input$ice, input$pollutant, station_clean)
       
       # generate warning: markdown and pdf formats
       showNotification("Generating Markdown file...")
@@ -190,13 +190,13 @@ nonWildfireSmoke <- function(input, output, session){
     
     filename = function() {
       # Set output file name
-      sprintf("%s_non-wildfire_smoke.zip", today)
+      sprintf("%s_community_smoke.zip", today)
     },
     content = function(file) {
       # Build file paths correctly using sprintf()
       files_to_zip <- list.files(
         path = here::here("outputs"),
-        pattern = "non-wildfire_smoke",
+        pattern = "community_smoke",
         full.names = TRUE
       )
       
@@ -231,7 +231,7 @@ nonWildfireSmoke <- function(input, output, session){
 ## For testing the standalone app
 
 # ui <- dashboardPage(
-#   dashboardHeader(title = "Non-Wildfire Smoke Advisory"),
+#   dashboardHeader(title = "community Smoke Advisory"),
 #   dashboardSidebar(
 #     sidebarMenu(
 #       menuItem("End", tabName = "end", icon = icon("exclamation-triangle"))
@@ -239,13 +239,13 @@ nonWildfireSmoke <- function(input, output, session){
 #   ),
 #   dashboardBody(
 #     tabItems(
-#       nonWildfireSmokeUI("nonWildfireSmoke")  # call your module UI here inside tabItems
+#       communitySmokeUI("communitySmoke")  # call your module UI here inside tabItems
 #     )
 #   )
 # )
 # 
 # server <- function(input, output, session) {
-#   moduleServer("nonWildfireSmoke", nonWildfireSmoke)
+#   moduleServer("communitySmoke", communitySmoke)
 # }
 # 
 # shinyApp(ui, server)
