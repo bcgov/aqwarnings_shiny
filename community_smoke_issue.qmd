@@ -5,13 +5,14 @@ date: "`r Sys.Date()`"
 params: 
   ice: Continue
   date: "`r Sys.Date()`"
-  pollutant: PM25
+  pollutant: PM10
   burnRestrictions: "Yes - Ben"
-  sel_aqMet: "Sakshi Jain"
-  station: "Smithers"
+  sel_aqMet: "Sakshi"
+  station: "Prince George"
   issuedate: "2025-07-20"
   HAauth: ""
   outputFormat: ""
+  customText: "Current conditions are expected to persist for the next 24 hours."
 format:
   markdown: default
   pdf:
@@ -54,81 +55,113 @@ source(here::here("load_metadata.r"))
 
 ```{r health_tips, include=FALSE}
 
-health_tips_PM <- paste("# Tips to reduce your personal health risk
+current_month <- as.numeric(format(Sys.Date(), "%m"))
 
-- Avoid roads with heavy vehicle traffic and areas with wood smoke.
-- Use common sense regarding outdoor physical activity; if your breathing becomes difficult or uncomfortable, stop or reduce the activity.
-- Maintaining good overall health is a good way to reduce health risks resulting from short-term exposure to air pollution.
-- Run an air cleaner. Some room air cleaners, such as HEPA filters, can help reduce indoor particulate levels provided they are the right size for your home and filters are changed regularly.
-- In public spaces, buildings with large indoor volumes of filtered outside air may provide temporary relief. When indoors, ensure physical distancing guidelines for COVID-19 are observed. Be aware that space within indoor public buildings may be limited due to physical distancing guidelines for COVID-19.
-
-Additional tips for persons with chronic underlying medical conditions
-
-- People with heart or respiratory conditions (including COVID-19) should watch for any change in symptoms that may be due to poor air quality exposure. If any symptoms are noted, affected individuals should take steps to reduce their exposure to poor air quality. If symptoms continue to be bothersome, seek medical attention.
-- People with asthma or other chronic illness should activate their asthma or personal care plan.
-- People with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the advisory is lifted.
-- Stay indoors, keep windows and doors closed and reduce indoor sources of pollution such as smoking, vacuuming and use of wood stoves. When indoors, ensure physical distancing guidelines for COVID-19 are observed.")
+health_tips <- paste(
+  "# Actions you can take\n\n",
   
-health_tips_O3 <- paste("# Tips to reduce your personal health risk
+  "As air contaminant levels increase, health risks increase. Consider reducing or rescheduling outdoor sports, activities and events.\n\n",
+  "People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.\n\n",
+  
+  "## Follow your common sense\n",
+  "- Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.\n",
+  if (current_month %in% 6:8) {
+    "- During warm weather, stay cool and drink plenty of fluids.\n"
+  } else {
+    ""
+  },
+  "- Always carry any rescue medications with you.\n",
+  "- Make sure that children and others who cannot care for themselves follow the same advice.\n\n",
+  
+  "## Monitor your symptoms\n",
+  "- Different people have different responses to elevated levels of air contaminants.\n",
+  "- Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the air contaminants return to typical levels.\n",
+  "- More serious but less common symptoms include wheezing, chest pains or severe cough.\n",
+  "- People with asthma or other chronic illness should follow any personal care plans designed with their family physicians.\n",
+  "- If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.\n",
+  "- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department.\n",
+  "- If you are having a medical emergency, call 9-1-1.\n\n",
+  
+  "## Tips to reduce your exposure to air contaminants\n",
+  "- When indoors, keep windows and doors closed as much as possible.\n",
+  "- Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.\n",
+  if (current_month %in% 6:8) {
+    "- When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.\n"
+  } else {
+    ""
+  },
+  if (params$pollutant %in% c("PM25", "PM10")) {
+    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it yourself air cleaners may also be used if other options are not available. For details, visit: https://rb.gy/epi7qv.\n"
+    "- If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n"
+  } else {
+    ""
+  },
+  if ((params$pollutant == "PM25" && current_month %in% 6:8)) {
+  "- Avoid roads with heavy vehicle traffic.\n"
+  } else {
+  ""
+  },
+  
+  if (params$pollutant %in% c("PM25", "PM10") && current_month %in% c(9:12, 1:5)) {
+    "- Avoid roads with heavy vehicle traffic and areas with wood smoke.\n"
+  } else {
+    ""
+  },
+  sep = ""
+)
 
-- During hot conditions, stay cool and drink plenty of water.
-- Consider reducing or rescheduling outdoor activities to cooler hours of the day or if you are experiencing symptoms such as coughing or throat irritation.
-- Reduce physical activity and stay in areas with cleaner air to reduce your exposure; wearing a mask, such as those worn to reduce transmissions of COVID-19, will not provide effective protection from gases in the air, including ground-level ozone.
-- Stay in cool, air-conditioned environments, especially during the afternoon when ground-level ozone levels are highest
-- Keep your indoor air clean by keeping windows and doors closed and by reducing indoor sources of air pollution such as smoking, sweeping, and vacuuming.
-- Maintain good overall health, since it is a good way to prevent health effects resulting from short-term exposure to air pollution.
-
-# Additional tips for persons with chronic underlying medical conditions
-
-- Continue to manage acute infections (such as COVID-19) or pre-existing chronic medical conditions such as lung disease, heart disease, COPD, asthma and diabetes. If symptoms continue to be bothersome, seek medical attention.
-- Use prescribed medications (such as inhalers) to manage symptoms as directed by your health care provider.
-- Consider creating a comfortable space at home with a portable air conditioner if you do not have central air conditioning.")
 ```
 
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
-    "- Common sources of fine particulates that contribute to episodes of poor air quality include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.\n",
-    "- This episode is expected to continue until there is a change in the current weather system.\n",
-    "- Real-time air quality information from ", params$station, " and other B.C. communities can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).\n",
-    "- The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+    "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
+    
+This episode is expected to continue until there is a change in the current weather system.
+    
+The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " local time today:"
   )
 
 additional_info_PM10 <- paste0(
-  "- This advisory has been triggered by high concentrations of dust, measured as PM$_{10}$, or particles 10 micrometers or smaller in diameter.\n",
-  "- The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.\n",
-  "- Real-time air quality information from ", params$station, " and other B.C. communities can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).\n",
+  "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers ($\\mu$m). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 $\\mu$m or less), these particles are referred to as PM$_{10}$. Sources of PM$_{10}$ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM$_{10}$ can easily penetrate indoors because of their small size.
+  
+  The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.\n\n",
   if (params$station == "Prince George") {paste0(
-  "- For information on the City of Prince George’s Clean Air Bylaw (8266), please contact City Hall at 250-561-7600 or visit the City’s website at: [https://www.princegeorge.ca](https://www.princegeorge.ca/).\n")
+  "For information on the City of Prince George’s Clean Air Bylaw (8266), please contact City Hall at 250-561-7600 or visit the City’s website at: [https://www.princegeorge.ca](https://www.princegeorge.ca/).\n\n")
   } else {NULL},
-  "- The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  "The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
   )
 
 additional_info_O3 <- paste0(
-  "- Ground-level ozone is formed when nitrogen oxides and volatile organic compounds (VOCs) react in sunlight.\n",
-  "- Nitrogen oxides are emitted from vehicles, boilers, building heating, and other combustion processes.\n",
-  "- VOCs are emitted from burning fossil fuels, evaporation of solvents (including paint, varnishes and thinners), refining and storing fuel and agricultural activities. VOCs also come from natural sources such as vegetation.\n",
-  "- Concentrations of ground-level ozone change over the course of the day, and the highest concentrations are usually later in the day (late afternoon or early evening).\n",
-  "- This episode is expected to continue until there is a change in the current weather system.\n",
-  "- Real-time air quality information from ", params$station, " and other B.C. communities can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).\n",
-  "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
+  "Ground-level ozone is formed when chemicals (such as nitrogen oxides and volatile organic compounds) react in the air when there is sunlight. Nitrogen oxides are emitted from vehicles, boilers, building heating, and other combustion processes. VOCs are emitted from burning fossil fuels, evaporation of solvents (including paint, varnishes and thinners), refining and storing fuel and agricultural activities. VOCs also come from natural sources such as vegetation.
+  
+The highest concentrations of ground-level ozone usually happen between mid-afternoon and early evening on summer days.
+  
+The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
   "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
   )
 ```
 
 ```{r volunary_reduction, include=FALSE}
 
-voluntary_reduction_PM <- paste0(
-  "- Avoid the use of wood stoves and fireplaces unless the sole source of residential heat.
-- Where woodstoves or fireplaces are the sole source of residential heat, burn dry wood and ensure an adequate supply of combustion air.
-- Reduce the use and idling of vehicles."
+voluntary_reduction_PM25 <- paste0(
+   if (current_month %in% c(10:12, 1:4)) {
+    "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n"
+  } else {
+    ""
+  },
+ "- Reduce vehicle use where possible and avoid idling vehicles.\n",
+    sep=""
+)
+
+voluntary_reduction_PM10 <- paste0(
+  "- Avoid driving on the road shoulder or other areas where road traction material has accumulated.\n",
+  "-  When cleaning driveways and parking lots, lightly wet the area before sweeping. Avoid using leaf blowers to clean up dirt during spring clean up.\n"
 )
 
 voluntary_reduction_O3 <- paste0(
-  "Reducing air pollutant emissions will help improve air quality. Actions people can take:\n\n",
-  "- Avoid or reduce using your vehicles and avoid idling.\n",
-  "- Fuel your vehicle in the cooler evening hours or after dark.\n",
-  "- Reduce or reschedule using gasoline and diesel equipment, such as lawn mowers, trimmers, and leaf blowers.\n"
+  "Fuel your vehicle in the cooler evening hours or after dark.\n",
+  "Reduce or reschedule using other gasoline and diesel equipment, such as lawn mowers, trimmers and leaf blowers.\n"
 )
 ```
 
@@ -148,36 +181,30 @@ HAcontact <- health_contact |>
 
 ```{r pollutant_specific_clauses, include=FALSE}
 if (params$pollutant == "PM25") {
-  health_tips <- health_tips_PM
   pollutantExpansion <- "fine particulate matter"
   additional_info <- additional_info_PM25
-  voluntary_reduction <- voluntary_reduction_PM
+  voluntary_reduction <- voluntary_reduction_PM25
   if (params$ice == "Issue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an air quality warning for ", params$station, " due to high concentrations of ", pollutantExpansion, " that are expected to persist until weather conditions change.")
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
   } else if (params$ice == "Continue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an air quality warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The Air Quality Advisory remains in effect due to high concentrations of ", pollutantExpansion, " that are expected to persist until weather conditions change."
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The Air Quality Advisory remains in effect due to high concentrations of ", pollutantExpansion, " that are expected to persist until weather conditions change."
     )
 }
-  background <- "Fine particulate matter, PM~2.5~, refers to airborne solid or liquid droplets with diameters of 2.5 micrometres ($\\textmu$ m) or less. PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic."
 } else if (params$pollutant == "PM10") {  
-  health_tips <- health_tips_PM
   pollutantExpansion <- "coarse particulate matter"
   additional_info <- additional_info_PM10
-  voluntary_reduction <- voluntary_reduction_PM
+  voluntary_reduction <- voluntary_reduction_PM10
   if (params$ice == "Issue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an air quality warning for ", params$station, " because of high concentrations of coarse particulate matter that are expected to persist until there is precipitation, dust suppression or a change in traffic patterns. Levels tend to be highest around busy roads and industrial operations. This advisory is in effect until further notice.")
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
   } else if (params$ice == "Continue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an air quality warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The advisory remains in effect due to high concentrations of coarse particulate matter that are expected to persist until there is precipitation, dust suppression or a change in traffic patterns. Levels tend to be highest around busy roads and industrial operations. This advisory is in effect until further notice."
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The advisory remains in effect due to high concentrations of coarse particulate matter that are expected to persist until there is precipitation, dust suppression or a change in traffic patterns. Levels tend to be highest around busy roads and industrial operations. This advisory is in effect until further notice."
     )
 }
-  background <- "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers ($\\textmu$ m). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 $\\textmu$ m or less), these particles are referred to as PM~10~. Sources of PM~10~ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM~10~ can easily penetrate indoors because of their small size."
 } else if (params$pollutant == "O3") {
-  health_tips <- health_tips_O3
-  pollutantExpansion <- "ozone"
+  pollutantExpansion <- "ground level ozone"
   additional_info <- additional_info_O3
   voluntary_reduction <- voluntary_reduction_O3
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an air quality warning for ", params$station, " due to high concentrations of ground-level ozone that are expected during hot and sunny weather conditions.")
-  background <- "**What is ground-level ozone?** Ground-level ozone is not emitted directly into the air. Instead, it is formed when other chemicals (such as nitrogen oxides and volatile organic compounds) react in the air when there is sunlight. The highest concentrations of ground-level ozone usually happen between mid-afternoon and early evening on summer days."
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
 } else {
   title_pollutant <- NULL
   background <- NULL
@@ -589,11 +616,11 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
-# Air quality warning `r title_burn_advisory` `r title_ICE` for `r params$station`
+# Air quality warning `r title_burn_advisory` `r title_ICE` for `r params$station` - `r format(Sys.Date(), "%B %d, %Y")`
 
 `r first_paragraph`
 
-Exposure is particularly a concern for individuals with chronic conditions such as asthma, COPD, heart disease, and diabetes; respiratory infections such as COVID-19, pregnant women, infants, and older adults. Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the advisory is lifted. Where appropriate, maintain physical distancing. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
+Exposure to `r pollutantExpansion` is particularly a concern for individuals with chronic conditions such as asthma, COPD, heart disease, and diabetes; respiratory infections such as COVID-19, pregnant women, infants, and older adults. Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the advisory is lifted. Where appropriate, maintain physical distancing. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
 
 `r burn_ban`
 
@@ -601,7 +628,9 @@ Exposure is particularly a concern for individuals with chronic conditions such 
 
 Real-time air quality observations and information regarding the health effects of air pollution can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).
 
-`r background`
+`r params$customText`
+
+The next update will be on `r format(as.Date(nextBulletin), "%B %d, %Y")` and posted to the province’s [Air Quality Warnings webpage](https://www.gov.bc.ca/airquality).  
 
 `r health_tips`
 
@@ -623,7 +652,14 @@ knitr::asis_output(burn_ban_bylaws)
 kable(final_table, row.names = FALSE)
 ```
 
-# Contacts
+## For general information about air quality in British Columbia: 
+
+- Real-time air quality observations and information regarding the health effects of air pollution can be found at gov.bc.ca/airquality.
+- Air Quality Health Index: gov.bc.ca/airqualityhealthindex 
+- Air Quality Map: gov.bc.ca/airqualitymap 
+- Metro Vancouver’s Air Quality Data and Advisories page: https://metrovancouver.org/services/air-quality-climate-change/air-quality-data-and-advisories 
+
+# Contact Information
 
 `r ENVcontact`
 
