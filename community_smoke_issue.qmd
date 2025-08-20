@@ -546,9 +546,7 @@ logos_list <- list(
 logos_names_selected <- c("Government of British Columbia",
                           "First Nations Health Authority", 
                           HAauth)
-
-# Get the correct logo codes (e.g., "BCID_V_RGB_pos", "VCH")
-logos_selected <- logos_list[logos_selected_names]  # this returns a named list
+logos_selected <- logos_list[logos_names_selected]
 
 # Count number of logos to display
 n_logos <- length(logos_selected)
