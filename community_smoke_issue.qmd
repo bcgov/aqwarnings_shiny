@@ -166,6 +166,10 @@ voluntary_reduction_O3 <- paste0(
 ```
 
 ```{r HAcontact, include=FALSE}
+#| label: HAcontact
+#| results: asis
+
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
 HAauth <- Health_Authority %>%
   filter(Station == params$station) %>%
@@ -175,8 +179,7 @@ HAcontact <- health_contact |>
     filter(authority == HAauth) |>
     select(authority, contact) |>
     group_by(authority) |>
-    summarise(html_string = paste(contact, collapse = "<br />"))
-
+    summarise(html_string = paste(contact, collapse = sep_type))
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -519,11 +522,17 @@ final_table <- pt4 %>%
 ```
 
 ```{r ENVcontact, include=FALSE}
+#| label: ENVcontact
+#| results: asis
+#| strip.white: false
 
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+
+# AQ met information
 ENVcontact <- aq_mets |>
   filter(nickname == params$sel_aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
-  pull(contact)
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
+  pull(contact) 
 ```
 
 ```{r}
@@ -611,6 +620,7 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
+
 # Air quality warning `r title_burn_advisory` `r title_ICE` for `r params$station` - `r format(Sys.Date(), "%B %d, %Y")`
 
 `r first_paragraph`

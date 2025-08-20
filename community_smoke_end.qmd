@@ -98,13 +98,24 @@ if (params$pollutant == "PM25") {
 ```
 
 ```{r ENVcontact, include=FALSE}
+#| label: ENVcontact
+#| results: asis
+#| strip.white: false
+
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+
+# AQ met information
 ENVcontact <- aq_mets |>
   filter(nickname == params$sel_aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
-  pull(contact)
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
+  pull(contact) 
 ```
 
 ```{r HAcontact, include=FALSE}
+#| label: HAcontact
+#| results: asis
+
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
 HAauth <- Health_Authority %>%
   filter(Station == params$station) %>%
@@ -114,9 +125,9 @@ HAcontact <- health_contact |>
     filter(authority == HAauth) |>
     select(authority, contact) |>
     group_by(authority) |>
-    summarise(html_string = paste(contact, collapse = "<br />"))
-
+    summarise(html_string = paste(contact, collapse = sep_type))
 ```
+
 
 ```{r table-setup, include=FALSE}
 
