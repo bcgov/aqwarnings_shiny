@@ -353,6 +353,7 @@ kable(final_table, row.names = FALSE)
 
 # Contacts
 
-`r ENVcontact`
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
 
-`r HAcontact$html_string`
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r HAcontact$html_string`[{{< card_end >}}]{.content-visible when-format="markdown"}
+

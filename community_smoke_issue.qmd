@@ -654,13 +654,18 @@ kable(final_table, row.names = FALSE)
 
 ## For general information about air quality in British Columbia: 
 
-- Real-time air quality observations and information regarding the health effects of air pollution can be found at gov.bc.ca/airquality.
-- Air Quality Health Index: gov.bc.ca/airqualityhealthindex 
-- Air Quality Map: gov.bc.ca/airqualitymap 
-- Metro Vancouver’s Air Quality Data and Advisories page: https://metrovancouver.org/services/air-quality-climate-change/air-quality-data-and-advisories 
+- Real-time air quality observations and information regarding the health effects of air pollution can be found at [gov.bc.ca/airquality](https://gov.bc.ca/airquality).
+- View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
+- Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
+- [Metro Vancouver’s Air Quality Data and Warnings][Air quality data and warnings]
+
+[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
+[What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
+[Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
 
 # Contact Information
 
-`r ENVcontact`
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
 
-`r HAcontact$html_string`
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r HAcontact$html_string`[{{< card_end >}}]{.content-visible when-format="markdown"}
+
