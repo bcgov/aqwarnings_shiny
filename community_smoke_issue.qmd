@@ -166,6 +166,10 @@ voluntary_reduction_O3 <- paste0(
 ```
 
 ```{r HAcontact, include=FALSE}
+#| label: HAcontact
+#| results: asis
+
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
 HAauth <- Health_Authority %>%
   filter(Station == params$station) %>%
@@ -175,8 +179,7 @@ HAcontact <- health_contact |>
     filter(authority == HAauth) |>
     select(authority, contact) |>
     group_by(authority) |>
-    summarise(html_string = paste(contact, collapse = "<br />"))
-
+    summarise(html_string = paste(contact, collapse = sep_type))
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -519,41 +522,42 @@ final_table <- pt4 %>%
 ```
 
 ```{r ENVcontact, include=FALSE}
+#| label: ENVcontact
+#| results: asis
+#| strip.white: false
 
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+
+# AQ met information
 ENVcontact <- aq_mets |>
   filter(nickname == params$sel_aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
-  pull(contact)
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
+  pull(contact) 
 ```
 
 ```{r}
 #| label: create-logo-list
 
+# Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
+# This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
 logos_list <- list(
   "Government of British Columbia" = "BCID_V_RGB_pos",
   "First Nations Health Authority" = "FNHA",
-  "Interior Health Authority" = "IH", 
-  "Fraser Health Authority" = "FH", 
-  "Vancouver Coastal Health Authority" = "VCH", 
-  "Vancouver Island Health Authority" = "VIH", 
-  "Northern Health Authority" = "NH")
+  "Interior Health Authority" = "IH",
+  "Fraser Health Authority" = "FH",
+  "Vancouver Coastal Health Authority" = "VCH",
+  "Vancouver Island Health Authority" = "VIH",
+  "Northern Health Authority" = "NH"
+)
 
 # Logos selected by user and ordered as per logos_list
 # Logos selected by user
-logos_selected_names <- c("Government of British Columbia", HAauth)
+logos_names_selected <- c("Government of British Columbia",
+                          "First Nations Health Authority", 
+                          HAauth)
+logos_selected <- logos_list[logos_names_selected]
 
-# Get the correct logo codes (e.g., "BCID_V_RGB_pos", "VCH")
-logos_selected <- logos_list[logos_selected_names]  # this returns a named list
-
-# Build image lines
-# logo_image_line <- c()
-# for (logo_name in names(logos_selected)) {
-#   logo_image_line <- c(
-#     logo_image_line,
-#     paste0("![", logo_name, " logo](/utility/logos/logo_", logos_selected[[logo_name]], ".png){width=150px}\\")
-#   )
-# }
-
+# Count number of logos to display
 n_logos <- length(logos_selected)
 
 logo_image_line <- c()
@@ -598,13 +602,13 @@ logos <- magick::image_read(logo_urls) |>
 logos_combined <- magick::image_append(logos) |> 
   magick::image_write(path = "logo.png")
 }
-
 ```
 
+
+<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
 <!-- the trailing slash means the text in square brackets is alt text -->
 
 [`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
-
 
 ```{r}
 #| label: print-logos
@@ -616,6 +620,7 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
+
 # Air quality warning `r title_burn_advisory` `r title_ICE` for `r params$station` - `r format(Sys.Date(), "%B %d, %Y")`
 
 `r first_paragraph`
@@ -654,13 +659,18 @@ kable(final_table, row.names = FALSE)
 
 ## For general information about air quality in British Columbia: 
 
-- Real-time air quality observations and information regarding the health effects of air pollution can be found at gov.bc.ca/airquality.
-- Air Quality Health Index: gov.bc.ca/airqualityhealthindex 
-- Air Quality Map: gov.bc.ca/airqualitymap 
-- Metro Vancouver’s Air Quality Data and Advisories page: https://metrovancouver.org/services/air-quality-climate-change/air-quality-data-and-advisories 
+- Real-time air quality observations and information regarding the health effects of air pollution can be found at [gov.bc.ca/airquality](https://gov.bc.ca/airquality).
+- View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
+- Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
+- [Metro Vancouver’s Air Quality Data and Warnings][Air quality data and warnings]
+
+[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
+[What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
+[Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
 
 # Contact Information
 
-`r ENVcontact`
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
 
-`r HAcontact$html_string`
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r HAcontact$html_string`[{{< card_end >}}]{.content-visible when-format="markdown"}
+
