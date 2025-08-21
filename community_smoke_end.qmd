@@ -12,6 +12,7 @@ params:
   nextBulletin: "2025-05-08"
   issuedate: "2025-07-09"
   outputFormat: ""
+  customMessage: ""
 format:
   markdown: default
   pdf:

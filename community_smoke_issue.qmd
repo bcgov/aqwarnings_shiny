@@ -12,7 +12,7 @@ params:
   issuedate: "2025-07-20"
   HAauth: ""
   outputFormat: ""
-  customText: "Current conditions are expected to persist for the next 24 hours."
+  customMessage: ""
 format:
   markdown: default
   pdf:
@@ -633,7 +633,7 @@ Exposure to `r pollutantExpansion` is particularly a concern for individuals wit
 
 Real-time air quality observations and information regarding the health effects of air pollution can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).
 
-`r params$customText`
+`r params$customMessage`
 
 The next update will be on `r format(as.Date(nextBulletin), "%B %d, %Y")` and posted to the province’s [Air Quality Warnings webpage](https://www.gov.bc.ca/airquality).  
 

@@ -80,6 +80,13 @@ communitySmokeUI <- function(id) {
                         width = "50%"
               ),
               
+              textAreaInput(inputId = ns("customMessage"),
+                            label = h5("Custom smoke outlook message:"),
+                            value = "Current conditions are expected to persist for the next 24 hours.",
+                            width = "100%",
+                            height = "80px",
+                            resize = "vertical"),
+              
               h5("2. Generate Warning:"),
               actionButton(
                 inputId = ns("genWarning"),
@@ -156,6 +163,7 @@ communitySmoke <- function(input, output, session){
                               station = input$station,
                               burnRestrictions = input$burnRestrictions,
                               issuedate = input$issuedate,
+                              customMessage = input$customMessage,
                               outputFormat = "markdown"),
                             debug = FALSE)
       
@@ -170,6 +178,7 @@ communitySmoke <- function(input, output, session){
                               station = input$station,
                               burnRestrictions = input$burnRestrictions,
                               issuedate = input$issuedate,
+                              customMessage = input$customMessage,
                               outputFormat = "pdf"),
                             debug = FALSE)
     }
