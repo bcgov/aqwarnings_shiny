@@ -9,8 +9,8 @@ date: "`r Sys.Date()`"
 params: 
   ice: Continue
   date: "`r Sys.Date()`"
-  pollutant: PM10
-  burnRestrictions: "Yes - Ben"
+  pollutant: "O3"
+  burnRestrictions: "No"
   sel_aqMet: "Sakshi"
   station: "Prince George"
   issuedate: "2025-07-20"
@@ -83,22 +83,26 @@ health_tips <- paste(
   "- More serious but less common symptoms include wheezing, chest pains or severe cough.\n",
   "- People with asthma or other chronic illness should follow any personal care plans designed with their family physicians.\n",
   "- If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.\n",
-  "- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department.\n",
-  "- If you are having a medical emergency, call 9-1-1.\n\n",
+  "- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.\n\n",
   
   "## Tips to reduce your exposure to air contaminants\n",
-  "- When indoors, keep windows and doors closed as much as possible.\n",
   "- Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.\n",
+  "- When indoors, keep windows and doors closed as much as possible.\n",
   if (current_month %in% 6:8) {
     "- When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.\n"
   } else {
     ""
   },
-  if (params$pollutant %in% c("PM25", "PM10")) {
+  if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
     "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it yourself air cleaners may also be used if other options are not available. For details, visit: https://rb.gy/epi7qv.\n"
     "- If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n"
   } else {
     ""
+  },
+  if ((params$pollutant == "PM10")) {
+  "- Avoid busy roadways.\n"
+  } else {
+  ""
   },
   if ((params$pollutant == "PM25" && current_month %in% 6:8)) {
   "- Avoid roads with heavy vehicle traffic.\n"
@@ -106,7 +110,7 @@ health_tips <- paste(
   ""
   },
   
-  if (params$pollutant %in% c("PM25", "PM10") && current_month %in% c(9:12, 1:5)) {
+  if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in% c(9:12, 1:5)) {
     "- Avoid roads with heavy vehicle traffic and areas with wood smoke.\n"
   } else {
     ""
@@ -127,11 +131,9 @@ The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic m
 additional_info_PM10 <- paste0(
   "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers ($\\mu$m). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 $\\mu$m or less), these particles are referred to as PM$_{10}$. Sources of PM$_{10}$ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM$_{10}$ can easily penetrate indoors because of their small size.
   
-  The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.\n\n",
-  if (params$station == "Prince George") {paste0(
-  "For information on the City of Prince George’s Clean Air Bylaw (8266), please contact City Hall at 250-561-7600 or visit the City’s website at: [https://www.princegeorge.ca](https://www.princegeorge.ca/).\n\n")
-  } else {NULL},
-  "The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.
+  
+  The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
   )
 
 additional_info_O3 <- paste0(
@@ -142,6 +144,7 @@ The highest concentrations of ground-level ozone usually happen between mid-afte
 The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
   "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
   )
+
 ```
 
 ```{r volunary_reduction, include=FALSE}
@@ -159,6 +162,12 @@ voluntary_reduction_PM25 <- paste0(
 voluntary_reduction_PM10 <- paste0(
   "- Avoid driving on the road shoulder or other areas where road traction material has accumulated.\n",
   "-  When cleaning driveways and parking lots, lightly wet the area before sweeping. Avoid using leaf blowers to clean up dirt during spring clean up.\n"
+)
+
+voluntary_reduction_PM <- paste0(
+  voluntary_reduction_PM25,
+  voluntary_reduction_PM10,
+  sep = "\n\n"
 )
 
 voluntary_reduction_O3 <- paste0(
@@ -203,8 +212,16 @@ if (params$pollutant == "PM25") {
   first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
   } else if (params$ice == "Continue") {
   first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The advisory remains in effect due to high concentrations of coarse particulate matter that are expected to persist until there is precipitation, dust suppression or a change in traffic patterns. Levels tend to be highest around busy roads and industrial operations. This advisory is in effect until further notice."
-    )
+)
 }
+} else if (params$pollutant == "PM25 & PM10") {
+  pollutantExpansion <- "fine particulate matter and coarse particulate matter"
+  voluntary_reduction <- voluntary_reduction_PM
+  if (params$ice == "Issue") {
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
+  } else if (params$ice == "Continue") {
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The advisory remains in effect due to high concentrations of coarse particulate matter that are expected to persist until there is precipitation, dust suppression or a change in traffic patterns. Levels tend to be highest around busy roads and industrial operations. This advisory is in effect until further notice.")
+} 
 } else if (params$pollutant == "O3") {
   pollutantExpansion <- "ground level ozone"
   additional_info <- additional_info_O3
@@ -323,129 +340,141 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
 ```
 
 ```{r table-setup, include=FALSE}
-
-pollutant <- params$pollutant
+pollutants <- strsplit(params$pollutant, "&")[[1]] %>% trimws()
 stations <- params$station
-
 COMPLETE_THRESHOLD_PCT <- 75
 
-# ---- Check that stations are valid for this pollutant ----
-valid_stations <- buddy_stations %>%
-  filter(Station %in% stations) %>%
-  pull(Buddy_location) %>%
-  unique()
+results <- list()
 
-if (length(valid_stations) == 0) {
-  stop("None of the specified stations are valid for this pollutant.")
-}
+for (i in seq_along(pollutants)) {
+  pollutant <- pollutants[i]
 
-# ---- Lookup table for units and averaging times ----
-lookup <- data.frame(
-  units = c("$\\mu$g/m$^{3}$", "$\\mu$g/m$^{3}$", "ppb"),
-  hours = c(24, 24, 8),
-  row.names = c("PM25", "PM10", "O3")
-) %>%
-  mutate(avgtimelabel = sprintf("%d-hr", hours))
+  # ---- Check that stations are valid for this pollutant ----
+  valid_stations <- buddy_stations %>%
+    filter(Station %in% stations) %>%
+    pull(Buddy_location) %>%
+    unique()
 
-# ---- Read in CSV from FTP ----
-columndefs <- cols_only(
-  DATE_PST = col_character(),
-  STATION_NAME = col_factor(),
-  RAW_VALUE = col_double(),
-  REPORTED_VALUE = col_double(),
-  INSTRUMENT = col_factor(),
-  UNITS = col_character(),
-  PARAMETER = col_character(),
-  EMS_ID = col_character()
-)
+  if (length(valid_stations) == 0) {
+    stop(sprintf("None of the specified stations are valid for %s.", pollutant))
+  }
 
-dfraw <- read_csv(
-  sprintf("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_raw_air_data/Air_Quality/%s.csv", pollutant),
-  col_types = columndefs
-)
-
-# ---- Clean and filter data ----
-df <- dfraw %>%
-  mutate(DATE_PST = as.POSIXct(DATE_PST, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) %>%
-  filter(INSTRUMENT != "") %>%
-  filter(STATION_NAME %in% valid_stations)
-
-
-# ---- Get time window per station ----
-dts <- df %>%
-  group_by(STATION_NAME) %>%
-  summarize(max_dt = max(DATE_PST), .groups = "drop") %>%
-  mutate(min_dt = max_dt - (3600 * (lookup[pollutant, "hours"] - 1)))
-
-df_filtered <- df %>%
-  left_join(dts, by = "STATION_NAME") %>%
-  filter(DATE_PST >= min_dt & DATE_PST <= max_dt) %>%
-  select(-min_dt, -max_dt)
-
-# ---- Summarize concentrations ----
-integrated <- df_filtered %>%
-  group_by(STATION_NAME, PARAMETER) %>%
-  summarize(
-    n_hours = n(),
-    n_na = sum(is.na(REPORTED_VALUE)),
-    pct_valid = 100 * (n_hours - n_na) / n_hours,
-    mean_conc = if_else(n_hours == n_na, NA_real_, mean(REPORTED_VALUE, na.rm = TRUE)),
-    max_conc = if_else(n_hours == n_na, NA_real_, max(REPORTED_VALUE, na.rm = TRUE)),
-    start_dt = min(DATE_PST),
-    end_dt = max(DATE_PST),
-    .groups = "drop"
+  # ---- Lookup table for units and averaging times ----
+  lookup <- data.frame(
+    units = c("$\\mu$g/m$^{3}$", "$\\mu$g/m$^{3}$", "ppb"),
+    hours = c(24, 24, 8),
+    row.names = c("PM25", "PM10", "O3")
   ) %>%
-  mutate(
-    mean_conc = na_if(mean_conc, pct_valid < COMPLETE_THRESHOLD_PCT),
-    max_conc = na_if(max_conc, pct_valid < COMPLETE_THRESHOLD_PCT)
+    mutate(avgtimelabel = sprintf("%d-hr", hours))
+
+  # ---- Read in CSV from FTP ----
+  columndefs <- cols_only(
+    DATE_PST = col_character(),
+    STATION_NAME = col_factor(),
+    RAW_VALUE = col_double(),
+    REPORTED_VALUE = col_double(),
+    INSTRUMENT = col_factor(),
+    UNITS = col_character(),
+    PARAMETER = col_character(),
+    EMS_ID = col_character()
   )
 
-stationByParameterList <- read_rds(sprintf("./utility/stations_%s.rds", tolower(pollutant)))
-
-# Join with station info using STATION_NAME
-integrated <- integrated %>%
-  left_join(
-    stationByParameterList %>% select(STATION_NAME, COMMUNITY),
-    by = "STATION_NAME"
+  dfraw <- read_csv(
+    sprintf("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_raw_air_data/Air_Quality/%s.csv", pollutant),
+    col_types = columndefs
   )
 
-# ---- Format wide table ----
-table2 <- integrated %>%
-  mutate(
-    mean_conc = ifelse(is.finite(mean_conc), sprintf("%.1f", mean_conc), "NA"),
-    max_conc = ifelse(is.finite(max_conc), sprintf("%.1f", max_conc), "NA")
-  ) %>%
-  pivot_wider(
-    names_from = PARAMETER,
-    id_cols = c(STATION_NAME, COMMUNITY),
-    values_from = c(mean_conc, max_conc)
-  ) %>%
-  rename(Station = STATION_NAME, Community = COMMUNITY)
+  # ---- Clean and filter data ----
+  df <- dfraw %>%
+    mutate(DATE_PST = as.POSIXct(DATE_PST, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) %>%
+    filter(INSTRUMENT != "") %>%
+    filter(STATION_NAME %in% valid_stations)
 
-# ---- Clean up table: remove suffixes ----
-table2 <- table2 %>%
-  rename_with(~ gsub(sprintf("_%s", pollutant), "", .x), everything())
+  # ---- Get time window per station ----
+  dts <- df %>%
+    group_by(STATION_NAME) %>%
+    summarize(max_dt = max(DATE_PST), .groups = "drop") %>%
+    mutate(min_dt = max_dt - (3600 * (lookup[pollutant, "hours"] - 1)))
 
-table2 <- table2[ , -1]
+  df_filtered <- df %>%
+    left_join(dts, by = "STATION_NAME") %>%
+    filter(DATE_PST >= min_dt & DATE_PST <= max_dt) %>%
+    select(-min_dt, -max_dt)
 
-# ---- Transpose and finalize ----
-pt2 <- t(table2) %>% as.data.frame() %>% rownames_to_column()
-colnames(pt2) <- pt2[1, ]
-pt3 <- pt2[-c(1), ]  # drop row names and station name if only one station
+  # ---- Summarize concentrations ----
+  integrated <- df_filtered %>%
+    group_by(STATION_NAME, PARAMETER) %>%
+    summarize(
+      n_hours = n(),
+      n_na = sum(is.na(REPORTED_VALUE)),
+      pct_valid = 100 * (n_hours - n_na) / n_hours,
+      mean_conc = if_else(n_hours == n_na, NA_real_, mean(REPORTED_VALUE, na.rm = TRUE)),
+      max_conc = if_else(n_hours == n_na, NA_real_, max(REPORTED_VALUE, na.rm = TRUE)),
+      start_dt = min(DATE_PST),
+      end_dt = max(DATE_PST),
+      .groups = "drop"
+    ) %>%
+    mutate(
+      mean_conc = na_if(mean_conc, pct_valid < COMPLETE_THRESHOLD_PCT),
+      max_conc = na_if(max_conc, pct_valid < COMPLETE_THRESHOLD_PCT)
+    )
 
-if (pollutant == "O3") {
-    pt4 <- pt3
+  stationByParameterList <- read_rds(sprintf("./utility/stations_%s.rds", tolower(pollutant)))
+
+  # Join with station info using STATION_NAME
+  integrated <- integrated %>%
+    left_join(
+      stationByParameterList %>% select(STATION_NAME, COMMUNITY),
+      by = "STATION_NAME"
+    )
+
+  # ---- Format wide table ----
+  table2 <- integrated %>%
+    mutate(
+      mean_conc = ifelse(is.finite(mean_conc), sprintf("%.1f", mean_conc), "NA"),
+      max_conc = ifelse(is.finite(max_conc), sprintf("%.1f", max_conc), "NA")
+    ) %>%
+    pivot_wider(
+      names_from = PARAMETER,
+      id_cols = c(STATION_NAME, COMMUNITY),
+      values_from = c(mean_conc, max_conc)
+    ) %>%
+    rename(Station = STATION_NAME, Community = COMMUNITY)
+
+  # ---- Clean up table: remove suffixes ----
+  table2 <- table2 %>%
+    rename_with(~ gsub(sprintf("_%s", pollutant), "", .x), everything())
+
+  table2 <- table2[ , -1]
+
+  # ---- Transpose and finalize ----
+  pt2 <- t(table2) %>% as.data.frame() %>% rownames_to_column()
+  colnames(pt2) <- pt2[1, ]
+  pt3 <- pt2[-c(1), ]
+  
+  pt3 <- as.data.frame(pt3, stringsAsFactors = FALSE)
+
+
+  if (pollutant != "O3") {
+  pt4 <- pt3 %>% filter(Community != "max_conc")
   } else {
-    pt4 <- pt3 %>% filter(Community != "max_conc")
+  pt4 <- pt3
+  }
+
+  # ---- Final format ----
+  final_table <- pt4 %>%
+    mutate(Community = case_when(
+      Community == "mean_conc" ~ sprintf("%s average (%s)", lookup[pollutant, "avgtimelabel"], lookup[pollutant, "units"]),
+      Community == "max_conc" ~ sprintf("Max. within %s (%s)", gsub("-", " ", lookup[pollutant, "avgtimelabel"]), lookup[pollutant, "units"]),
+      TRUE ~ Community
+    ))
+
+  results[[paste0("final_table", i)]] <- final_table
 }
 
-# ---- Final format ----
-final_table <- pt4 %>%
-  mutate(Community = case_when(
-    Community == "mean_conc" ~ sprintf("%s average (%s)", lookup[pollutant, "avgtimelabel"], lookup[pollutant, "units"]),
-    Community == "max_conc" ~ sprintf("Max. within %s (%s)", gsub("-", " ", lookup[pollutant, "avgtimelabel"]), lookup[pollutant, "units"]),
-    TRUE ~ Community
-  ))
+# Expose them as final_table1, final_table2, etc.
+list2env(results, envir = .GlobalEnv)
+
 
 ```
 
@@ -564,10 +593,8 @@ The next update will be on `r format(as.Date(nextBulletin), "%B %d, %Y")` and po
 # Mandatory emission reduction actions
 
 - Facilities with air discharge authorizations under the Environmental Management Act are required to follow trigger actions within their permit related to Air Quality Warnings and are encouraged to reduce any other emissions where possible.
-
-`r paste ("-", bylaws)`
-
-`r paste ("-", burn_ban)`
+`r if (!is.null(bylaws) && nzchar(bylaws)) paste0("- ", bylaws)`
+`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban)`
 
 # Voluntary emission reduction actions
 
@@ -575,10 +602,39 @@ The next update will be on `r format(as.Date(nextBulletin), "%B %d, %Y")` and po
 
 # More information
 
-`r additional_info`
+```{r final-table, results='asis', echo=FALSE}
 
-```{r final-table}
-kable(final_table, row.names = FALSE)
+# Single pollutant: PM25
+if (length(pollutants) == 1 && pollutants == "PM25") {
+  cat(additional_info_PM25, "\n\n")
+  print(knitr::kable(final_table, row.names = FALSE))
+}
+
+# Single pollutant: PM10
+if (length(pollutants) == 1 && pollutants == "PM10") {
+  cat(additional_info_PM10, "\n\n")
+  print(knitr::kable(final_table, row.names = FALSE))
+}
+
+# Single pollutant: O3
+if (length(pollutants) == 1 && pollutants == "O3") {
+  cat(additional_info_O3, "\n\n")
+  print(knitr::kable(final_table, row.names = FALSE))
+}
+
+# Both PM25 & PM10
+if (all(c("PM25", "PM10") %in% pollutants)) {
+  # PM25
+  cat(additional_info_PM25, "\n\n")
+  print(knitr::kable(final_table1, row.names = FALSE))
+  
+  cat("\n\n")  # spacing
+  
+  # PM10
+  cat(additional_info_PM10, "\n\n")
+  print(knitr::kable(final_table2, row.names = FALSE))
+}
+
 ```
 
 ## For general information about air quality in British Columbia: 
@@ -592,7 +648,7 @@ kable(final_table, row.names = FALSE)
 [What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
 [Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
 
-# Contact Information
+# Contact information
 
 [{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
 

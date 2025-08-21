@@ -53,7 +53,7 @@ communitySmokeUI <- function(id) {
                 inputId = ns("pollutant"),
                 label = h5("Pollutant:"),
                 selected = "",
-                choices = c("", "PM25", "PM10", "O3"),
+                choices = c("", "PM25", "PM10", "O3", "PM25 & PM10"),
                 width = "50%"
               ),
               selectInput(
