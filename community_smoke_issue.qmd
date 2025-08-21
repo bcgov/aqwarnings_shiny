@@ -1,5 +1,9 @@
 ---
-title: "Air Quality Warning" 
+title: "`r paste0('Air quality warning ', ifelse(params$ice == 'Continue', 'continued',
+    ifelse(params$ice == 'End', 'ended',
+      ifelse(params$ice == 'Issue', 'issued', params$ice)
+    )
+  ), ' for ', params$station)`"
 type: "community_smoke"
 date: "`r Sys.Date()`"
 params: 
@@ -117,8 +121,6 @@ health_tips <- paste(
 additional_info_PM25 <- paste0(
     "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
     
-This episode is expected to continue until there is a change in the current weather system.
-    
 The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " local time today:"
   )
 
@@ -228,15 +230,6 @@ title_ICE <- if (params$ice == "Issue") {
 
 ```
 
-```{r PG_text, include=FALSE}
-
-PG_text <- if (params$station == "Prince George") 
-  {"The City of Prince George's Clean Air Bylaw prohibits all open burning, including backyard burning, and land clearing burning. During air quality advisories, this bylaw also prohibits recreational fires, use of wood-burning appliances (except for sole wood burning heat users), and street sweeping activities (unless approved by an Authorized Person)."
-} else {
-  NULL
-}
-```
-
 ```{r bylaws, include=FALSE}
 
 bylaws <- if (params$station == "Burns Lake") {
@@ -262,43 +255,6 @@ bylaws <- if (params$station == "Burns Lake") {
 } else {
   NULL
 }
-
-# Only run if 'bylaws' is defined and a character string
-if (exists("bylaws") && is.character(bylaws)) {
-
-  # Split into lines
-  bylaw_lines <- unlist(strsplit(bylaws, "\n"))
-
-  # Clean up leading/trailing whitespace
-  bylaw_lines <- trimws(bylaw_lines)
-
-  # Remove empty lines
-  bylaw_lines <- bylaw_lines[bylaw_lines != ""]
-
-  # Separate bulleted (items) vs non-bulleted (intro) points
-  bylaw_items <- bylaw_lines[grepl("^-", bylaw_lines)]
-  bylaw_intro <- bylaw_lines[!grepl("^-", bylaw_lines)]
-
-  # Create HTML
-  formatted_bylaws <- paste0(
-    if (length(bylaw_intro) > 0) paste0("<p>", paste(bylaw_intro, collapse = " "), "</p>") else NULL,
-    if (length(bylaw_items) > 0) {
-      paste0(
-        "<ul>",
-        paste0("<li>", sub("^-\\s*", "", bylaw_items), "</li>", collapse = ""),
-        "</ul>"
-      )
-    } else {
-      NULL
-    }
-  )
-
-} else {
-  # Fallback if there are no local bylaws
-  formatted_bylaws <- NULL
-}
-
-
 ```
 
 ```{r ban_areas, include=FALSE}
@@ -329,17 +285,6 @@ nextBulletin <- Sys.Date() + 1
 if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
   
   title_burn_advisory <- "and open burning restrictions"
-  mandatory_reductions_heading <- "# Mandatory Emission Reduction Actions"
-  burn_ban <- paste0(
-    "Open burning restrictions are now in effect for ", params$station, 
-    " and surrounding area until ", format(as.Date(nextBulletin), "%B %d, %Y"), 
-    " at 4:00 PM local time. No new fires may be initiated and no additional material may be added to existing fires. ",
-    "For more information on burning restrictions, see the section below entitled **Mandatory Emission Reduction Actions**."
-  )
-  signature_style <- "margin-top:15px; margin-left: 20px;"  # with indent
-  date_div <- paste0("<div style='margin-top:15px; margin-left: 20px;'>",
-                       "<p>Date issued: ", format(Sys.Date(), "%B %d, %Y"), "</p>",
-                       "</div>")
   
   # Define signature and title info depending on who it is
   if (params$burnRestrictions == "Yes - Arvind") {
@@ -352,45 +297,28 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
     name_line <- "Benjamin Weinstein"
     title_line1 <- "For Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
-    
   }
   
-  burn_ban_bylaws <- paste0(
-    "<ul>",
-      "<li>As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning in the ", 
-      params$station, " area within ", ban_area, 
-      " until ", format(as.Date(nextBulletin), "%B %d, %Y"), 
-      " at 04:00 PM. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.</li>",
-    "</ul>",
-    date_div,
-    "<div style='", signature_style, "'>",
-      "<img src='", signature_img, "' style='height:60px;'><br>",
-      name_line, "<br>",
-      title_line1, "<br>",
-      title_line2,
-    "</div>",
-    "<ul style='margin-top:20px;'>",
-     if (!is.null(formatted_bylaws) && nzchar(formatted_bylaws)) {
-      paste0(
-        "<li>Additional local restrictions may apply under municipal bylaws:",
-        formatted_bylaws,
-        "</li>"
-      )
-    } else {
-      NULL
-    },
-    "<li>Industry is required to follow permit requirements that are triggered during air quality advisories and are asked to reduce emissions wherever possible.</li>",
-  "</ul>"
+  burn_ban <- paste0(
+    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning in the ",
+    params$station, " area within ", ban_area,
+    " until ", format(as.Date(nextBulletin), "%B %d, %Y"),
+    " at 04:00 PM. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
+    "\n\n",
+    "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
+     "> ![](", signature_img, "){width=150px}\n\n",
+  "> ", name_line, "\n\n",
+  "> ", title_line1, "\n\n",
+  "> ", title_line2, "\n\n"
 )
   
 } else {
-  
   title_burn_advisory <- NULL
   mandatory_reductions_heading <- NULL
   burn_ban <- NULL
-  burn_ban_bylaws <- NULL
   bylaws <- NULL
 }
+
 
 ```
 
@@ -621,15 +549,9 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-# Air quality warning `r title_burn_advisory` `r title_ICE` for `r params$station` - `r format(Sys.Date(), "%B %d, %Y")`
-
 `r first_paragraph`
 
-Exposure to `r pollutantExpansion` is particularly a concern for individuals with chronic conditions such as asthma, COPD, heart disease, and diabetes; respiratory infections such as COVID-19, pregnant women, infants, and older adults. Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the advisory is lifted. Where appropriate, maintain physical distancing. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
-
-`r burn_ban`
-
-`r PG_text`
+Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant. Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the warning is ended. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
 
 Real-time air quality observations and information regarding the health effects of air pollution can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).
 
@@ -639,17 +561,19 @@ The next update will be on `r format(as.Date(nextBulletin), "%B %d, %Y")` and po
 
 `r health_tips`
 
-`r mandatory_reductions_heading`
+# Mandatory emission reduction actions
 
-```{r, echo=FALSE, results='asis'}
-knitr::asis_output(burn_ban_bylaws)
-```
+- Facilities with air discharge authorizations under the Environmental Management Act are required to follow trigger actions within their permit related to Air Quality Warnings and are encouraged to reduce any other emissions where possible.
 
-# Voluntary Emission Reductions
+`r paste ("-", bylaws)`
+
+`r paste ("-", burn_ban)`
+
+# Voluntary emission reduction actions
 
 `r voluntary_reduction`
 
-# Additional Information
+# More information
 
 `r additional_info`
 

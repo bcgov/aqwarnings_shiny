@@ -80,6 +80,8 @@ communitySmokeUI <- function(id) {
                         width = "50%"
               ),
               
+              helpText("Enter a short outlook message for smoke conditions, including burn ban area. This text will appear in the bulletin. If no changes are needed, you can leave the default message."),
+              
               textAreaInput(inputId = ns("customMessage"),
                             label = h5("Custom smoke outlook message:"),
                             value = "Current conditions are expected to persist for the next 24 hours.",
