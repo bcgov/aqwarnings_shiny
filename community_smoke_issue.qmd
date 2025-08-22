@@ -1,16 +1,19 @@
 ---
-title: "`r paste0('Air quality warning ', ifelse(params$ice == 'Continue', 'continued',
+title: "`r paste0(
+  'Air quality warning ', ifelse(params$burnRestrictions != 'No', ' and open burning restrictions ', ''),
+  ifelse(params$ice == 'Continue', 'continued',
     ifelse(params$ice == 'End', 'ended',
       ifelse(params$ice == 'Issue', 'issued', params$ice)
     )
-  ), ' for ', params$station)`"
+  ),
+  ' for ', params$station)`"
 type: "community_smoke"
 date: "`r Sys.Date()`"
 params: 
   ice: Continue
   date: "`r Sys.Date()`"
-  pollutant: "O3"
-  burnRestrictions: "No"
+  pollutant: "PM25"
+  burnRestrictions: "Yes - Ben"
   sel_aqMet: "Sakshi"
   station: "Prince George"
   issuedate: "2025-07-20"
@@ -60,63 +63,6 @@ source(here::here("load_metadata.r"))
 ```{r health_tips, include=FALSE}
 
 current_month <- as.numeric(format(Sys.Date(), "%m"))
-
-health_tips <- paste(
-  "# Actions you can take\n\n",
-  
-  "As air contaminant levels increase, health risks increase. Consider reducing or rescheduling outdoor sports, activities and events.\n\n",
-  "People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.\n\n",
-  
-  "## Follow your common sense\n",
-  "- Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.\n",
-  if (current_month %in% 6:8) {
-    "- During warm weather, stay cool and drink plenty of fluids.\n"
-  } else {
-    ""
-  },
-  "- Always carry any rescue medications with you.\n",
-  "- Make sure that children and others who cannot care for themselves follow the same advice.\n\n",
-  
-  "## Monitor your symptoms\n",
-  "- Different people have different responses to elevated levels of air contaminants.\n",
-  "- Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the air contaminants return to typical levels.\n",
-  "- More serious but less common symptoms include wheezing, chest pains or severe cough.\n",
-  "- People with asthma or other chronic illness should follow any personal care plans designed with their family physicians.\n",
-  "- If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.\n",
-  "- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.\n\n",
-  
-  "## Tips to reduce your exposure to air contaminants\n",
-  "- Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.\n",
-  "- When indoors, keep windows and doors closed as much as possible.\n",
-  if (current_month %in% 6:8) {
-    "- When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.\n"
-  } else {
-    ""
-  },
-  if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
-    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it yourself air cleaners may also be used if other options are not available. For details, visit: https://rb.gy/epi7qv.\n"
-    "- If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n"
-  } else {
-    ""
-  },
-  if ((params$pollutant == "PM10")) {
-  "- Avoid busy roadways.\n"
-  } else {
-  ""
-  },
-  if ((params$pollutant == "PM25" && current_month %in% 6:8)) {
-  "- Avoid roads with heavy vehicle traffic.\n"
-  } else {
-  ""
-  },
-  
-  if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in% c(9:12, 1:5)) {
-    "- Avoid roads with heavy vehicle traffic and areas with wood smoke.\n"
-  } else {
-    ""
-  },
-  sep = ""
-)
 
 ```
 
@@ -201,8 +147,8 @@ if (params$pollutant == "PM25") {
   if (params$ice == "Issue") {
   first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
   } else if (params$ice == "Continue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The Air Quality Advisory remains in effect due to high concentrations of ", pollutantExpansion, " that are expected to persist until weather conditions change."
-    )
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The warning remains in effect due to elevated ", pollutantExpansion, "."
+                            )
 }
 } else if (params$pollutant == "PM10") {  
   pollutantExpansion <- "coarse particulate matter"
@@ -211,8 +157,8 @@ if (params$pollutant == "PM25") {
   if (params$ice == "Issue") {
   first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
   } else if (params$ice == "Continue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The advisory remains in effect due to high concentrations of coarse particulate matter that are expected to persist until there is precipitation, dust suppression or a change in traffic patterns. Levels tend to be highest around busy roads and industrial operations. This advisory is in effect until further notice."
-)
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The warning remains in effect due to elevated ", pollutantExpansion, "."
+                            )
 }
 } else if (params$pollutant == "PM25 & PM10") {
   pollutantExpansion <- "fine particulate matter and coarse particulate matter"
@@ -220,7 +166,8 @@ if (params$pollutant == "PM25") {
   if (params$ice == "Issue") {
   first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
   } else if (params$ice == "Continue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The advisory remains in effect due to high concentrations of coarse particulate matter that are expected to persist until there is precipitation, dust suppression or a change in traffic patterns. Levels tend to be highest around busy roads and industrial operations. This advisory is in effect until further notice.")
+  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The warning remains in effect due to elevated ", pollutantExpansion, "."
+                            )
 } 
 } else if (params$pollutant == "O3") {
   pollutantExpansion <- "ground level ozone"
@@ -295,7 +242,7 @@ ban_area <- burn_areas[params$station]
 ban_area <- ifelse(is.na(ban_area), "a 10 km radius of City Hall", ban_area)
 ```
 
-```{r burn_ban_clauses, results='asis', echo=FALSE}
+```{r burn_ban, results='asis', echo=FALSE}
 
 nextBulletin <- Sys.Date() + 1
 
@@ -588,7 +535,78 @@ Real-time air quality observations and information regarding the health effects 
 
 The next update will be on `r format(as.Date(nextBulletin), "%B %d, %Y")` and posted to the province’s [Air Quality Warnings webpage](https://www.gov.bc.ca/airquality).  
 
-`r health_tips`
+# Actions you can take
+
+As air contaminant levels increase, health risks increase. Consider reducing or rescheduling outdoor sports, activities and events.
+
+People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
+
+## Follow your common sense
+
+- Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
+
+```{r, results='asis', echo=FALSE}
+
+if (current_month %in% 6:8) {
+  cat("- During warm weather, stay cool and drink plenty of fluids.\n")
+}
+```
+
+- Always carry any rescue medications with you.
+- Make sure that children and others who cannot care for themselves follow the same advice.
+
+## Monitor your symptoms
+
+- Different people have different responses to elevated levels of air contaminants.
+- Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the air contaminants return to typical levels.
+- More serious but less common symptoms include wheezing, chest pains or severe cough.
+- People with asthma or other chronic illness should follow any personal care plans designed with their family physicians.
+- If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
+- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
+
+## Tips to reduce your exposure to air contaminants
+
+- Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
+- When indoors, keep windows and doors closed as much as possible.
+
+```{r, results='asis', echo=FALSE}
+
+if (current_month %in% 6:8) {
+  cat("- When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.\n")
+}
+```
+
+```{r, results='asis', echo=FALSE}
+
+if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
+  cat(
+    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are not available. For details, visit: https://rb.gy/epi7qv.\n",
+    "- If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n"
+  )
+}
+
+```
+
+```{r, results='asis', echo=FALSE}
+
+if (params$pollutant == "PM10") {
+  cat("- Avoid busy roadways.\n")
+}
+```
+
+```{r, results='asis', echo=FALSE}
+
+if (params$pollutant == "PM25" && current_month %in% 6:8) {
+  cat("-  Avoid roads with heavy vehicle traffic.\n")
+}
+```
+ 
+```{r, results='asis', echo=FALSE}
+
+if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in% c(9:12, 1:5)) {
+  cat("-  Avoid roads with heavy vehicle traffic and areas with wood smoke.\n")
+}
+```
 
 # Mandatory emission reduction actions
 
