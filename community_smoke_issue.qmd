@@ -240,10 +240,9 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
   }
   
   burn_ban <- paste0(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning in the ",
-    params$station, " area within ", params$customMessageBanArea,
-    " until ", format(as.Date(nextBulletin), "%B %d, %Y"),
-    " at 04:00 PM. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
+    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning ",
+    params$customMessageBanArea,
+    " No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
     "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
      "> ![](", signature_img, "){width=150px}\n\n",
@@ -504,6 +503,17 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 `r first_paragraph`
 
 Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant. Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the warning is ended. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
+
+```{r, results='asis', echo=FALSE}
+if (params$burnRestrictions != 'No') {
+  cat(
+    "Open burning restrictions are now in effect for ", params$customMessageBanArea,
+    " No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.",
+    sep = ""
+  )
+}
+```
+
 
 Real-time air quality observations and information regarding the health effects of air pollution can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).
 

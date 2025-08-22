@@ -80,11 +80,20 @@ communitySmokeUI <- function(id) {
                         width = "50%"
               ),
               
-              helpText("Enter a short outlook message for smoke conditions, including burn ban area. This text will appear in the bulletin. If no changes are needed, you can leave the default message."),
+              helpText("Enter a short outlook message for smoke conditions. This text will appear in the bulletin. If no changes are needed, you can leave the default message."),
               
               textAreaInput(inputId = ns("customMessage"),
                             label = h5("Custom smoke outlook message:"),
                             value = "Current conditions are expected to persist for the next 24 hours.",
+                            width = "100%",
+                            height = "80px",
+                            resize = "vertical"),
+              
+              helpText("Enter burn ban area and burn restriction end date/time."),
+              
+              textAreaInput(inputId = ns("customMessageBanArea"),
+                            label = h5("Custom ban area and end date/time:"),
+                            value = "<location> and surrounding area until <burn restriction end date/time>.",
                             width = "100%",
                             height = "80px",
                             resize = "vertical"),
@@ -166,6 +175,7 @@ communitySmoke <- function(input, output, session){
                               burnRestrictions = input$burnRestrictions,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
+                              customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "markdown"),
                             debug = FALSE)
       
@@ -181,6 +191,7 @@ communitySmoke <- function(input, output, session){
                               burnRestrictions = input$burnRestrictions,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
+                              customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "pdf"),
                             debug = FALSE)
     }
