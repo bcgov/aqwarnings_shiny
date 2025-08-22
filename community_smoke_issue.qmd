@@ -20,6 +20,7 @@ params:
   HAauth: ""
   outputFormat: ""
   customMessage: ""
+  customMessageBanArea: ""
 format:
   markdown: default
   pdf:
@@ -58,12 +59,10 @@ library(readr)
 library(xtable)
 
 source(here::here("load_metadata.r"))
-```
 
-```{r health_tips, include=FALSE}
+nextBulletin <- Sys.Date() + 1
 
 current_month <- as.numeric(format(Sys.Date(), "%m"))
-
 ```
 
 ```{r additional_info, include=FALSE}
@@ -207,7 +206,7 @@ bylaws <- if (params$station == "Burns Lake") {
   - **2.1.1**: No person shall use a wood burning appliance at any time when an air quality advisory is in effect, except to heat premises that are equipped with no heating appliance or facilities other than the wood burning appliance.\n\n
   - Contact the Houston municipal office at [250-845-2238](tel:2508452238) for more information on woodstove restrictions."
 } else if (params$station == "Prince George") {
-  "The City of Prince George's **Clean Air Bylaw** prohibits all open burning, including backyard burning, and land clearing burning. During air quality advisories, this bylaw also prohibits **recreational fires**, use of **wood-burning appliances** (except for sole wood-burning heat users), and **street sweeping activities** (unless approved by an Authorized Person)."
+  "The City of Prince George's Clean Air Bylaw prohibits all open burning, including backyard burning, and land clearing burning. During air quality advisories, this bylaw also prohibits recreational fires, use of wood-burning appliances (except for sole wood-burning heat users), and street sweeping activities (unless approved by an Authorized Person)."
 } else if (params$station == "Smithers") {
   "Smithers bylaw 1520 restricts the use of wood burning appliances during air quality advisories:\n\n
   - **6a**: No person shall use a wood-burning appliance at any time when an air quality advisory is in effect, except to heat premises that are equipped with no heating appliance or facilities other than the wood burning appliance.\n\n
@@ -221,30 +220,7 @@ bylaws <- if (params$station == "Burns Lake") {
 }
 ```
 
-```{r ban_areas, include=FALSE}
-burn_areas <- c(
-  "Burns Lake" = "Lakes Timber Supply Area",
-  "Golden" = "15km of the Hospital",
-  "Grand Forks" = "a 15 km radius of City Hall",
-  "Houston" = "the Morice Timber Supply Area",
-  "Powell River" = "Sunshine Coast Timber Supply Area",
-  "Prince George" = "within the Prince George and Quesnel Natural Resource Districts in all locations east of Highway 97, south of Highway 16, and west of Bowron Lake Provincial Park",
-  "Squamish" = "a 20 km radius of Squamish Municipal Hall",
-  "Terrace" = "Kalum Resource District",
-  "Vanderhoof" = "former Vanderhoof Resource District",
-  "Whistler" = "Soo Timber Supply Area"
-)
-
-# Use single bracket to get a named element safely
-ban_area <- burn_areas[params$station]
-
-# If the station isn't found, return the default
-ban_area <- ifelse(is.na(ban_area), "a 10 km radius of City Hall", ban_area)
-```
-
 ```{r burn_ban, results='asis', echo=FALSE}
-
-nextBulletin <- Sys.Date() + 1
 
 if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
   
@@ -265,7 +241,7 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
   
   burn_ban <- paste0(
     "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning in the ",
-    params$station, " area within ", ban_area,
+    params$station, " area within ", params$customMessageBanArea,
     " until ", format(as.Date(nextBulletin), "%B %d, %Y"),
     " at 04:00 PM. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
@@ -439,7 +415,7 @@ ENVcontact <- aq_mets |>
   pull(contact) 
 ```
 
-```{r}
+```{r logo}
 #| label: create-logo-list
 
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
@@ -574,9 +550,6 @@ if (current_month %in% 6:8) {
 if (current_month %in% 6:8) {
   cat("- When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.\n")
 }
-```
-
-```{r, results='asis', echo=FALSE}
 
 if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
   cat(
@@ -585,23 +558,13 @@ if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
   )
 }
 
-```
-
-```{r, results='asis', echo=FALSE}
-
 if (params$pollutant == "PM10") {
   cat("- Avoid busy roadways.\n")
 }
-```
-
-```{r, results='asis', echo=FALSE}
 
 if (params$pollutant == "PM25" && current_month %in% 6:8) {
   cat("-  Avoid roads with heavy vehicle traffic.\n")
 }
-```
- 
-```{r, results='asis', echo=FALSE}
 
 if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in% c(9:12, 1:5)) {
   cat("-  Avoid roads with heavy vehicle traffic and areas with wood smoke.\n")
