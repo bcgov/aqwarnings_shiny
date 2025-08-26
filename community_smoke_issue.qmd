@@ -527,7 +527,14 @@ As air contaminant levels increase, health risks increase. Consider reducing or 
 
 People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
 
-## Follow your common sense
+
+::: {.content-visible when-format="markdown"}
+
+{{< accordion_controls >}}
+
+{{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
+
+:::
 
 - Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
 
@@ -541,7 +548,13 @@ if (current_month %in% 6:8) {
 - Always carry any rescue medications with you.
 - Make sure that children and others who cannot care for themselves follow the same advice.
 
-## Monitor your symptoms
+::: {.content-visible when-format="markdown"}
+
+{{< accordion_end >}}
+
+{{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
+
+:::
 
 - Different people have different responses to elevated levels of air contaminants.
 - Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the air contaminants return to typical levels.
@@ -550,7 +563,13 @@ if (current_month %in% 6:8) {
 - If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
 - If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
 
-## Tips to reduce your exposure to air contaminants
+::: {.content-visible when-format="markdown"}
+
+{{< accordion_end >}}
+
+{{< accordion_start title="Tips to reduce your smoke exposure" initiallyOpen="true" >}}
+
+:::
 
 - Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
 - When indoors, keep windows and doors closed as much as possible.
@@ -580,6 +599,8 @@ if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in%
   cat("-  Avoid roads with heavy vehicle traffic and areas with wood smoke.\n")
 }
 ```
+
+[{{< accordion_end >}}]{.content-visible when-format="markdown"}
 
 # Mandatory emission reduction actions
 
@@ -630,10 +651,31 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 ## For general information about air quality in British Columbia: 
 
-- Real-time air quality observations and information regarding the health effects of air pollution can be found at [gov.bc.ca/airquality](https://gov.bc.ca/airquality).
+::: {.content-visible when-format="markdown"}
+
+<div class="bcds-card-wrapper"> 
+{{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
+
+[What's the air like today?] {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+
+[Latest air quality data] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Advisories and map of air quality and weather data.
+
+[Air quality data and warnings] {{< card_end >}}
+</div>
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+- Real-time air quality observations and information regarding the health effects of air pollution can be found at [gov.bc.ca/airquality](https://gov.bc.ca/airquality)
+
 - View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
+
 - Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
+
 - [Metro Vancouver’s Air Quality Data and Warnings][Air quality data and warnings]
+
+:::
 
 [Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
 [What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
