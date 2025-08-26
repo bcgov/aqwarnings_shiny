@@ -1,6 +1,7 @@
 ---
-title: "Air Quality Warning" 
-type: "community_smoke"
+title: "`r paste0(
+  'Air quality warning ended for ', params$location)`" 
+type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
   ice: End
@@ -8,8 +9,7 @@ params:
   pollutant: PM25
   burnRestrictions: "Yes"
   sel_aqMet: "Sakshi Jain"
-  station: "Whistler"
-  nextBulletin: "2025-05-08"
+  location: "Whistler"
   issuedate: "2025-07-09"
   outputFormat: ""
   customMessage: ""
@@ -20,10 +20,6 @@ format:
     date-format: long
     include-in-header: 
       - src/header.tex
-    mainfont: BCSans-Regular
-    mainfontoptions:
-      - Boldfont = BCSans-Bold
-      - ItalicFont = BCSans-Italic
     fontsize: "11pt"
     urlcolor: bcblue
 ---
@@ -58,45 +54,39 @@ source(here::here("load_metadata.r"))
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
-    "- The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+    "The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " local time today:"
   )
 
 additional_info_PM10 <- paste0(
-  "- The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  "The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
   )
 
 additional_info_O3 <- paste0(
   "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
-  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
 )
 ```
 
-```{r burn_ban_clauses, include=FALSE}
-
-if (params$burnRestrictions == "Yes") {
-  title_burn_advisory <- "and open burning restrictions"
-} else {
-  title_burn_advisory <- NULL
-  burn_ban <- NULL
-  burn_ban_bylaw <- NULL
-}
-```
-
 ```{r pollutant_specific_clauses, include=FALSE}
+pollutant_tbl <- tribble(
+  ~pollutant,~pollutantExpansion,
+  "PM25","fine particulate matter",
+  "PM10","coarse particulate matter",
+  "PM25 & PM10","fine particulate matter and coarse particulate matter",
+  "O3","ground level ozone"
+)
 
-if (params$pollutant == "PM25") {
-  pollutantExpansion <- "fine particulate matter"
-  additional_info <- additional_info_PM25
-} else if (params$pollutant == "PM10") {
-  pollutantExpansion <- "coarse particulate matter"
-  additional_info <- additional_info_PM10
-} else if (params$pollutant == "O3") {
-  pollutantExpansion <- "ozone"
-  additional_info <- additional_info_O3
-} else {
-  title_pollutant <- NULL
-  background <- NULL
-}
+# Pick the row for the current pollutant
+pollutant_info <- pollutant_tbl %>% filter(pollutant == params$pollutant)
+
+# Assign values
+pollutantExpansion  <- pollutant_info$pollutantExpansion
+
+first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ",
+    HAauth, " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
+    " due to elevated levels of ", pollutantExpansion, "."
+  )
 ```
 
 ```{r ENVcontact, include=FALSE}
@@ -108,7 +98,7 @@ if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  
 
 # AQ met information
 ENVcontact <- aq_mets |>
-  filter(nickname == params$sel_aqMet) |>
+  filter(fullname == params$sel_aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
   pull(contact) 
 ```
@@ -119,9 +109,9 @@ ENVcontact <- aq_mets |>
 
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
-HAauth <- Health_Authority %>%
-  filter(Station == params$station) %>%
-  pull(Health_authority)
+HAauth <- match_health_city %>%
+  filter(location == params$location) %>%
+  pull(health_city)
 
 HAcontact <- health_contact |>
     filter(authority == HAauth) |>
@@ -134,18 +124,18 @@ HAcontact <- health_contact |>
 ```{r table-setup, include=FALSE}
 
 pollutant <- params$pollutant
-stations <- params$station
+locations <- params$location
 
 COMPLETE_THRESHOLD_PCT <- 75
 
-# ---- Check that stations are valid for this pollutant ----
-valid_stations <- buddy_stations %>%
-  filter(Station %in% stations) %>%
+# ---- Check that locations are valid for this pollutant ----
+valid_locations <- buddy_stations %>%
+  filter(location %in% locations) %>%
   pull(Buddy_location) %>%
   unique()
 
-if (length(valid_stations) == 0) {
-  stop("None of the specified stations are valid for this pollutant.")
+if (length(valid_locations) == 0) {
+  stop("None of the specified locations are valid for this pollutant.")
 }
 
 # ---- Lookup table for units and averaging times ----
@@ -177,10 +167,10 @@ dfraw <- read_csv(
 df <- dfraw %>%
   mutate(DATE_PST = as.POSIXct(DATE_PST, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) %>%
   filter(INSTRUMENT != "") %>%
-  filter(STATION_NAME %in% valid_stations)
+  filter(STATION_NAME %in% valid_locations)
 
 
-# ---- Get time window per station ----
+# ---- Get time window per location ----
 dts <- df %>%
   group_by(STATION_NAME) %>%
   summarize(max_dt = max(DATE_PST), .groups = "drop") %>%
@@ -229,7 +219,7 @@ table2 <- integrated %>%
     id_cols = c(STATION_NAME, COMMUNITY),
     values_from = c(mean_conc, max_conc)
   ) %>%
-  rename(Station = STATION_NAME, Community = COMMUNITY)
+  rename(location = STATION_NAME, Community = COMMUNITY)
 
 # ---- Clean up table: remove suffixes ----
 table2 <- table2 %>%
@@ -240,7 +230,7 @@ table2 <- table2[ , -1]
 # ---- Transpose and finalize ----
 pt2 <- t(table2) %>% as.data.frame() %>% rownames_to_column()
 colnames(pt2) <- pt2[1, ]
-pt3 <- pt2[-c(1), ]  # drop row names and station name if only one station
+pt3 <- pt2[-c(1), ]  # drop row names and location name if only one location
 
 if (pollutant == "O3") {
     pt4 <- pt3
@@ -345,13 +335,11 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-# Air quality warning `r title_burn_advisory` ended for `r params$station`
+The Ministry of Environment and Parks in collaboration with the `r HAauth` has ended the air quality warning that was issued `r format(as.Date(params$issuedate), '%B %d, %Y')` for `r params$location` due to elevated concentrations of `r pollutantExpansion`. Changing meteorological conditions have improved conditions across the region.
 
-The Ministry of Environment and Parks in collaboration with the `r HAauth` has ended the air quality warning that was issued `r format(as.Date(params$issuedate), '%B %d, %Y')` for `r params$station` due to elevated concentrations of `r pollutantExpansion`. Changing meteorological conditions have improved conditions across the region.
+Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 
-Real-time air quality observations and information regarding the health effects of air pollution can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).
-
-# Additional Information
+# More information
 
 `r additional_info`
 
@@ -359,9 +347,12 @@ Real-time air quality observations and information regarding the health effects 
 kable(final_table, row.names = FALSE)
 ```
 
-# Contacts
+# Contact information
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
+**Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r HAcontact$html_string`[{{< card_end >}}]{.content-visible when-format="markdown"}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"} `r ENVcontact` [{{< card_end >}}]{.content-visible when-format="markdown"}
 
+**Media questions regarding health implications of wildfires:**
+
+[{{< card_start  width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}

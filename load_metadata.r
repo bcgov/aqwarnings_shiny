@@ -20,7 +20,7 @@ health_contact <- read.csv(here::here("data", "raw", "health_auth_contact.csv"))
 match_eccc_health <- read.csv(here::here("data", "raw", "eccc_health_regions.csv"))
 reg_description <- read.csv(here::here("data", "raw", "eccc_descriptions.csv"))
 buddy_stations <- read.csv(here::here("data", "raw", "buddy_stations.csv"))
-Health_Authority <- read.csv(here::here("data", "raw", "Health_Authority.csv"))
+match_health_city <- read.csv(here::here("data", "raw", "match_health_city.csv"))
 bc_map <- bcmaps::bc_bound() |>  sf::st_transform(crs = crs)
 
 # Load pre-edited ECCC forecast regions and "points" within Metro Vancouver

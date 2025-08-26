@@ -1,23 +1,18 @@
 ---
 title: "`r paste0(
-  'Air quality warning ', ifelse(params$burnRestrictions != 'No', ' and open burning restrictions ', ''),
-  ifelse(params$ice == 'Continue', 'continued',
-    ifelse(params$ice == 'End', 'ended',
-      ifelse(params$ice == 'Issue', 'issued', params$ice)
-    )
-  ),
-  ' for ', params$station)`"
-type: "community_smoke"
+  'Air quality warning ', ifelse(params$burnRestrictions != 'No', ' and open burning restrictions ', ''), 
+  tolower(params$ice),
+ 'd for ',
+ params$location)`"
+type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
   ice: Continue
-  date: "`r Sys.Date()`"
-  pollutant: "PM25"
+  pollutant: "PM25 & PM10"
   burnRestrictions: "Yes - Ben"
-  sel_aqMet: "Sakshi"
-  station: "Prince George"
+  sel_aqMet: "Sakshi Jain"
+  location: "Prince George"
   issuedate: "2025-07-20"
-  HAauth: ""
   outputFormat: ""
   customMessage: ""
   customMessageBanArea: ""
@@ -27,10 +22,6 @@ format:
     date-format: long
     include-in-header: 
       - src/header.tex
-    mainfont: BCSans-Regular
-    mainfontoptions:
-      - Boldfont = BCSans-Bold
-      - ItalicFont = BCSans-Italic
     fontsize: "11pt"
     urlcolor: bcblue
 ---
@@ -57,10 +48,10 @@ library(sf)
 library(lubridate)
 library(readr)
 library(xtable)
+library(tibble)
+library(dplyr)
 
 source(here::here("load_metadata.r"))
-
-nextBulletin <- Sys.Date() + 1
 
 current_month <- as.numeric(format(Sys.Date(), "%m"))
 ```
@@ -68,9 +59,9 @@ current_month <- as.numeric(format(Sys.Date(), "%m"))
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
-    "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
+    "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$µm) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
     
-The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " local time today:"
+The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " local time today:"
   )
 
 additional_info_PM10 <- paste0(
@@ -78,7 +69,7 @@ additional_info_PM10 <- paste0(
   
   The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.
   
-  The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
   )
 
 additional_info_O3 <- paste0(
@@ -87,7 +78,7 @@ additional_info_O3 <- paste0(
 The highest concentrations of ground-level ozone usually happen between mid-afternoon and early evening on summer days.
   
 The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
-  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$station, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
   )
 
 ```
@@ -127,9 +118,9 @@ voluntary_reduction_O3 <- paste0(
 
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
-HAauth <- Health_Authority %>%
-  filter(Station == params$station) %>%
-  pull(Health_authority)
+HAauth <- match_health_city %>%
+  filter(location == params$location) %>%
+  pull(health_city)
 
 HAcontact <- health_contact |>
     filter(authority == HAauth) |>
@@ -139,44 +130,39 @@ HAcontact <- health_contact |>
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
-if (params$pollutant == "PM25") {
-  pollutantExpansion <- "fine particulate matter"
-  additional_info <- additional_info_PM25
-  voluntary_reduction <- voluntary_reduction_PM25
-  if (params$ice == "Issue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
-  } else if (params$ice == "Continue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The warning remains in effect due to elevated ", pollutantExpansion, "."
-                            )
+
+# Lookup table for pollutants
+pollutant_tbl <- tribble(
+  ~pollutant,~pollutantExpansion,~voluntary_reduction,
+  "PM25","fine particulate matter",voluntary_reduction_PM25,
+  "PM10","coarse particulate matter",voluntary_reduction_PM10,
+  "PM25 & PM10","fine particulate matter and coarse particulate matter",voluntary_reduction_PM,
+  "O3","ground level ozone",voluntary_reduction_O3
+)
+
+# Pick the row for the current pollutant
+pollutant_info <- pollutant_tbl %>% filter(pollutant == params$pollutant)
+
+# Assign values
+pollutantExpansion  <- pollutant_info$pollutantExpansion
+voluntary_reduction <- pollutant_info$voluntary_reduction
+
+# Build first_paragraph
+if (params$ice == "Issue") {
+  first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ",
+    HAauth, " has issued an Air Quality Warning for ", params$location,
+    " due to elevated ", pollutantExpansion, "."
+  )
+} else if (params$ice == "Continue") {
+  first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ",
+    HAauth, " issued an Air Quality Warning for ", params$location,
+    " on ", format(as.Date(params$issuedate), "%B %d, %Y"),
+    ". The warning remains in effect due to elevated ", pollutantExpansion, "."
+  )
 }
-} else if (params$pollutant == "PM10") {  
-  pollutantExpansion <- "coarse particulate matter"
-  additional_info <- additional_info_PM10
-  voluntary_reduction <- voluntary_reduction_PM10
-  if (params$ice == "Issue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
-  } else if (params$ice == "Continue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The warning remains in effect due to elevated ", pollutantExpansion, "."
-                            )
-}
-} else if (params$pollutant == "PM25 & PM10") {
-  pollutantExpansion <- "fine particulate matter and coarse particulate matter"
-  voluntary_reduction <- voluntary_reduction_PM
-  if (params$ice == "Issue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
-  } else if (params$ice == "Continue") {
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " issued an Air Quality Warning for ", params$station, " on ", format(as.Date(params$issuedate), "%B %d, %Y"), ". The warning remains in effect due to elevated ", pollutantExpansion, "."
-                            )
-} 
-} else if (params$pollutant == "O3") {
-  pollutantExpansion <- "ground level ozone"
-  additional_info <- additional_info_O3
-  voluntary_reduction <- voluntary_reduction_O3
-  first_paragraph <- paste0("The Ministry of Environment and Parks in collaboration with the ", HAauth, " has issued an Air Quality Warning for ", params$station, " due to elevated ", pollutantExpansion, ".")
-} else {
-  title_pollutant <- NULL
-  background <- NULL
-}
+
 ```
 
 ```{r title_ICE, include=FALSE}
@@ -195,23 +181,23 @@ title_ICE <- if (params$ice == "Issue") {
 
 ```{r bylaws, include=FALSE}
 
-bylaws <- if (params$station == "Burns Lake") {
+bylaws <- if (params$location == "Burns Lake") {
   "Burns Lake bylaw 871 restricts the use of wood burning appliances during air quality advisories:\n\n
   - **6a**: No person shall use a Wood Burning Appliance at any time when an air quality advisory is in effect, except to heat the premises that are equipped with no heating appliance or facilities other than the Wood Burning Appliance.\n\n
   - Contact the Burns Lake municipal office at [250-692-7587](tel:2506927587) for more information on woodstove restrictions."
-} else if (params$station == "Duncan") {
+} else if (params$location == "Duncan") {
   "Comply with the requirements of local woodstove bylaws that apply to periods when air quality advisories are in effect (e.g., City of Duncan and Municipality of North Cowichan)."
-} else if (params$station == "Houston") {
+} else if (params$location == "Houston") {
   "Houston bylaw 947 restricts the use of wood burning appliances during air quality advisories:\n\n
   - **2.1.1**: No person shall use a wood burning appliance at any time when an air quality advisory is in effect, except to heat premises that are equipped with no heating appliance or facilities other than the wood burning appliance.\n\n
   - Contact the Houston municipal office at [250-845-2238](tel:2508452238) for more information on woodstove restrictions."
-} else if (params$station == "Prince George") {
+} else if (params$location == "Prince George") {
   "The City of Prince George's Clean Air Bylaw prohibits all open burning, including backyard burning, and land clearing burning. During air quality advisories, this bylaw also prohibits recreational fires, use of wood-burning appliances (except for sole wood-burning heat users), and street sweeping activities (unless approved by an Authorized Person)."
-} else if (params$station == "Smithers") {
+} else if (params$location == "Smithers") {
   "Smithers bylaw 1520 restricts the use of wood burning appliances during air quality advisories:\n\n
   - **6a**: No person shall use a wood-burning appliance at any time when an air quality advisory is in effect, except to heat premises that are equipped with no heating appliance or facilities other than the wood burning appliance.\n\n
   - Contact the Smithers municipal office at [250-847-1600](tel:2508471600) for more information on woodstove restrictions."
-} else if (params$station == "Valemount") {
+} else if (params$location == "Valemount") {
   "Valemount Bylaw No. 838 restricts the use of wood burning appliances during air quality advisories:\n\n
   - **5.1**: A person will not use a wood-burning appliance at any time when an air quality advisory is in effect, except to heat premises that are equipped with no heating source other than the wood burning appliance.\n\n
   - Contact the Valemount municipal office at [250-566-4435](tel:2505664435) or visit [https://valemount.ca](https://valemount.ca) for more information on wood stove restrictions."
@@ -255,7 +241,6 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
   title_burn_advisory <- NULL
   mandatory_reductions_heading <- NULL
   burn_ban <- NULL
-  bylaws <- NULL
 }
 
 
@@ -263,7 +248,7 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
 
 ```{r table-setup, include=FALSE}
 pollutants <- strsplit(params$pollutant, "&")[[1]] %>% trimws()
-stations <- params$station
+locations <- params$location
 COMPLETE_THRESHOLD_PCT <- 75
 
 results <- list()
@@ -271,14 +256,14 @@ results <- list()
 for (i in seq_along(pollutants)) {
   pollutant <- pollutants[i]
 
-  # ---- Check that stations are valid for this pollutant ----
-  valid_stations <- buddy_stations %>%
-    filter(Station %in% stations) %>%
+  # ---- Check that locations are valid for this pollutant ----
+  valid_locations <- buddy_stations %>%
+    filter(location %in% locations) %>%
     pull(Buddy_location) %>%
     unique()
 
-  if (length(valid_stations) == 0) {
-    stop(sprintf("None of the specified stations are valid for %s.", pollutant))
+  if (length(valid_locations) == 0) {
+    stop(sprintf("None of the specified locations are valid for %s.", pollutant))
   }
 
   # ---- Lookup table for units and averaging times ----
@@ -310,9 +295,9 @@ for (i in seq_along(pollutants)) {
   df <- dfraw %>%
     mutate(DATE_PST = as.POSIXct(DATE_PST, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) %>%
     filter(INSTRUMENT != "") %>%
-    filter(STATION_NAME %in% valid_stations)
+    filter(STATION_NAME %in% valid_locations)
 
-  # ---- Get time window per station ----
+  # ---- Get time window per location ----
   dts <- df %>%
     group_by(STATION_NAME) %>%
     summarize(max_dt = max(DATE_PST), .groups = "drop") %>%
@@ -361,7 +346,7 @@ for (i in seq_along(pollutants)) {
       id_cols = c(STATION_NAME, COMMUNITY),
       values_from = c(mean_conc, max_conc)
     ) %>%
-    rename(Station = STATION_NAME, Community = COMMUNITY)
+    rename(location = STATION_NAME, Community = COMMUNITY)
 
   # ---- Clean up table: remove suffixes ----
   table2 <- table2 %>%
@@ -409,7 +394,7 @@ if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  
 
 # AQ met information
 ENVcontact <- aq_mets |>
-  filter(nickname == params$sel_aqMet) |>
+  filter(fullname == params$sel_aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
   pull(contact) 
 ```
@@ -515,11 +500,11 @@ if (params$burnRestrictions != 'No') {
 ```
 
 
-Real-time air quality observations and information regarding the health effects of air pollution can be found at: [Air Quality Data](https://www.gov.bc.ca/airquality).
+Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 
 `r params$customMessage`
 
-The next update will be on `r format(as.Date(nextBulletin), "%B %d, %Y")` and posted to the province’s [Air Quality Warnings webpage](https://www.gov.bc.ca/airquality).  
+The next update will be on The next update will be on `r format(Sys.Date() + 1, "%B %d, %Y")` and posted to the province’s [Air Quality Warnings webpage](https://www.gov.bc.ca/airquality).
 
 # Actions you can take
 
@@ -550,7 +535,7 @@ if (current_month %in% 6:8) {
 - If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
 - If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
 
-## Tips to reduce your exposure to air contaminants
+## Tips to reduce your exposure to air pollution
 
 - Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
 - When indoors, keep windows and doors closed as much as possible.
@@ -630,7 +615,7 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 ## For general information about air quality in British Columbia: 
 
-- Real-time air quality observations and information regarding the health effects of air pollution can be found at [gov.bc.ca/airquality](https://gov.bc.ca/airquality).
+- Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 - View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
 - Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
 - [Metro Vancouver’s Air Quality Data and Warnings][Air quality data and warnings]
@@ -641,7 +626,10 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 # Contact information
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
+**Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r HAcontact$html_string`[{{< card_end >}}]{.content-visible when-format="markdown"}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"} `r ENVcontact` [{{< card_end >}}]{.content-visible when-format="markdown"}
 
+**Media questions regarding health implications of wildfires:**
+
+[{{< card_start  width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}

@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## Air Quality Warning - Wildfire Smoke and community smoke UI
+# Air Quality Warning UI
 
 library(shiny)
 library(shinydashboard)
@@ -21,25 +21,30 @@ library(markdown)
 #--------------------------------------------------
 # 3 sections: header, sidebar, body
 
-header <- dashboardHeader(title = "Air Quality Warning - Wildfire Smoke")
+header <- dashboardHeader(title = "Air Quality Warning")
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
     id = "tabs",
     menuItem(
-      "Issue Warning",
+      "Issue - wildfire smoke",
       icon = icon("pencil"),
-      tabName = "issue"
+      tabName = "issue-wildfire"
       ),
     menuItem(
-      "End Warning",
+      "End - wildfire smoke",
       icon = icon("pencil"),
-      tabName = "end"
+      tabName = "end-wildfire"
       ),
     menuItem(
-      "Community Warning",
+      "Issue - local emissions",
       icon = icon("pencil"),
-      tabName = "community"
+      tabName = "issue-community"
+    ),
+    menuItem(
+      "End - local emissions",
+      icon = icon("pencil"),
+      tabName = "end-community"
     )
     )
   )
@@ -50,9 +55,10 @@ body <- dashboardBody(
     tags$style(HTML(".leaflet-container { background: white; }"))
     ), 
   tabItems(
-    tabItem(tabName = "issue", issueWildfireSmokeUI("issue_wildfire_smoke")),
-    tabItem(tabName = "end", endWildfireSmokeUI("end_wildfire_smoke")),
-    tabItem(tabName = "community", communitySmokeUI("community_smoke"))
+    tabItem(tabName = "issue-wildfire", issueWildfireSmokeUI("issue_wildfire_smoke")),
+    tabItem(tabName = "end-wildfire", endWildfireSmokeUI("end_wildfire_smoke")),
+    tabItem(tabName = "issue-community", issueLocalEmissionsUI("issue_local_emissions")),
+    tabItem(tabName = "end-community", endLocalEmissionsUI("end_local_emissions"))
   )
  )
 

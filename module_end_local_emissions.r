@@ -23,7 +23,7 @@ source(here::here("load_metadata.r"))
 # UI
 #--------------------------------------------------
 
-communitySmokeUI <- function(id) {
+endLocalEmissionsUI <- function(id) {
   ns <- NS(id)
   tabItem(tabName = "end",
           fluidRow(
@@ -38,7 +38,7 @@ communitySmokeUI <- function(id) {
                 inputId = ns("sel_aqMet"),
                 label = h5("Author:"),
                 selected = "",
-                choices = c("", aq_mets$nickname),
+                choices = c("", aq_mets$fullname),
                 width = "50%"
               ),
               
@@ -46,7 +46,7 @@ communitySmokeUI <- function(id) {
                 inputId = ns("ice"),
                 label = h5("I.C.E.:"),
                 selected = "",
-                choices = c("", "Issue", "Continue", "End"),
+                choices = c("", "End"),
                 width = "50%"
               ),
               selectInput(
@@ -57,22 +57,15 @@ communitySmokeUI <- function(id) {
                 width = "50%"
               ),
               selectInput(
-                inputId = ns("station"),
-                label = h5("Station:"),
+                inputId = ns("location"),
+                label = h5("Location:"),
                 selected = "",
-                choices = c("", Health_Authority$Station),
-                width = "50%"
-              ),
-              selectInput(
-                inputId = ns("burnRestrictions"),
-                label = h5("Burn Restrictions:"),
-                selected = "No",
-                choices = c("No", "Yes - Arvind", "Yes - Ben"),
+                choices = c("", match_health_city$location),
                 width = "50%"
               ),
               
               dateInput(inputId = ns("issuedate"),
-                        label = h5("Date last warning was issued:"),
+                        label = h5("Date warning was first issued:"),
                         max = Sys.Date(),
                         value = Sys.Date() -1,
                         startview = "month",
@@ -80,20 +73,11 @@ communitySmokeUI <- function(id) {
                         width = "50%"
               ),
               
-              helpText("Enter a short outlook message for smoke conditions. This text will appear in the bulletin. If no changes are needed, you can leave the default message."),
+              helpText("Add an optional custom message below. The default message can be retained, edited or deleted."),
               
               textAreaInput(inputId = ns("customMessage"),
                             label = h5("Custom smoke outlook message:"),
-                            value = "Current conditions are expected to persist for the next 24 hours.",
-                            width = "100%",
-                            height = "80px",
-                            resize = "vertical"),
-              
-              helpText("Enter burn ban area and burn restriction end date/time."),
-              
-              textAreaInput(inputId = ns("customMessageBanArea"),
-                            label = h5("Custom ban area and end date/time:"),
-                            value = "<location> and surrounding area until <burn restriction end date/time>.",
+                            value = "Local air quality has improved due to changing meteorological conditions.",
                             width = "100%",
                             height = "80px",
                             resize = "vertical"),
@@ -124,7 +108,7 @@ communitySmokeUI <- function(id) {
 # Server
 #--------------------------------------------------
 
-communitySmoke <- function(input, output, session){
+endLocalEmissions <- function(input, output, session){
   
   completeNotificationIDs <- character(0)
   today <- format(Sys.Date(), "%Y-%m-%d")
@@ -138,7 +122,7 @@ communitySmoke <- function(input, output, session){
       showNotification("No advisory status selected; please select a status", type = "error")
     } else if (length(input$pollutant) == "") {
       showNotification("No pollutant selected; please select a pollutant", type = "error")
-    } else if (input$station == "") {
+    } else if (input$location == "") {
       showNotification("No location selected; please select a location", type = "error")
     } else {
       ncomplete <- length(completeNotificationIDs)
@@ -154,25 +138,22 @@ communitySmoke <- function(input, output, session){
       
       showNotification("Preparing files. Please wait for completion notification.")
       
-      qmd_file <- if (input$ice == "End") "community_smoke_end.qmd" else "community_smoke_issue.qmd"
-      
-      # Clean station name for file name
-      station_clean <- gsub("\\s+", "_", input$station)
+      # Clean location name for file name
+      location_clean <- gsub("\\s+", "_", input$location)
       
       # Set output file name
-      output_file_name <- sprintf("%s_community_smoke_%s_%s_%s", today, input$ice, input$pollutant, station_clean)
+      output_file_name <- sprintf("%s_%s_%s_%s", today, input$ice, input$pollutant, location_clean)
       
       # generate warning: markdown and pdf formats
       showNotification("Generating Markdown file...")
-      quarto::quarto_render(input = here::here(qmd_file),
+      quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
                             output_file = sprintf("%s_%s.md", today, output_file_name),
                             output_format = "markdown",
                             execute_params = list(
                               sel_aqMet = input$sel_aqMet,
                               pollutant = input$pollutant,
                               ice = input$ice,
-                              station = input$station,
-                              burnRestrictions = input$burnRestrictions,
+                              location = input$location,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               customMessageBanArea = input$customMessageBanArea,
@@ -180,15 +161,14 @@ communitySmoke <- function(input, output, session){
                             debug = FALSE)
       
       showNotification("Generating PDF file...")
-      quarto::quarto_render(input = here::here(qmd_file),
+      quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
                             output_file = sprintf("%s_%s.pdf", today, output_file_name),
                             output_format = "pdf",
                             execute_params = list(
                               sel_aqMet = input$sel_aqMet,
                               pollutant = input$pollutant,
                               ice = input$ice,
-                              station = input$station,
-                              burnRestrictions = input$burnRestrictions,
+                              location = input$location,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               customMessageBanArea = input$customMessageBanArea,
@@ -212,13 +192,13 @@ communitySmoke <- function(input, output, session){
     
     filename = function() {
       # Set output file name
-      sprintf("%s_community_smoke.zip", today)
+      sprintf("%s_local_emissions.zip", today)
     },
     content = function(file) {
       # Build file paths correctly using sprintf()
       files_to_zip <- list.files(
         path = here::here("outputs"),
-        pattern = "community_smoke",
+        pattern = "local_emissions",
         full.names = TRUE
       )
       
@@ -248,26 +228,3 @@ communitySmoke <- function(input, output, session){
     }
   })
 }
-
-
-## For testing the standalone app
-
-# ui <- dashboardPage(
-#   dashboardHeader(title = "community Smoke Advisory"),
-#   dashboardSidebar(
-#     sidebarMenu(
-#       menuItem("End", tabName = "end", icon = icon("exclamation-triangle"))
-#     )
-#   ),
-#   dashboardBody(
-#     tabItems(
-#       communitySmokeUI("communitySmoke")  # call your module UI here inside tabItems
-#     )
-#   )
-# )
-# 
-# server <- function(input, output, session) {
-#   moduleServer("communitySmoke", communitySmoke)
-# }
-# 
-# shinyApp(ui, server)
