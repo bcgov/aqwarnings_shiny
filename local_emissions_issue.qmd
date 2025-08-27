@@ -381,8 +381,6 @@ for (i in seq_along(pollutants)) {
 
 # Expose them as final_table1, final_table2, etc.
 list2env(results, envir = .GlobalEnv)
-
-
 ```
 
 ```{r ENVcontact, include=FALSE}
@@ -626,10 +624,10 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 # Contact information
 
-**Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
+**Media questions regarding health implications of this Air Quality Warning:**
 
 [{{< card_start width="wide" >}}]{.content-visible when-format="markdown"} `r ENVcontact` [{{< card_end >}}]{.content-visible when-format="markdown"}
 
-**Media questions regarding health implications of wildfires:**
+**Media questions regarding health implications of this Air Quality Warning:**
 
 [{{< card_start  width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
