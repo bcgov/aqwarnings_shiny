@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## Module: Air Quality Warning - Non Wildfire Smoke
+# Module: Air Quality Warning - local emissions (community based)
 
 library(shiny)
 library(shinydashboard)
@@ -65,7 +65,7 @@ issueLocalEmissionsUI <- function(id) {
               ),
               selectInput(
                 inputId = ns("burnRestrictions"),
-                label = h5("Burn Restrictions:"),
+                label = h5("Burn Restrictions & SDM:"),
                 selected = "No",
                 choices = c("No", "Yes - Arvind", "Yes - Ben"),
                 width = "50%"
@@ -83,7 +83,7 @@ issueLocalEmissionsUI <- function(id) {
               helpText("Add an optional custom message below. The default message can be retained, edited or deleted."),
               
               textAreaInput(inputId = ns("customMessage"),
-                            label = h5("Custom smoke outlook message:"),
+                            label = h5("Custom message:"),
                             value = "Current conditions are expected to persist until weather conditions change and/or local emissions are reduced.",
                             width = "100%",
                             height = "80px",
@@ -93,7 +93,7 @@ issueLocalEmissionsUI <- function(id) {
               
               textAreaInput(inputId = ns("customMessageBanArea"),
                             label = h5("Burn ban location and end date/time:"),
-                            value = "<location> until <mmmm, dd, yyyy hh:mm> local time.",
+                            value = "<location> until <mmmm, dd, yyyy hh:mm AM/PM> local time",
                             width = "100%",
                             height = "80px",
                             resize = "vertical"),

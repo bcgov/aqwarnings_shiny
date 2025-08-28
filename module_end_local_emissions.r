@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## Module: Air Quality Warning - Non Wildfire Smoke
+# Module: Air Quality Warning - local emissions (community based)
 
 library(shiny)
 library(shinydashboard)
@@ -76,7 +76,7 @@ endLocalEmissionsUI <- function(id) {
               helpText("Add an optional custom message below. The default message can be retained, edited or deleted."),
               
               textAreaInput(inputId = ns("customMessage"),
-                            label = h5("Custom smoke outlook message:"),
+                            label = h5("Custom message:"),
                             value = "Local air quality has improved due to changing meteorological conditions.",
                             width = "100%",
                             height = "80px",

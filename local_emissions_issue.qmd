@@ -625,10 +625,10 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 # Contact information
 
-**Media questions regarding health implications of this Air Quality Warning:**
+**Media questions regarding air quality conditions related to this Air Quality Warning:**
 
 [{{< card_start width="wide" >}}]{.content-visible when-format="markdown"} `r ENVcontact` [{{< card_end >}}]{.content-visible when-format="markdown"}
 
-**Media questions regarding health implications of this Air Quality Warning:**
+**Media questions regarding health implications related to degraded air quality:**
 
 [{{< card_start  width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
