@@ -158,7 +158,7 @@ issueLocalEmissions <- function(input, output, session){
       location_clean <- gsub("\\s+", "_", input$location)
       
       # Set output file name
-      output_file_name <- sprintf("%s_%s_%s_%s", today, input$ice, input$pollutant, location_clean)
+      output_file_name <<- sprintf("%s_%s_%s", input$ice, input$pollutant, location_clean) # make globally available for downloading files later
       
       # generate warning: markdown and pdf formats
       showNotification("Generating Markdown file...")
@@ -216,7 +216,7 @@ issueLocalEmissions <- function(input, output, session){
       # Build file paths correctly using sprintf()
       files_to_zip <- list.files(
         path = here::here("outputs"),
-        pattern = "local_emissions",
+        pattern =  sprintf("%s_%s", today, output_file_name),
         full.names = TRUE
       )
       
