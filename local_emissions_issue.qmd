@@ -7,15 +7,19 @@ title: "`r paste0(
 type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
-  ice: Continue
+  ice: "Continue"
   pollutant: "PM25 & PM10"
   burnRestrictions: "Yes - Ben"
   sel_aqMet: "Sakshi Jain"
   location: "Prince George"
   issuedate: "2025-07-20"
-  outputFormat: ""
-  customMessage: ""
-  customMessageBanArea: ""
+  outputFormat: "markdown"
+  customMessage: "`Custom message.`"
+  customMessageBanArea: "`Custom message describing area included in burn prohibition.`"
+ice: "`r params$ice`"
+author: "`r params$sel_aqMet`"
+location: "`r params$location`"
+outputFormat: "`r params$outputFormat`" 
 format:
   markdown: default
   pdf:
