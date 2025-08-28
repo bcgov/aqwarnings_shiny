@@ -142,7 +142,7 @@ endLocalEmissions <- function(input, output, session){
       location_clean <- gsub("\\s+", "_", input$location)
       
       # Set output file name
-      output_file_name <- sprintf("%s_%s_%s_%s", today, input$ice, input$pollutant, location_clean)
+      output_file_name <- sprintf("%s_%s_%s", input$ice, input$pollutant, location_clean)
       
       # generate warning: markdown and pdf formats
       showNotification("Generating Markdown file...")
