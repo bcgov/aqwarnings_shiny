@@ -156,7 +156,6 @@ endLocalEmissions <- function(input, output, session){
                               location = input$location,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
-                              customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "markdown"),
                             debug = FALSE)
       
@@ -171,7 +170,6 @@ endLocalEmissions <- function(input, output, session){
                               location = input$location,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
-                              customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "pdf"),
                             debug = FALSE)
     }

@@ -206,7 +206,7 @@ bylaws <- if (params$location == "Burns Lake") {
 }
 ```
 
-```{r burn_ban, results='asis', echo=FALSE}
+```{r burn_ban, include=FALSE}
 
 if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
   
@@ -225,10 +225,16 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
     title_line2 <- "Environmental Monitoring and Analysis Branch"
   }
   
+  burn_ban_first_paragraph <- paste0(
+    "Open burning restrictions are now in effect ", 
+    params$customMessageBanArea, 
+    ". No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below."
+    )
+  
   burn_ban <- paste0(
     "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning ",
     params$customMessageBanArea,
-    " No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
+    ". No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
     "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
      "> ![](", signature_img, "){width=150px}\n\n",
@@ -487,16 +493,7 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant. Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the warning is ended. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
 
-```{r, results='asis', echo=FALSE}
-if (params$burnRestrictions != 'No') {
-  cat(
-    "Open burning restrictions are now in effect for ", params$customMessageBanArea,
-    " No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.",
-    sep = ""
-  )
-}
-```
-
+`r if (!is.null(burn_ban_first_paragraph) && nzchar(burn_ban_first_paragraph)) paste0(burn_ban_first_paragraph)`
 
 Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 
