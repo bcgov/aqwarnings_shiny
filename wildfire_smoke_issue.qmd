@@ -463,11 +463,11 @@ Worksafe BC
 
 ## Contact
 
-**Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
+**Media questions regarding air quality conditions related to this Air Quality Warning:**
 
 [{{< card_start width="wide" >}}]{.content-visible when-format="markdown"} `r ENVcontact` [{{< card_end >}}]{.content-visible when-format="markdown"}
 
-**Media questions regarding health implications of wildfires:**
+**Media questions regarding health implications of wildfire smoke:**
 
 [{{< card_start  width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
 
