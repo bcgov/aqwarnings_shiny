@@ -13,13 +13,13 @@ params:
   sel_aqMet: "Sakshi Jain"
   location: "Prince George"
   issuedate: "2025-07-20"
+  nextUpdate: "2025-09-28"
   outputFormat: "markdown"
   customMessage: "`Custom message.`"
   customMessageBanArea: "`Custom message describing area included in burn prohibition.`"
 ice: "`r params$ice`"
 author: "`r params$sel_aqMet`"
 location: "`r params$location`"
-outputFormat: "`r params$outputFormat`" 
 format:
   markdown: default
   pdf:
@@ -63,7 +63,7 @@ current_month <- as.numeric(format(Sys.Date(), "%m"))
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
-    "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$µm) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
+    "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
     
 The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " local time today:"
   )
@@ -218,12 +218,12 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
   
   # Define signature and title info depending on who it is
   if (params$burnRestrictions == "Yes - Arvind") {
-    signature_img <- file.path("utility", "signatures", "SignatureAS.png")
+    signature_img <- file.path("src", "signatures", "SignatureAS.png")
     name_line <- "Arvind Saraswat"
     title_line1 <- "Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
   } else if (params$burnRestrictions == "Yes - Ben") {
-    signature_img <- file.path("utility", "signatures", "SignatureBW.jpg")
+    signature_img <- file.path("src", "signatures", "SignatureBW.jpg")
     name_line <- "Benjamin Weinstein"
     title_line1 <- "For Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
@@ -336,7 +336,7 @@ for (i in seq_along(pollutants)) {
       max_conc = na_if(max_conc, pct_valid < COMPLETE_THRESHOLD_PCT)
     )
 
-  stationByParameterList <- read_rds(sprintf("./utility/stations_%s.rds", tolower(pollutant)))
+  stationByParameterList <- read_rds(sprintf("./src/stations_%s.rds", tolower(pollutant)))
 
   # Join with station info using STATION_NAME
   integrated <- integrated %>%
@@ -503,7 +503,7 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 
 `r params$customMessage`
 
-The next update will be on The next update will be on `r format(Sys.Date() + 1, "%B %d, %Y")` and posted to the province’s [Air Quality Warnings webpage](https://www.gov.bc.ca/airquality).
+The next update will be on `r format(as.Date(params$nextUpdate), "%B %d, %Y")` and posted to the province’s [Air Quality Warnings webpage](https://www.gov.bc.ca/airquality).
 
 # Actions you can take
 

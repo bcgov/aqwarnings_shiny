@@ -143,7 +143,7 @@ endLocalEmissions <- function(input, output, session){
       
       # Set output file name
       output_file_name <<- sprintf("%s_%s_%s", input$ice, input$pollutant, location_clean) # make globally available for downloading files later
-      
+
       # generate warning: markdown and pdf formats
       showNotification("Generating Markdown file...")
       quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
