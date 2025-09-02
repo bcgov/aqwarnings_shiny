@@ -199,7 +199,7 @@ for (i in seq_along(pollutants)) {
       max_conc = na_if(max_conc, pct_valid < COMPLETE_THRESHOLD_PCT)
     )
 
-  stationByParameterList <- read_rds(sprintf("./src/stations_%s.rds", tolower(pollutant)))
+  stationByParameterList <- read_rds(sprintf("./utility/stations_%s.rds", tolower(pollutant)))
 
   # Join with station info using STATION_NAME
   integrated <- integrated %>%

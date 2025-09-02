@@ -71,15 +71,6 @@ issueLocalEmissionsUI <- function(id) {
                 width = "50%"
               ),
               
-              dateInput(inputId = ns("nextUpdate"),
-                        label = h5("Date of next update: "),
-                        max = Sys.Date() +7,
-                        value = Sys.Date() +1,
-                        startview = "month",
-                        weekstart = 0,
-                        width = "50%"
-              ),
-              
               dateInput(inputId = ns("issuedate"),
                         label = h5("Date warning was first issued:"),
                         max = Sys.Date(),
@@ -181,7 +172,6 @@ issueLocalEmissions <- function(input, output, session){
                               location = input$location,
                               burnRestrictions = input$burnRestrictions,
                               issuedate = input$issuedate,
-                              nextUpdate = input$nextUpdate,
                               customMessage = input$customMessage,
                               customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "markdown"),
@@ -198,7 +188,6 @@ issueLocalEmissions <- function(input, output, session){
                               location = input$location,
                               burnRestrictions = input$burnRestrictions,
                               issuedate = input$issuedate,
-                              nextUpdate = input$nextUpdate,
                               customMessage = input$customMessage,
                               customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "pdf"),
