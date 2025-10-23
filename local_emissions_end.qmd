@@ -1,6 +1,6 @@
 ---
 title: "`r paste0(
-  'Air quality warning ended for ', params$location)`" 
+  'Air quality warning ended for ', params$location)`"  # removed "open burning restrictions" - requires user input, which doesn't exist; discuss with team if inclusion of open burning restrictions is required for "end" warnings
 type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
@@ -11,8 +11,14 @@ params:
   sel_aqMet: "Sakshi Jain"
   location: "Whistler"
   issuedate: "2025-07-09"
-  outputFormat: ""
+  outputFormat: "markdown"
   customMessage: ""
+ice: "`r params$ice`"
+author: "`r params$sel_aqMet`"
+customMessage: "`r params$customMessage`"
+customMessageBanArea: "`r params$customMessageBanArea`"  # confirm if this field is needed for "end" warnings
+location: "`r params$location`"
+outputFormat: "`r params$outputFormat`" 
 format:
   markdown: default
   pdf:
