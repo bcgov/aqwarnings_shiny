@@ -1,9 +1,9 @@
 ---
 title: "`r paste0(
-  'Air quality warning ', ifelse(params$burnRestrictions != 'No', ' and open burning restrictions ', ''), 
-  tolower(params$ice),
- 'd for ',
- params$location)`"
+  'Air quality warning ', 
+  ifelse(params$burnRestrictions != 'No', 'and open burning restrictions ', ''),
+  'in effect for ',
+  params$location)`"
 type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
@@ -14,9 +14,15 @@ params:
   location: "Prince George"
   issuedate: "2025-07-20"
   nextUpdate: "2025-09-28"
-  outputFormat: ""
+  outputFormat: "markdown"
   customMessage: ""
   customMessageBanArea: ""
+ice: "`r params$ice`"
+author: "`r params$sel_aqMet`"
+customMessage: "`r params$customMessage`"
+customMessageBanArea: "`r params$customMessageBanArea`"
+location: "`r params$location`"
+outputFormat: "`r params$outputFormat`" 
 format:
   markdown: default
   pdf:
