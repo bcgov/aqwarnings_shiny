@@ -22,10 +22,12 @@ outputFormat: "`r params$outputFormat`"
 format:
   markdown: default
   pdf:
+    css: https://github.com/bcgov/bc-sans/raw/refs/heads/main/css/BC_Sans.css
+    mainfont: BC Sans
     date-format: long
     include-in-header: 
       - src/header.tex
-    fontsize: "11pt"
+    fontsize: "12pt"
     urlcolor: bcblue
 ---
 
@@ -90,16 +92,16 @@ HAcontact <- health_contact |>
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
-    "The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " local time today:"
+    "The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%I:%M %p"), " local time today:"
   )
 
 additional_info_PM10 <- paste0(
-  "The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  "The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%I:%M %p"), " local time today:"
   )
 
 additional_info_O3 <- paste0(
   "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
-  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%I:%M %p"), " local time today:"
 )
 ```
 

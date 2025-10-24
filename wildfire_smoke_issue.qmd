@@ -1,5 +1,5 @@
 ---
-title: "Air Quality Warning"
+title: "Air quality warning in effect for wildfire smoke"
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`"
 params:
@@ -24,10 +24,12 @@ outputFormat: "`r params$outputFormat`"
 format:
   markdown: default
   pdf:
+    css: https://github.com/bcgov/bc-sans/raw/refs/heads/main/css/BC_Sans.css
+    mainfont: BC Sans
     date-format: long
     include-in-header: 
       - src/header.tex
-    fontsize: "11pt"
+    fontsize: "12pt"
     urlcolor: bcblue
 ---
 
@@ -253,8 +255,9 @@ logos_combined <- magick::image_append(logos) |>
 
 ```
 
-<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
+<!-- Logo header for markdown output, the layout-col should be set based on number of logos including FHNA and BCGov -->
 <!-- the trailing slash means the text in square brackets is alt text -->
+<!-- note: logos and title for PDF output handled in src/header.txt -->
 
 [`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
@@ -389,7 +392,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 ::: {.content-visible when-format="pdf"}
 
-- Air quality notifications issued by Metro Vancouver
+Air quality notifications issued by Metro Vancouver
 
 - Visit Metro Vancouver's [air quality data and warnings page][Air quality data and warnings]
 

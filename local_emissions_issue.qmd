@@ -26,10 +26,12 @@ outputFormat: "`r params$outputFormat`"
 format:
   markdown: default
   pdf:
+    css: https://github.com/bcgov/bc-sans/raw/refs/heads/main/css/BC_Sans.css
+    mainfont: BC Sans
     date-format: long
     include-in-header: 
       - src/header.tex
-    fontsize: "11pt"
+    fontsize: "12pt"
     urlcolor: bcblue
 ---
 ```{=html}
@@ -63,12 +65,12 @@ source(here::here("load_metadata.r"))
 current_month <- as.numeric(format(Sys.Date(), "%m"))
 ```
 
-```{r additional_info, include=FALSE}
+```{r additional_info, include=FALSE, results='asis'}
 
 additional_info_PM25 <- paste0(
     "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
     
-The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " local time today:"
+The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%I:%M %p"), " local time today:"
   )
 
 additional_info_PM10 <- paste0(
@@ -84,8 +86,9 @@ additional_info_O3 <- paste0(
   
 The highest concentrations of ground-level ozone usually happen between mid-afternoon and early evening on summer days.
   
-The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
-  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality warnings. Air quality warnings for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. 
+
+The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%I:%M %p"), " local time today:"
   )
 
 ```
@@ -114,12 +117,12 @@ voluntary_reduction_PM <- paste0(
 )
 
 voluntary_reduction_O3 <- paste0(
-  "Fuel your vehicle in the cooler evening hours or after dark.\n",
-  "Reduce or reschedule using other gasoline and diesel equipment, such as lawn mowers, trimmers and leaf blowers.\n"
+  "- Fuel your vehicle in the cooler evening hours or after dark.\n",
+  "- Reduce or reschedule using other gasoline and diesel equipment, such as lawn mowers, trimmers and leaf blowers.\n"
 )
 ```
 
-```{r HAcontact, include=FALSE}
+```{r include=FALSE}
 #| label: HAcontact
 #| results: asis
 
@@ -390,7 +393,7 @@ for (i in seq_along(pollutants)) {
 list2env(results, envir = .GlobalEnv)
 ```
 
-```{r ENVcontact, include=FALSE}
+```{r include=FALSE}
 #| label: ENVcontact
 #| results: asis
 #| strip.white: false
@@ -404,7 +407,7 @@ ENVcontact <- aq_mets |>
   pull(contact) 
 ```
 
-```{r logo}
+```{r}
 #| label: create-logo-list
 
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
@@ -497,7 +500,7 @@ Exposure to `r pollutantExpansion` is particularly a concern for infants, older 
 ```{r, results='asis', echo=FALSE}
 if (params$burnRestrictions != 'No') {
   cat(
-    "Open burning restrictions are now in effect for ", params$customMessageBanArea,
+    "Open burning restrictions are now in effect ", params$customMessageBanArea,
     " No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.",
     sep = ""
   )
@@ -588,7 +591,7 @@ if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in%
 # Single pollutant: PM25
 if (length(pollutants) == 1 && pollutants == "PM25") {
   cat(additional_info_PM25, "\n\n")
-  print(knitr::kable(final_table, row.names = FALSE))
+  print(knitr::kable(final_table, row.names = FALSE, escape = FALSE))
 }
 
 # Single pollutant: PM10

@@ -1,5 +1,5 @@
 ---
-title: "Air Quality Warning" 
+title: "Air quality warning for wildfire smoke ended" 
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`" 
 params: 
@@ -22,14 +22,12 @@ outputFormat: "`r params$outputFormat`"
 format:
   markdown: default
   pdf:
+    css: https://github.com/bcgov/bc-sans/raw/refs/heads/main/css/BC_Sans.css
+    mainfont: BC Sans
     date-format: long
     include-in-header: 
       - src/header.tex
-    mainfont: BCSans-Regular
-    mainfontoptions:
-      - Boldfont = BCSans-Bold
-      - ItalicFont = BCSans-Italic
-    fontsize: "11pt"
+    fontsize: "12pt"
     urlcolor: bcblue
 ---
 
