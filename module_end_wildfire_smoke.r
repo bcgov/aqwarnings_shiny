@@ -106,7 +106,7 @@ endWildfireSmokeUI <- function(id) {
 endWildfireSmoke <- function(input, output, session){
   
   completeNotificationIDs <- character(0)
-  currentDate <- Sys.Date()
+  current_date <- as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles"))
   
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {

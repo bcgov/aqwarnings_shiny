@@ -102,7 +102,7 @@ issueLocalEmissionsUI <- function(id) {
               
               textAreaInput(inputId = ns("customMessageBanArea"),
                             label = h5("Burn ban location and end date/time:"),
-                            value = "<location> until <mmmm, dd, yyyy hh:mm> local time.",
+                            value = "<location> until <mmmm, dd, yyyy hh:mm AM/PM> local time.",
                             width = "100%",
                             height = "80px",
                             resize = "vertical"),
@@ -136,8 +136,9 @@ issueLocalEmissionsUI <- function(id) {
 issueLocalEmissions <- function(input, output, session){
   
   completeNotificationIDs <- character(0)
-  today <- format(Sys.Date(), "%Y-%m-%d")
-
+  
+  # server that runs Shiny App runs on UTC. Specify tz to ensure proper date assigned to file name
+  today <- as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles"))  
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
     

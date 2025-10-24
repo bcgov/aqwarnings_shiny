@@ -151,7 +151,7 @@ issueWildfireSmoke <- function(input, output, session){
   initial_zoom = 5
   completeNotificationIDs <- character(0)
   
-  currentDate <- Sys.Date()
+  currentDate <- as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles"))
 
   map_reactive <- reactive({
     leaflet(options = leafletOptions(zoomControl = TRUE, dragging = TRUE)) |> 
@@ -459,7 +459,7 @@ issueWildfireSmoke <- function(input, output, session){
                             debug = FALSE)
       
       # move the .md and .html to outputs/
-      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub-directory
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
@@ -479,6 +479,7 @@ issueWildfireSmoke <- function(input, output, session){
                                                   location = input$location,
                                                   outputFormat = "pdf"),
                             debug = FALSE)
+     
      # move the .pdf to outputs/
      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, issueBasename), full.names = TRUE)

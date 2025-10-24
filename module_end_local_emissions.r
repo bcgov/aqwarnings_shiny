@@ -111,7 +111,7 @@ endLocalEmissionsUI <- function(id) {
 endLocalEmissions <- function(input, output, session){
   
   completeNotificationIDs <- character(0)
-  today <- format(Sys.Date(), "%Y-%m-%d")
+  today <- as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles"))
 
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
