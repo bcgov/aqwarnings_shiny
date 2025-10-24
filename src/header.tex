@@ -1,8 +1,4 @@
 
-\usepackage[scaled]{helvet} % load Helvetica font
-\renewcommand{\familydefault}{\sfdefault} % set sans-serif as default
-\usepackage[T1]{fontenc} % ensure proper font encoding
-
 % set custom color: bcblue
 \usepackage{xcolor}	% colours for title page and hyperlinks
 \definecolor{bcblue}{RGB}{0,0,128} % blue
@@ -18,7 +14,7 @@
 \usepackage{lastpage} % for referencing the total number of pages
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\fancyhf{} % Clear all header and footer fields
+\fancyhf{} % clear all header and footer fields
 \renewcommand{\headrulewidth}{0pt} % remove top horizontal rule
 \fancyfoot[R]{Page \thepage\ of \pageref*{LastPage}} % bottom right:X of Y
 
@@ -28,7 +24,8 @@
 \includegraphics[width = 1\textwidth]{logo.png}\\[\bigskipamount]
 \vspace{-0.4cm} % reduce vertical space between logos and title
 \begin{flushleft}
-{\color{bcblue}\huge\textbf{\@title} - \textbf{\@date}} \vspace{0.3cm} \newline
+{\color{bcblue}\LARGE\textbf{\@title}} \vspace{0.3cm} \newline
+{\color{bcblue}\Large\textbf{\@date}}
 \noindent\textcolor{bcblue}{\rule{\textwidth}{0.4pt}} % add line under title
 \end{flushleft}\egroup
 }
@@ -38,4 +35,4 @@
 
 \usepackage{float}
 \usepackage{wrapfig} % to wrap text around map
-\usepackage[font = footnotesize, width=0.4\textwidth]{caption} % font size for map caption
+\usepackage[font = footnotesize, width=0.4\textwidth]{caption} % font size for map caption and caption* command which suppresses figure numbers
