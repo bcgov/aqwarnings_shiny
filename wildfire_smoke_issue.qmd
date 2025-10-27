@@ -279,9 +279,9 @@ The Regions of BC highlighted on the map are being impacted or are likely to be 
 \centering
 \vspace{-0.5cm}
 \includegraphics[width= 0.55\textwidth]{`r map`}
-\captionsetup{width = 0.45\textwidth}
-\caption*{Descriptions of affected region(s) are provided at the end of this document. This Air Quality Warning excludes the area managed by Metro Vancouver. For air quality notifications issued by Metro Vancouver refer to Metro Vancouver's \href{https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories}{air quality data and warnings page}.}
-\vspace*{-1.2cm}
+\captionsetup{width = 0.45\textwidth, font = footnotesize, labelformat = empty, justification = raggedright}
+\caption{Descriptions of the affected region(s) are provided at the end of this document. This Air Quality Warning excludes the area managed by Metro Vancouver. For air quality notifications issued by Metro Vancouver refer to Metro Vancouver's \href{https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories}{air quality data and warnings page}.}
+\vspace*{-2 cm}
 \end{wrapfigure}
 
 :::
