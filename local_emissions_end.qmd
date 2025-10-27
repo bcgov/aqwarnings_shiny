@@ -22,8 +22,7 @@ outputFormat: "`r params$outputFormat`"
 format:
   markdown: default
   pdf:
-    css: https://github.com/bcgov/bc-sans/raw/refs/heads/main/css/BC_Sans.css
-    mainfont: BC Sans
+    mainfont: "Calibri"
     date-format: long
     include-in-header: 
       - src/header.tex
