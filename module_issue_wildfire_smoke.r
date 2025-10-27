@@ -151,8 +151,9 @@ issueWildfireSmoke <- function(input, output, session){
   initial_zoom = 5
   completeNotificationIDs <- character(0)
   
-  currentDate <- as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles"))
-
+  # server runs Shiny App on UTC. Specify tz to ensure local date assigned to file name
+  currentDate <- format(as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles")))
+  
   map_reactive <- reactive({
     leaflet(options = leafletOptions(zoomControl = TRUE, dragging = TRUE)) |> 
       
@@ -437,7 +438,7 @@ issueWildfireSmoke <- function(input, output, session){
       
       html_map <- sprintf("%s_%s_map.html", currentDate, issueBasename)
       htmlwidgets::saveWidget(usermap, html_map)
-
+      
       png_map <- sprintf("%s_%s_map.png", currentDate, issueBasename)
       webshot(url = html_map,
               file = png_map,
