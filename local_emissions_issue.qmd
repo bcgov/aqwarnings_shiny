@@ -223,12 +223,18 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
   
   # Define signature and title info depending on who it is
   if (params$burnRestrictions == "Yes - Arvind") {
-    signature_img <- file.path("src", "signatures", "SignatureAS.png")
+    signature_path <- ifelse(params$outputFormat == "markdown", 
+                            paste0("![](//assets/SignatureAS.png)"), 
+                            paste0("![](", file.path("src", "signatures", "SignatureAS.png"), ")")
+    )
     name_line <- "Arvind Saraswat"
     title_line1 <- "Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
   } else if (params$burnRestrictions == "Yes - Ben") {
-    signature_img <- file.path("src", "signatures", "SignatureBW.jpg")
+    signature_path <- ifelse(params$outputFormat == "markdown",
+                            paste0("![](//assets/SignatureBW.jpg){width=150px}\n\n"), 
+                            paste0("![](", file.path("src", "signatures", "SignatureBW.jpg"), "){width=150px}\n\n")
+                            )
     name_line <- "Benjamin Weinstein"
     title_line1 <- "For Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
@@ -240,10 +246,10 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
     " No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
     "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
-     "> ![](", signature_img, "){width=150px}\n\n",
-  "> ", name_line, "\n\n",
-  "> ", title_line1, "\n\n",
-  "> ", title_line2, "\n\n"
+    "> " , signature_path,
+    "> ", name_line, "\n\n",
+    "> ", title_line1, "\n\n",
+    "> ", title_line2, "\n\n"
 )
   
 } else {
