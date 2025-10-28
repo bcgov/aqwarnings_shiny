@@ -184,7 +184,7 @@ endLocalEmissions <- function(input, output, session){
     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", today, output_file_name), full.names = TRUE)
     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
     
-    showNotification("File generation complete!", duration = NULL)
+    showNotification("Processing complete. Files are ready for downloading.", duration = NULL)
   })
   
   # Download files
