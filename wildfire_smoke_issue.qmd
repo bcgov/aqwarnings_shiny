@@ -24,7 +24,7 @@ outputFormat: "`r params$outputFormat`"
 format:
   markdown: default
   pdf:
-    mainfont: "Calibri"
+    mainfont: "Roboto"
     date-format: long
     include-in-header: 
       - src/header.tex
