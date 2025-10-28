@@ -138,7 +138,7 @@ issueLocalEmissions <- function(input, output, session){
   completeNotificationIDs <- character(0)
   
   # server that runs Shiny App runs on UTC. Specify tz to ensure proper date assigned to file name
-  today <- as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles"))  
+  today <- format(as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles")))
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
     
@@ -222,13 +222,13 @@ issueLocalEmissions <- function(input, output, session){
     
     filename = function() {
       # Set output file name
-      sprintf("%s_local_emissions.zip", today)
+      sprintf("%s_%s_%s_%s.zip", today, input$ice, input$pollutant, input$location)
     },
     content = function(file) {
-      # Build file paths correctly using sprintf()
-      files_to_zip <- list.files(
+      # find files with today's date; "*" allows multiple locations to be included in one zip file
+        files_to_zip <- list.files(
         path = here::here("outputs"),
-        pattern = "local_emissions",
+        pattern = paste0("^", today, ".*\\.(pdf|md)$"),
         full.names = TRUE
       )
       

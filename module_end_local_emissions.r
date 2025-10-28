@@ -195,10 +195,10 @@ endLocalEmissions <- function(input, output, session){
       sprintf("%s_local_emissions.zip", today)
     },
     content = function(file) {
-      # Build file paths correctly using sprintf()
+      # find files with today's date; "*" allows multiple locations to be included in one zip file
       files_to_zip <- list.files(
         path = here::here("outputs"),
-        pattern = "local_emissions",
+        pattern = paste0("^", today, ".*\\.(pdf|md)$"),
         full.names = TRUE
       )
       
