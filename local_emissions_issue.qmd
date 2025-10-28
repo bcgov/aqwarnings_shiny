@@ -246,7 +246,7 @@ if (params$burnRestrictions %in% c("Yes - Arvind", "Yes - Ben")) {
     " No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
     "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
-    "> " , signature_path,
+    "> " , signature_path, "\n\n",
     "> ", name_line, "\n\n",
     "> ", title_line1, "\n\n",
     "> ", title_line2, "\n\n"
