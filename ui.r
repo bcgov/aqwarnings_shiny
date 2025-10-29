@@ -21,10 +21,11 @@ library(markdown)
 #--------------------------------------------------
 # 3 sections: header, sidebar, body
 
-header <- dashboardHeader(title = "Air Quality Warning")
+header <- dashboardHeader(title = "Air Quality Warnings")
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
+    tags$h4("Wildfire Smoke Warnings", style = "padding: 10px"),
     id = "tabs",
     menuItem(
       "Issue - wildfire smoke",
@@ -36,6 +37,8 @@ sidebar <- dashboardSidebar(
       icon = icon("pencil"),
       tabName = "end-wildfire"
       ),
+    tags$hr(),
+    tags$h4("Community Warnings", style = "padding: 10px"),
     menuItem(
       "Issue - local emissions",
       icon = icon("pencil"),
