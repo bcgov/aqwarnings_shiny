@@ -151,9 +151,6 @@ issueWildfireSmoke <- function(input, output, session){
   initial_zoom = 5
   completeNotificationIDs <- character(0)
   
-  # server runs Shiny App on UTC. Specify tz to ensure local date assigned to file name
-  currentDate <- format.Date(Sys.Date(), tz = "⁠America/Los_Angeles")
-  
   map_reactive <- reactive({
     leaflet(options = leafletOptions(zoomControl = TRUE, dragging = TRUE)) |> 
       
@@ -436,10 +433,10 @@ issueWildfireSmoke <- function(input, output, session){
       
       usermap <- user_created_map()
       
-      html_map <- sprintf("%s_%s_map.html", currentDate, issueBasename)
+      html_map <- sprintf("%s_%s_map.html", as.character(today), issueBasename)
       htmlwidgets::saveWidget(usermap, html_map)
       
-      png_map <- sprintf("%s_%s_map.png", currentDate, issueBasename)
+      png_map <- sprintf("%s_%s_map.png", as.character(today), issueBasename)
       webshot(url = html_map,
               file = png_map,
               cliprect = cliprect
@@ -447,7 +444,7 @@ issueWildfireSmoke <- function(input, output, session){
 
       # generate markdown via Quarto
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
-                            output_file = sprintf("%s_%s.md", currentDate, issueBasename),
+                            output_file = sprintf("%s_%s.md", as.character(today), issueBasename),
                             output_format = "markdown",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
@@ -461,15 +458,15 @@ issueWildfireSmoke <- function(input, output, session){
       
       # move the .md and .html to outputs/
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub-directory
-      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, issueBasename), full.names = TRUE)
+      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", as.character(today), issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
-      map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", currentDate, issueBasename), full.names = TRUE)
+      map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", as.character(today), issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs"))
       
       # generate pdf via Quarto 
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
-                            output_file = sprintf("%s_%s.pdf", currentDate, issueBasename),
+                            output_file = sprintf("%s_%s.pdf", as.character(today), issueBasename),
                             output_format = "pdf",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
@@ -483,7 +480,7 @@ issueWildfireSmoke <- function(input, output, session){
      
      # move the .pdf to outputs/
      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, issueBasename), full.names = TRUE)
+     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), issueBasename), full.names = TRUE)
      fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
      id <- showNotification("Processing complete. Files are ready for downloading.", 

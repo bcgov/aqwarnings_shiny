@@ -107,9 +107,6 @@ endWildfireSmoke <- function(input, output, session){
   
   completeNotificationIDs <- character(0)
   
-  # server runs Shiny App on UTC. Specify tz to ensure local date assigned to file name
-  currentDate <- format.Date(Sys.Date(), tz = "⁠America/Los_Angeles")
-  
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
     
@@ -139,7 +136,7 @@ endWildfireSmoke <- function(input, output, session){
       # generate warning: markdown and pdf formats
       showNotification("Generating Markdown file...")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
-                            output_file = sprintf("%s_%s.md", currentDate, endBasename),
+                            output_file = sprintf("%s_%s.md", as.character(today), endBasename),
                             output_format = "markdown",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   lastWarning = input$lastWarning,
@@ -152,7 +149,7 @@ endWildfireSmoke <- function(input, output, session){
 
       showNotification("Generating PDF file...")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
-                            output_file = sprintf("%s_%s.pdf", currentDate, endBasename),
+                            output_file = sprintf("%s_%s.pdf", as.character(today), endBasename),
                             output_format = "pdf",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   lastWarning = input$lastWarning,
@@ -166,10 +163,10 @@ endWildfireSmoke <- function(input, output, session){
       
       # move the .md and .pdf to outputs/
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, endBasename), full.names = TRUE)
+      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", as.character(today), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
-      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", currentDate, endBasename), full.names = TRUE)
+      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
       showNotification("File generation complete!", duration = NULL)
