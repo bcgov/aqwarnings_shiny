@@ -108,7 +108,7 @@ endWildfireSmoke <- function(input, output, session){
   completeNotificationIDs <- character(0)
   
   # server runs Shiny App on UTC. Specify tz to ensure local date assigned to file name
-  currentDate <- format(as.Date(lubridate::with_tz(Sys.time(), "America/Los_Angeles")))
+  currentDate <- format.Date(Sys.Date(), tz = "⁠America/Los_Angeles")
   
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {

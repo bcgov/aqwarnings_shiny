@@ -4,7 +4,6 @@ title: "`r paste0(
 type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
-  ice: End
   date: "`r Sys.Date()`"
   pollutant: "PM25 & PM10"
   burnRestrictions: "Yes"
@@ -13,7 +12,7 @@ params:
   issuedate: "2025-07-09"
   outputFormat: "markdown"
   customMessage: ""
-ice: "`r params$ice`"
+ice: End
 author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`"
 customMessageBanArea: "`r params$customMessageBanArea`"  # confirm if this field is needed for "end" warnings
