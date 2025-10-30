@@ -25,27 +25,24 @@ header <- dashboardHeader(title = "Air Quality Warnings")
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    tags$h4("Wildfire Smoke Warnings", style = "padding: 10px"),
     id = "tabs",
-    menuItem(
-      "Issue - wildfire smoke",
-      icon = icon("pencil"),
-      tabName = "issue-wildfire"
-      ),
-    menuItem(
-      "End - wildfire smoke",
-      icon = icon("pencil"),
-      tabName = "end-wildfire"
-      ),
-    tags$hr(),
-    tags$h4("Community Warnings", style = "padding: 10px"),
-    menuItem(
-      "Issue - local emissions",
-      icon = icon("pencil"),
-      tabName = "issue-community"
-    ),
-    menuItem(
-      "End - local emissions",
+    menuItem("Wildfire Smoke Warnings"),
+    menuSubItem("Issue",
+                icon = icon("pen"),
+                tabName = "issue-wildfire"
+                ),
+    menuSubItem("End",
+                icon = icon("pen"),
+                tabName = "end-wildfire"
+                ),
+    menuItem("", tabName = NULL), # Empty item for spacing
+    menuItem("Community Warnings"),
+    menuSubItem("Issue",
+                icon = icon("pencil"),
+                tabName = "issue-community"
+                ),
+    menuSubItem(
+      "End",
       icon = icon("pencil"),
       tabName = "end-community"
     )
@@ -55,7 +52,10 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   shinyjs::useShinyjs(),
   tags$head(
-    tags$style(HTML(".leaflet-container { background: white; }"))
+    tags$style(HTML("
+                    .leaflet-container { background: white; }
+                    .main-sidebar { font-size: 18px; }
+                    "))
     ), 
   tabItems(
     tabItem(tabName = "issue-wildfire", issueWildfireSmokeUI("issue_wildfire_smoke")),
