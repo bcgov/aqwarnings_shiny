@@ -84,7 +84,7 @@ endWildfireSmokeUI <- function(id) {
        
        hr(),
        ## Add the download button here:
-       downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
+       downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
 
        hr(),
        actionButton(
