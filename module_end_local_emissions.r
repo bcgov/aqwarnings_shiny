@@ -32,11 +32,11 @@ endLocalEmissionsUI <- function(id) {
               width = 6,
               status = "primary",
               
-              h5("1. Complete fields below:"),
+              h4(tags$b("1. Complete fields below")),
               
               selectInput(
                 inputId = ns("sel_aqMet"),
-                label = h5("Author:"),
+                label = h4("Author:"),
                 selected = "",
                 choices = c("", aq_mets$fullname),
                 width = "50%"
@@ -44,21 +44,21 @@ endLocalEmissionsUI <- function(id) {
               
               selectInput(
                 inputId = ns("pollutant"),
-                label = h5("Pollutant:"),
+                label = h4("Pollutant:"),
                 selected = "",
                 choices = c("", "PM25", "PM10", "O3", "PM25 & PM10"),
                 width = "50%"
               ),
               selectInput(
                 inputId = ns("location"),
-                label = h5("Location:"),
+                label = h4("Location:"),
                 selected = "",
                 choices = c("", match_health_city$location),
                 width = "50%"
               ),
               
               dateInput(inputId = ns("issuedate"),
-                        label = h5("Date warning was first issued:"),
+                        label = h4("Date warning was first issued:"),
                         max = today,
                         value = today -1,
                         startview = "month",
@@ -69,13 +69,13 @@ endLocalEmissionsUI <- function(id) {
               helpText("Add an optional custom message below. The default message can be retained, edited or deleted."),
               
               textAreaInput(inputId = ns("customMessage"),
-                            label = h5("Custom smoke outlook message:"),
+                            label = h4("Custom smoke outlook message:"),
                             value = "Local air quality has improved due to changing meteorological conditions.",
                             width = "100%",
                             height = "80px",
                             resize = "vertical"),
               
-              h5("2. Generate Warning:"),
+              h4(tags$b("2. Generate Warning")),
               actionButton(
                 inputId = ns("genWarning"),
                 label = "Go!",

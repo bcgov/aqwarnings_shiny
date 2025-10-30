@@ -51,23 +51,22 @@ issueWildfireSmokeUI <- function(id) {
         width = 3,
         status = "primary",
 
-        h5("1. Complete fields below:"),
+        h4(tags$b("1. Complete the fields below")),
 
         selectInput(
           inputId = ns("sel_aqMet"),
-          label = h5("Author:"),
+          label = h4("Author:"),
           selected = "",
           choices = c("", aq_mets$fullname),
-          width = "100%"
-        ),
+          width = "100%"),
 
         textInput(inputId = ns("smokeDuration"),
-                  label = h5("Wildfire smoke expected to last:"),
+                  label = h4("Wildfire smoke expected to last:"),
                   value = "24-48 hours",
                   width = "100%"),
 
         dateInput(inputId = ns("nextUpdate"),
-                  label = h5("Next update:"),
+                  label = h4("Next update:"),
                   min = Sys.Date() +1,
                   value = Sys.Date() +1,
                   startview = "month",
@@ -75,25 +74,24 @@ issueWildfireSmokeUI <- function(id) {
                   width = "100%"),
 
         textAreaInput(inputId = ns("smokeMessage"),
-                      label = h5("Custom smoke outlook message:"),
+                      label = h4("Custom smoke outlook message:"),
                       value = "",
                       width = "100%",
                       height = "80px",
                       resize = "vertical"),
 
-        h5("2. Select regions on map."),
-        h5("3. Select or create summary description of affected regions (for AQ Warnings Table)."),
+        h4(tags$b("2. Select regions on map")),
         
         selectizeInput(
           inputId = ns("location"),
-          label = h5("Describe regions affected:"),
           selected = "",
+          label = h4(HTML("<b>3. Describe affected regions</b> (for warnings table on website)")),
           choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
           width = "100%",
           options = list(create = TRUE)
         ),
         
-        h5("4. Generate Warning:"),
+        h4(tags$b("4. Generate Warning")),
 
         actionButton(
           inputId = ns("genWarning"),
@@ -103,14 +101,14 @@ issueWildfireSmokeUI <- function(id) {
        
         hr(),
         
-        downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
+        downloadButton(ns("download_report"), "Download Files", style = "width: 80%"),
         
         hr(),
         
         actionButton(inputId = ns("cleanupdir"), label = "clean dir"),
         
         hr()
-      ),
+      ), #box
 
       #
       # map
@@ -130,12 +128,13 @@ issueWildfireSmokeUI <- function(id) {
       #
       # instructions
       #
+      
       box(width=9,
           status="info",
           includeMarkdown("docs/instructions.md"))
 
-    )
-  )
+    ) #fluidRow
+  ) #tabItem
 }
 
 #--------------------------------------------------

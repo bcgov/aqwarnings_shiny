@@ -30,27 +30,27 @@ endWildfireSmokeUI <- function(id) {
         width = 6,
         status = "primary",
 
-        h5("1. Complete fields below:"),
+        h4(tags$b("1. Complete fields below")),
 
         selectInput(
           inputId = ns("sel_aqMet"),
-          label = h5("Author:"),
+          label = h4("Author:"),
           selected = "",
           choices = c("", aq_mets$fullname),
           width = "50%"
         ),
 
         dateInput(inputId = ns("lastWarning"),
-          label = h5("Date last warning was issued:"),
-          max = Sys.Date(),
-          value = Sys.Date() -1,
+          label = h4("Date last warning was issued"),
+          max = today,
+          value = today -1,
           startview = "month",
           weekstart = 0,
           width = "50%"
         ),
 
         textAreaInput(inputId = ns("customMessage"),
-          label = h5("Custom message:"),
+          label = h4("Custom message:"),
           value = "Wildfire smoke concentrations have reduced over the past 24 hours.",
           placeholder = "(example) Wildfire smoke concentrations have reduced over the past 24 hours.",
           width = "100%",
@@ -60,16 +60,14 @@ endWildfireSmokeUI <- function(id) {
 
         checkboxGroupInput(
           inputId = ns("sel_healthAuth"),
-          label = h5("Health Authorities included on last warning (select all that apply; FNHA is automatically selected):"),
+          label = h4("Health Authorities included on last warning (select all that apply; FNHA is automatically selected):"),
           choices = unique(health_contact$authority)[unique(health_contact$authority) != "First Nations Health Authority"],   #exclude FNHA as a choice - exists on all bulletins
           width = "100%"
         ),
         
-        h5("2. Select or create summary description of affected regions (for AQ Warnings Table)."),
-        
         selectizeInput(
           inputId = ns("location"),
-          label = h5("Describe regions affected:"),
+          label = paste(h4(tags$b("2. Describe regions affected")), h4("(for warnings table on website)")),
           selected = "",
           choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
           width = "100%",
@@ -77,8 +75,8 @@ endWildfireSmokeUI <- function(id) {
         ),
         
 
-       h5("3. Generate Warning:"),
-       actionButton(
+        h4(tags$b("3. Generate Warning")),
+        actionButton(
          inputId = ns("genWarning"),
          label = "Go!",
          style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"

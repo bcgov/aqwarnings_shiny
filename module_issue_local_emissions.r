@@ -26,64 +26,84 @@ source(here::here("load_metadata.r"))
 issueLocalEmissionsUI <- function(id) {
   ns <- NS(id)
   tabItem(tabName = "end",
+          shinyjs::useShinyjs(),
           fluidRow(
-            
             box(
-              width = 6,
+              width = 5,
               status = "primary",
               
-              h5("1. Complete fields below:"),
+              h4(tags$b("1. Complete fields below")),
               
               selectInput(
                 inputId = ns("sel_aqMet"),
-                label = h5("Author:"),
+                label = h4("Author:"),
                 selected = "",
                 choices = c("", aq_mets$fullname),
                 width = "50%"
               ),
               
-              selectInput(
+              radioButtons(
                 inputId = ns("ice"),
-                label = h5("I.C.E.:"),
-                selected = "",
-                choices = c("", "Issue", "Continue"),
-                width = "50%"
+                label = h4("Issue Type:"),
+                choices = list("Issue", "Continue"),
+                selected = "Issue",
+                width = "50%",
+                inline = TRUE
               ),
+              
+              shinyjs::hidden(
+                dateInput(inputId = ns("issuedate"),
+                          label = h4("Date warning was first issued:"),
+                          max = today,
+                          value = today - 1,
+                          startview = "month",
+                          weekstart = 0,
+                          width = "50%"
+                )
+              ),
+              
               selectInput(
                 inputId = ns("pollutant"),
-                label = h5("Pollutant:"),
+                label = h4("Pollutant:"),
                 selected = "",
                 choices = c("", "PM25", "PM10", "O3", "PM25 & PM10"),
                 width = "50%"
               ),
+              
               selectInput(
                 inputId = ns("location"),
-                label = h5("Location:"),
+                label = h4("Location:"),
                 selected = "",
                 choices = c("", match_health_city$location),
                 width = "50%"
               ),
-              selectInput(
+              
+              radioButtons(
                 inputId = ns("burnRestrictions"),
-                label = h5("Burn Restrictions:"),
-                selected = "No",
-                choices = c("No", "Yes - Arvind", "Yes - Ben"),
-                width = "50%"
+                label = h4("Burn prohibition issued:"),
+                choices = list(
+                  "No" = 1, 
+                  "Yes (Ben)" = 2,
+                  "Yes (Arvind)" = 3),
+                selected = 1,
+                width = "50%",
+                inline = TRUE
+              ),
+              
+              shinyjs::hidden(
+                textAreaInput(inputId = ns("customMessageBanArea"),
+                              label = h4("Burn prohibition details: location and end date/time"),
+                              value = "<location> until <mmmm, dd, yyyy hh:mm AM/PM> local time.",
+                              width = "100%",
+                              height = "80px",
+                              resize = "vertical"
+                )
               ),
               
               dateInput(inputId = ns("nextUpdate"),
-                        label = h5("Date of next update: "),
+                        label = h4("Date of next update: "),
                         max = today + 7,
                         value = today + 1,
-                        startview = "month",
-                        weekstart = 0,
-                        width = "50%"
-              ),
-              
-              dateInput(inputId = ns("issuedate"),
-                        label = h5("Date warning was first issued:"),
-                        max = today,
-                        value = today - 1,
                         startview = "month",
                         weekstart = 0,
                         width = "50%"
@@ -92,22 +112,13 @@ issueLocalEmissionsUI <- function(id) {
               helpText("Add an optional custom message below. The default message can be retained, edited or deleted."),
               
               textAreaInput(inputId = ns("customMessage"),
-                            label = h5("Custom smoke outlook message:"),
+                            label = h4("Custom outlook message:"),
                             value = "Current conditions are expected to persist until weather conditions change and/or local emissions are reduced.",
                             width = "100%",
                             height = "80px",
                             resize = "vertical"),
               
-              helpText("Describe area included in the burn prohibition and the end date/time of the burn prohibition."),
-              
-              textAreaInput(inputId = ns("customMessageBanArea"),
-                            label = h5("Burn ban location and end date/time:"),
-                            value = "<location> until <mmmm, dd, yyyy hh:mm AM/PM> local time.",
-                            width = "100%",
-                            height = "80px",
-                            resize = "vertical"),
-              
-              h5("2. Generate Warning:"),
+              h4(tags$b("2. Generate Warning")),
               actionButton(
                 inputId = ns("genWarning"),
                 label = "Go!",
@@ -115,8 +126,8 @@ issueLocalEmissionsUI <- function(id) {
               ),
               
               hr(),
-              ## Add the download button here:
-              downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
+              
+              downloadButton(ns("download_report"), "Download Files", style = "width: 50%; font: 16pt"),
               
               hr(),
               actionButton(
@@ -135,9 +146,23 @@ issueLocalEmissionsUI <- function(id) {
 
 issueLocalEmissions <- function(input, output, session){
   
-  completeNotificationIDs <- character(0)
+  observeEvent(input$burnRestrictions, {
+    if (input$burnRestrictions > 1) {
+      shinyjs::show("customMessageBanArea") 
+    } else {
+      shinyjs::hide("customMessageBanArea")
+      }
+  })
   
-  # Generate report: markdown and pdf
+  observeEvent(input$ice, {
+    if (input$ice == "Continue") {
+      shinyjs::show("issuedate") 
+    } else {
+      shinyjs::hide("issuedate")
+    }
+  })
+  
+ # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
     
     if (input$sel_aqMet == "") {
