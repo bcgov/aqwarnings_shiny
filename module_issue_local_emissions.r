@@ -29,7 +29,7 @@ issueLocalEmissionsUI <- function(id) {
           shinyjs::useShinyjs(),
           fluidRow(
             box(
-              width = 5,
+              width = 6,
               status = "primary",
               
               h4(tags$b("1. Complete fields below")),

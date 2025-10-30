@@ -76,8 +76,8 @@ ENVcontact <- aq_mets |>
 
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
-HAauth <- match_health_city %>%
-  filter(location == params$location) %>%
+HAauth <- match_health_city |> 
+  filter(location == params$location) |> 
   pull(health_city)
 
 HAcontact <- health_contact |>
@@ -113,7 +113,7 @@ pollutant_tbl <- tribble(
 )
 
 # Pick the row for the current pollutant
-pollutant_info <- pollutant_tbl %>% filter(pollutant == params$pollutant)
+pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
 
 # Assign values
 pollutantExpansion  <- pollutant_info$pollutantExpansion
@@ -126,7 +126,7 @@ first_paragraph <- paste0(
 ```
 
 ```{r table-setup, include=FALSE}
-pollutants <- strsplit(params$pollutant, "&")[[1]] %>% trimws()
+pollutants <- strsplit(params$pollutant, "&")[[1]] |> trimws()
 locations <- params$location
 COMPLETE_THRESHOLD_PCT <- 75
 
@@ -136,9 +136,9 @@ for (i in seq_along(pollutants)) {
   pollutant <- pollutants[i]
 
   # ---- Check that locations are valid for this pollutant ----
-  valid_locations <- buddy_stations %>%
-    filter(location %in% locations) %>%
-    pull(Buddy_location) %>%
+  valid_locations <- buddy_stations |> 
+    filter(location %in% locations) |> 
+    pull(Buddy_location) |> 
     unique()
 
   if (length(valid_locations) == 0) {
@@ -150,7 +150,7 @@ for (i in seq_along(pollutants)) {
     units = c("$\\mu$g/m$^{3}$", "$\\mu$g/m$^{3}$", "ppb"),
     hours = c(24, 24, 8),
     row.names = c("PM25", "PM10", "O3")
-  ) %>%
+  ) |> 
     mutate(avgtimelabel = sprintf("%d-hr", hours))
 
   # ---- Read in CSV from FTP ----
@@ -171,25 +171,25 @@ for (i in seq_along(pollutants)) {
   )
 
   # ---- Clean and filter data ----
-  df <- dfraw %>%
-    mutate(DATE_PST = as.POSIXct(DATE_PST, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) %>%
-    filter(INSTRUMENT != "") %>%
+  df <- dfraw |> 
+    mutate(DATE_PST = as.POSIXct(DATE_PST, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) |> 
+    filter(INSTRUMENT != "") |> 
     filter(STATION_NAME %in% valid_locations)
 
   # ---- Get time window per location ----
-  dts <- df %>%
-    group_by(STATION_NAME) %>%
-    summarize(max_dt = max(DATE_PST), .groups = "drop") %>%
+  dts <- df |> 
+    group_by(STATION_NAME) |> 
+    summarize(max_dt = max(DATE_PST), .groups = "drop") |> 
     mutate(min_dt = max_dt - (3600 * (lookup[pollutant, "hours"] - 1)))
 
-  df_filtered <- df %>%
-    left_join(dts, by = "STATION_NAME") %>%
-    filter(DATE_PST >= min_dt & DATE_PST <= max_dt) %>%
+  df_filtered <- df |> 
+    left_join(dts, by = "STATION_NAME") |> 
+    filter(DATE_PST >= min_dt & DATE_PST <= max_dt) |> 
     select(-min_dt, -max_dt)
 
   # ---- Summarize concentrations ----
-  integrated <- df_filtered %>%
-    group_by(STATION_NAME, PARAMETER) %>%
+  integrated <- df_filtered |> 
+    group_by(STATION_NAME, PARAMETER) |> 
     summarize(
       n_hours = n(),
       n_na = sum(is.na(REPORTED_VALUE)),
@@ -199,7 +199,7 @@ for (i in seq_along(pollutants)) {
       start_dt = min(DATE_PST),
       end_dt = max(DATE_PST),
       .groups = "drop"
-    ) %>%
+    ) |> 
     mutate(
       mean_conc = na_if(mean_conc, pct_valid < COMPLETE_THRESHOLD_PCT),
       max_conc = na_if(max_conc, pct_valid < COMPLETE_THRESHOLD_PCT)
@@ -208,33 +208,33 @@ for (i in seq_along(pollutants)) {
   stationByParameterList <- read_rds(sprintf("./src/stations_%s.rds", tolower(pollutant)))
 
   # Join with station info using STATION_NAME
-  integrated <- integrated %>%
+  integrated <- integrated |> 
     left_join(
-      stationByParameterList %>% select(STATION_NAME, COMMUNITY),
+      stationByParameterList |> select(STATION_NAME, COMMUNITY),
       by = "STATION_NAME"
     )
 
   # ---- Format wide table ----
-  table2 <- integrated %>%
+  table2 <- integrated |> 
     mutate(
       mean_conc = ifelse(is.finite(mean_conc), sprintf("%.1f", mean_conc), "NA"),
       max_conc = ifelse(is.finite(max_conc), sprintf("%.1f", max_conc), "NA")
-    ) %>%
+    ) |> 
     pivot_wider(
       names_from = PARAMETER,
       id_cols = c(STATION_NAME, COMMUNITY),
       values_from = c(mean_conc, max_conc)
-    ) %>%
+    ) |> 
     rename(location = STATION_NAME, Community = COMMUNITY)
 
   # ---- Clean up table: remove suffixes ----
-  table2 <- table2 %>%
+  table2 <- table2 |> 
     rename_with(~ gsub(sprintf("_%s", pollutant), "", .x), everything())
 
   table2 <- table2[ , -1]
 
   # ---- Transpose and finalize ----
-  pt2 <- t(table2) %>% as.data.frame() %>% rownames_to_column()
+  pt2 <- t(table2) |> as.data.frame() |> rownames_to_column()
   colnames(pt2) <- pt2[1, ]
   pt3 <- pt2[-c(1), ]
   
@@ -242,13 +242,13 @@ for (i in seq_along(pollutants)) {
 
 
   if (pollutant != "O3") {
-  pt4 <- pt3 %>% filter(Community != "max_conc")
+  pt4 <- pt3 |> filter(Community != "max_conc")
   } else {
   pt4 <- pt3
   }
 
   # ---- Final format ----
-  final_table <- pt4 %>%
+  final_table <- pt4 |> 
     mutate(Community = case_when(
       Community == "mean_conc" ~ sprintf("%s average (%s)", lookup[pollutant, "avgtimelabel"], lookup[pollutant, "units"]),
       Community == "max_conc" ~ sprintf("Max. within %s (%s)", gsub("-", " ", lookup[pollutant, "avgtimelabel"]), lookup[pollutant, "units"]),
