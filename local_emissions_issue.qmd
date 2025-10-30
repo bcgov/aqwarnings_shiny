@@ -203,7 +203,7 @@ bylaws <- if (params$location == "Burns Lake") {
 
 ```{r burn_ban, results='asis', echo=FALSE}
 
-if (params$burnRestrictions > 0) {
+if (params$burnRestrictions > 1) {
   
   title_burn_advisory <- "and open burning restrictions"
   
