@@ -118,23 +118,14 @@ endWildfireSmoke <- function(input, output, session){
       showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
       
-      ncomplete <- length(completeNotificationIDs)
-      if (ncomplete > 0) {
-        # remove the notification for completed steps if the genWarning
-        # button is clicked again
-        for (i in seq(ncomplete)) {
-          # must remove these individually
-          removeNotification(completeNotificationIDs[i])
-        }
-        completeNotificationIDs <<- completeNotificationIDs[-c(seq(ncomplete))]
-      }
-      
-      showNotification("Preparing files. Please wait for completion notification.")
+      progress <- shiny::Progress$new()
+      on.exit(progress$close())
+      progress$set(message = "Preparing files...", value = 0)
       
       endBasename <- "wildfire_smoke_end"
 
       # generate warning: markdown and pdf formats
-      showNotification("Generating Markdown file...")
+      progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.md", as.character(today), endBasename),
                             output_format = "markdown",
@@ -147,7 +138,7 @@ endWildfireSmoke <- function(input, output, session){
                                                   outputFormat = "markdown"),
                             debug = FALSE)
 
-      showNotification("Generating PDF file...")
+      progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.pdf", as.character(today), endBasename),
                             output_format = "pdf",
@@ -169,7 +160,8 @@ endWildfireSmoke <- function(input, output, session){
       pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
-      showNotification("File generation complete!", duration = NULL)
+      progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
+      Sys.sleep(5)
   })
 
       # Download files

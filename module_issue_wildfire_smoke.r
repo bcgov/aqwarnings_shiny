@@ -413,19 +413,9 @@ issueWildfireSmoke <- function(input, output, session){
         showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
 
-      ncomplete <- length(completeNotificationIDs)
-      if (ncomplete > 0) {
-        # remove the notification for completed steps if the genWarning
-        # button is clicked again
-        for (i in seq(ncomplete)) {
-          # must remove these individually
-          removeNotification(completeNotificationIDs[i])
-        }
-        completeNotificationIDs <<- completeNotificationIDs[-c(seq(ncomplete))]
-      }
-      
-      showNotification("Preparing files. Please wait for completion notification.",
-                       duration = 17)
+      progress <- shiny::Progress$new()
+      on.exit(progress$close())
+      progress$set(message = "Preparing files...", value = 0)
       
       # prep image for PDF output
       issueBasename <- "wildfire_smoke_issue"
@@ -443,6 +433,7 @@ issueWildfireSmoke <- function(input, output, session){
       )
 
       # generate markdown via Quarto
+      progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.md", as.character(today), issueBasename),
                             output_format = "markdown",
@@ -465,6 +456,7 @@ issueWildfireSmoke <- function(input, output, session){
       fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs"))
       
       # generate pdf via Quarto 
+      progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.pdf", as.character(today), issueBasename),
                             output_format = "pdf",
@@ -483,10 +475,8 @@ issueWildfireSmoke <- function(input, output, session){
      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), issueBasename), full.names = TRUE)
      fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
-     id <- showNotification("Processing complete. Files are ready for downloading.", 
-                       duration = NULL)
-      
-      completeNotificationIDs <<- c(completeNotificationIDs, c(id))
+     progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
+     Sys.sleep(5)
 
     } #end else
     }) #end observeEvent for generating report

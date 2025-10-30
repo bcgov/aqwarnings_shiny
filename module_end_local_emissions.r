@@ -103,8 +103,6 @@ endLocalEmissionsUI <- function(id) {
 
 endLocalEmissions <- function(input, output, session){
   
-  completeNotificationIDs <- character(0)
-
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
     
@@ -115,18 +113,11 @@ endLocalEmissions <- function(input, output, session){
     } else if (input$location == "") {
       showNotification("No location selected; please select a location", type = "error")
     } else {
-      ncomplete <- length(completeNotificationIDs)
-      if (ncomplete > 0) {
-        # remove the notification for completed steps if the genWarning
-        # button is clicked again
-        for (i in seq(ncomplete)) {
-          # must remove these individually
-          removeNotification(completeNotificationIDs[i])
-        }
-        completeNotificationIDs <<- completeNotificationIDs[-c(seq(ncomplete))]
-      }
       
-      showNotification("Preparing files. Please wait for completion notification.")
+      # create progress object; ensure it closes when reactive exits
+      progress <- shiny::Progress$new()
+      on.exit(progress$close())
+      progress$set(message = "Preparing files...", value = 0)
       
       # Clean location name for file name
       location_clean <- gsub("\\s+", "_", input$location)
@@ -134,8 +125,9 @@ endLocalEmissions <- function(input, output, session){
       # Set output file name
       output_file_name <- sprintf("%s_%s_%s", "End", input$pollutant, location_clean)
       
+      progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
+  
       # generate warning: markdown and pdf formats
-      showNotification("Generating Markdown file...")
       quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
                             output_file = sprintf("%s_%s.md", as.character(today), output_file_name),
                             output_format = "markdown",
@@ -145,11 +137,10 @@ endLocalEmissions <- function(input, output, session){
                               location = input$location,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
-                              # customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "markdown"),
                             debug = FALSE)
       
-      showNotification("Generating PDF file...")
+      progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
                             output_file = sprintf("%s_%s.pdf", as.character(today), output_file_name),
                             output_format = "pdf",
@@ -159,10 +150,9 @@ endLocalEmissions <- function(input, output, session){
                               location = input$location,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
-                              # customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "pdf"),
                             debug = FALSE)
-    }
+    
     
     # move the .md and .pdf to outputs/
     # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
@@ -172,13 +162,15 @@ endLocalEmissions <- function(input, output, session){
     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), output_file_name), full.names = TRUE)
     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
     
-    showNotification("Processing complete. Files are ready for downloading.", duration = NULL)
+    progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
+    Sys.sleep(5)
+    }
   })
   
   # Download files
   output$download_report <- downloadHandler(
     
-    filename = function() {
+     filename = function() {
       # Set output file name
       sprintf("%s_local_emissions.zip", as.character(today))
     },
@@ -194,9 +186,10 @@ endLocalEmissions <- function(input, output, session){
       zip::zip(zipfile = file,
                files = files_to_zip,
                mode = "cherry-pick")
-    },
+    
+      },
     contentType = "application/zip"
-  )
+    )
   
   # Clean up directories
   observeEvent(input$cleanupdir, {
@@ -211,7 +204,6 @@ endLocalEmissions <- function(input, output, session){
     } else {
       
       file.remove(filesToRemove)
-      
       showNotification(paste("Files removed:", nfiles, "."), type = "message")  
     }
   })

@@ -149,18 +149,10 @@ issueLocalEmissions <- function(input, output, session){
     } else if (input$location == "") {
       showNotification("No location selected; please select a location", type = "error")
     } else {
-      ncomplete <- length(completeNotificationIDs)
-      if (ncomplete > 0) {
-        # remove the notification for completed steps if the genWarning
-        # button is clicked again
-        for (i in seq(ncomplete)) {
-          # must remove these individually
-          removeNotification(completeNotificationIDs[i])
-        }
-        completeNotificationIDs <<- completeNotificationIDs[-c(seq(ncomplete))]
-      }
-      
-      showNotification("Preparing files. Please wait for completion notification.")
+
+      progress <- shiny::Progress$new()
+      on.exit(progress$close())
+      progress$set(message = "Preparing files...", value = 0)
     
       # Clean location name for file name
       location_clean <- gsub("\\s+", "_", input$location)
@@ -169,7 +161,7 @@ issueLocalEmissions <- function(input, output, session){
       output_file_name <- sprintf("%s_%s_%s", input$ice, input$pollutant, location_clean)
       
       # generate warning: markdown and pdf formats
-      showNotification("Generating Markdown file...")
+      progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
                             output_file = sprintf("%s_%s.md", as.character(today), output_file_name),
                             output_format = "markdown",
@@ -186,7 +178,7 @@ issueLocalEmissions <- function(input, output, session){
                               outputFormat = "markdown"),
                             debug = FALSE)
       
-      showNotification("Generating PDF file...")
+      progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
                             output_file = sprintf("%s_%s.pdf", as.character(today), output_file_name),
                             output_format = "pdf",
@@ -212,7 +204,8 @@ issueLocalEmissions <- function(input, output, session){
     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), output_file_name), full.names = TRUE)
     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
     
-    showNotification("Processing complete. Files are ready for downloading.", duration = NULL)
+    progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
+    Sys.sleep(5)
   })
   
   # Download files
