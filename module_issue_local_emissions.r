@@ -181,7 +181,7 @@ issueLocalEmissions <- function(input, output, session){
     
       # Clean location name for file name
       location_clean <- gsub("\\s+", "_", input$location)
-      pollutant_clean <- gsub(" ", "", gsub("&", "_", params$pollutant))
+      pollutant_clean <- gsub(" ", "", gsub("&", "_", input$pollutant))
       
       # Set output file name
       if (input$burnRestrictions < 1) {  # no burn restriction
