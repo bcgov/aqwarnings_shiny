@@ -25,7 +25,7 @@ source(here::here("load_metadata.r"))
 
 issueLocalEmissionsUI <- function(id) {
   ns <- NS(id)
-  tabItem(tabName = "end",
+  tabItem(tabName = "issue",
           shinyjs::useShinyjs(),
           fluidRow(
             box(
@@ -82,10 +82,10 @@ issueLocalEmissionsUI <- function(id) {
                 inputId = ns("burnRestrictions"),
                 label = h4("Burn prohibition issued:"),
                 choices = list(
-                  "No" = 1, 
-                  "Yes (Ben)" = 2,
-                  "Yes (Arvind)" = 3),
-                selected = 1,
+                  "No" = 0, 
+                  "Yes (Ben)" = 1,
+                  "Yes (Arvind)" = 2),
+                selected = 0,
                 width = "50%",
                 inline = TRUE
               ),
@@ -147,7 +147,7 @@ issueLocalEmissionsUI <- function(id) {
 issueLocalEmissions <- function(input, output, session){
   
   observeEvent(input$burnRestrictions, {
-    if (input$burnRestrictions > 1) {
+    if (input$burnRestrictions > 0) {
       shinyjs::show("customMessageBanArea") 
     } else {
       shinyjs::hide("customMessageBanArea")
@@ -181,9 +181,18 @@ issueLocalEmissions <- function(input, output, session){
     
       # Clean location name for file name
       location_clean <- gsub("\\s+", "_", input$location)
+      pollutant_clean <- gsub(" ", "", gsub("&", "_", params$pollutant))
       
       # Set output file name
-      output_file_name <- sprintf("%s_%s_%s", input$ice, input$pollutant, location_clean)
+      if (input$burnRestrictions < 1) {  # no burn restriction
+        
+        output_file_name <- sprintf("%s_%s_%s", input$ice, pollutant_clean, location_clean) 
+        
+      } else { # burn restriction
+        
+        output_file_name <- sprintf("%s_%s_%s_%s", input$ice, pollutant_clean, "open_burn_restriction", location_clean) 
+        
+      }
       
       # generate warning: markdown and pdf formats
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")

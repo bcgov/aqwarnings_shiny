@@ -1,11 +1,11 @@
 ---
 title: "`r paste0(
   'Air quality warning ', 
-  ifelse(params$burnRestrictions > 1, 'and open burning restrictions ', ''),
+  ifelse(params$burnRestrictions > 0, 'and open burning restrictions ', ''),
   'in effect for ',
   params$location)`"
 type: "local_emissions"
-date: "`r Sys.Date()`"
+date: today
 params: 
   ice: "Issue" # Issue; Continue
   pollutant: "PM25 & PM10"
@@ -61,7 +61,159 @@ library(dplyr)
 
 source(here::here("load_metadata.r"))
 
+
+# date/time information 
 current_month <- as.numeric(format(Sys.Date(), "%m"))
+
+```
+
+```{r table-setup, include=FALSE}
+
+pollutants <- strsplit(params$pollutant, "&")[[1]] |> trimws()
+min_data_capture_pct <- 75
+
+results <- list()
+
+for (i in seq_along(pollutants)) {
+  pollutant <- pollutants[i]
+  
+  # ---- Check that locations are valid for this pollutant ----
+  valid_locations <- buddy_stations |> 
+    filter(location %in% params$location) |> 
+    pull(Buddy_location) |> 
+    unique()
+  
+  if (length(valid_locations) == 0) {
+    stop(sprintf("None of the specified locations are valid for %s.", pollutant))
+  }
+  
+  # ---- Lookup table for units and averaging times ----
+  lookup <- data.frame(
+    units = c("$\\mu$g/m$^{3}$", "$\\mu$g/m$^{3}$", "ppb"),
+    hours = c(24, 24, 8),
+    row.names = c("PM25", "PM10", "O3")
+  ) |> 
+    mutate(avgtimelabel = sprintf("%d-hr", hours))
+  
+  # ---- Read in CSV from FTP ----
+  columndefs <- cols_only(
+    DATE_PST = col_character(),  # time zone assigned below; col_datetime does not support time zone assignment
+    STATION_NAME = col_factor(),
+    INSTRUMENT = col_factor(),  #is instrument necessary?
+    REPORTED_VALUE = col_double(),
+    PARAMETER = col_character(),
+    EMS_ID = col_character()
+  )
+  
+  dfraw <- read_csv(
+    sprintf("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_Raw_Air_Data/Air_Quality/%s.csv", pollutant),
+    col_types = columndefs
+  ) |> 
+    rename_all(tolower)
+  
+  # ---- Filter data to retain pnly stations relevant to this warning (params$location + neighbouring sites) ----
+  df <- dfraw |> 
+    mutate(date_pst = as.POSIXct(date_pst, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) |> 
+    filter(instrument != "") |>   #is this needed?
+    filter(station_name %in% valid_locations)
+  
+  # ---- Get time window per location ----
+  dts <- df |> 
+    group_by(station_name) |> 
+    summarize(max_dt = max(date_pst), .groups = "drop") |> 
+    mutate(min_dt = max_dt - (3600 * (lookup[pollutant, "hours"] - 1)))
+  
+  df_filtered <- df |> 
+    left_join(dts, by = "station_name") |> 
+    filter(date_pst >= min_dt & date_pst <= max_dt) |> 
+    select(-min_dt, -max_dt)
+  
+  # ---- Summarize concentrations ----
+  integrated <- df_filtered |> 
+    group_by(station_name, parameter) |> 
+    summarize(
+      n_hours = n(),
+      n_na = sum(is.na(reported_value)),
+      pct_valid = 100 * (n_hours - n_na) / n_hours,
+      mean_conc = if_else(n_hours == n_na, NA_real_, mean(reported_value, na.rm = TRUE)),
+      max_conc = if_else(n_hours == n_na, NA_real_, max(reported_value, na.rm = TRUE)),
+      start_dt = min(date_pst),
+      end_dt = max(date_pst),
+      .groups = "drop"
+    ) |> 
+    mutate(
+      mean_conc = na_if(mean_conc, pct_valid < min_data_capture_pct),
+      max_conc = na_if(max_conc, pct_valid < min_data_capture_pct)
+    )
+  
+  station_metadata_raw <- read_csv("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_Raw_Air_Data/Year_to_Date/bc_air_monitoring_stations.csv", show_col_types = FALSE) 
+  station_metadata <- station_metadata_raw |> 
+    rename_all(tolower) |> 
+    select(station_name, location = city) |> 
+    distinct()
+  
+  # Join with station info using STATION_NAME
+  integrated <- integrated |> 
+    left_join(station_metadata, by = "station_name")
+  
+  # ---- Define most recent hour of data and express as 12 hour clock and local time 
+  # function to assign local time zone based on location
+  local_tz <- function(x) {
+    if (x %in% c("Cranbrook", "Golden", "Invermere")) {
+      "America/Edmonton"  
+    } else if (x %in% c("Fort St John", "Dawson Creek", "Fort Nelson", "Creston")) {
+      "America/Fort_Nelson"
+    } else {
+      "America/Vancouver"
+    }
+  }
+  
+  local_time <- integrated |> 
+    filter(location == params$location) |> 
+    pull(end_dt) |> 
+    as.POSIXct(., tz = local_tz(params$location))
+  
+  local_hour <- format(lubridate::floor_date(local_time, "hour"), format = "%l:00 %p")
+  
+  # ---- Format final table ----
+  formatted_table <- integrated |> 
+    mutate(
+      mean_conc = ifelse(is.finite(mean_conc), sprintf("%.1f", mean_conc), "NA"),
+      max_conc = ifelse(is.finite(max_conc), sprintf("%.1f", max_conc), "NA")
+    ) |> 
+    pivot_wider(
+      names_from = parameter,
+      id_cols = c(station_name, location),
+      values_from = c(mean_conc, max_conc)
+    )
+  
+  # clean up names, drop station_name and sort by params$location then other stations alphabetically
+  formatted_table <- formatted_table |> 
+    rename_with(~ gsub(sprintf("_%s", pollutant), "", .x), everything()) |> 
+    select(-station_name) |> 
+    arrange(location != params$location)  # arrange rows with params$location first, then rest
+  
+  # transpose
+  formatted_table <- formatted_table |> 
+    pivot_longer(cols = -location, names_to = "Community", values_to = "concentration") |> 
+    pivot_wider(names_from = "location", values_from = "concentration")
+  
+  # handle special case for O3
+  if (pollutant != "O3") {formatted_table <- formatted_table |>  filter(Community != "max_conc")}
+  
+  # clean up labels
+  final_table <- formatted_table |> 
+    mutate(Community = case_when(
+      Community == "mean_conc" ~ sprintf("%s average (%s)", lookup[pollutant, "avgtimelabel"], lookup[pollutant, "units"]),
+      Community == "max_conc" ~ sprintf("Max. within %s (%s)", gsub("-", " ", lookup[pollutant, "avgtimelabel"]), lookup[pollutant, "units"]),
+      TRUE ~ Community
+    ))
+  
+  results[[paste0("final_table", i)]] <- final_table
+}
+
+# Expose them as final_table1, final_table2, etc.
+list2env(results, envir = .GlobalEnv)
 ```
 
 ```{r additional_info, include=FALSE, results='asis'}
@@ -69,7 +221,7 @@ current_month <- as.numeric(format(Sys.Date(), "%m"))
 additional_info_PM25 <- paste0(
     "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
     
-The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%I:%M %p"), " local time today:"
+The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
   )
 
 additional_info_PM10 <- paste0(
@@ -77,7 +229,7 @@ additional_info_PM10 <- paste0(
   
   The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.
   
-  The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%H:%M"), " PST today:"
+  The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
   )
 
 additional_info_O3 <- paste0(
@@ -87,7 +239,7 @@ The highest concentrations of ground-level ozone usually happen between mid-afte
   
 The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality warnings. Air quality warnings for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. 
 
-The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", format(floor_date(Sys.time(), "hour"), "%I:%M %p"), " local time today:"
+The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
   )
 
 ```
@@ -203,12 +355,12 @@ bylaws <- if (params$location == "Burns Lake") {
 
 ```{r burn_ban, results='asis', echo=FALSE}
 
-if (params$burnRestrictions > 1) {
+if (params$burnRestrictions > 0) {
   
   title_burn_advisory <- "and open burning restrictions"
   
   # Define signature and title info depending on who it is
-  if (params$burnRestrictions == 2) {
+  if (params$burnRestrictions == 1) {
     signature_path <- ifelse(params$outputFormat == "markdown", 
                              paste0("![](//assets/SignatureBW.jpg){width=150px}\n\n"), 
                              paste0("![](", file.path("src", "signatures", "SignatureBW.jpg"), "){width=150px}\n\n")
@@ -216,7 +368,7 @@ if (params$burnRestrictions > 1) {
     name_line <- "Benjamin Weinstein"
     title_line1 <- "For Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
-  } else if (params$burnRestrictions == 3) {
+  } else if (params$burnRestrictions == 2) {
     signature_path <- ifelse(params$outputFormat == "markdown",
                              paste0("![](//assets/SignatureAS.png){width=150px}\n\n"), 
                              paste0("![](", file.path("src", "signatures", "SignatureAS.png"), "){width=150px}\n\n")
@@ -231,7 +383,7 @@ if (params$burnRestrictions > 1) {
     params$customMessageBanArea,
     " No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
-    "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
+    "> Date issued: ", today, "\n\n",
     "> " , signature_path, "\n\n",
     "> ", name_line, "\n\n",
     "> ", title_line1, "\n\n",
@@ -245,143 +397,6 @@ if (params$burnRestrictions > 1) {
 }
 
 
-```
-
-```{r table-setup, include=FALSE}
-pollutants <- strsplit(params$pollutant, "&")[[1]] |> trimws()
-locations <- params$location
-COMPLETE_THRESHOLD_PCT <- 75
-
-results <- list()
-
-for (i in seq_along(pollutants)) {
-  pollutant <- pollutants[i]
-
-  # ---- Check that locations are valid for this pollutant ----
-  valid_locations <- buddy_stations |> 
-    filter(location %in% locations) |> 
-    pull(Buddy_location) |> 
-    unique()
-
-  if (length(valid_locations) == 0) {
-    stop(sprintf("None of the specified locations are valid for %s.", pollutant))
-  }
-
-  # ---- Lookup table for units and averaging times ----
-  lookup <- data.frame(
-    units = c("$\\mu$g/m$^{3}$", "$\\mu$g/m$^{3}$", "ppb"),
-    hours = c(24, 24, 8),
-    row.names = c("PM25", "PM10", "O3")
-  ) |> 
-    mutate(avgtimelabel = sprintf("%d-hr", hours))
-
-  # ---- Read in CSV from FTP ----
-  columndefs <- cols_only(
-    DATE_PST = col_character(),
-    STATION_NAME = col_factor(),
-    RAW_VALUE = col_double(),
-    REPORTED_VALUE = col_double(),
-    INSTRUMENT = col_factor(),
-    UNITS = col_character(),
-    PARAMETER = col_character(),
-    EMS_ID = col_character()
-  )
-
-  dfraw <- read_csv(
-    sprintf("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_raw_air_data/Air_Quality/%s.csv", pollutant),
-    col_types = columndefs
-  )
-
-  # ---- Clean and filter data ----
-  df <- dfraw |> 
-    mutate(DATE_PST = as.POSIXct(DATE_PST, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) |> 
-    filter(INSTRUMENT != "") |> 
-    filter(STATION_NAME %in% valid_locations)
-
-  # ---- Get time window per location ----
-  dts <- df |> 
-    group_by(STATION_NAME) |> 
-    summarize(max_dt = max(DATE_PST), .groups = "drop") |> 
-    mutate(min_dt = max_dt - (3600 * (lookup[pollutant, "hours"] - 1)))
-
-  df_filtered <- df |> 
-    left_join(dts, by = "STATION_NAME") |> 
-    filter(DATE_PST >= min_dt & DATE_PST <= max_dt) |> 
-    select(-min_dt, -max_dt)
-
-  # ---- Summarize concentrations ----
-  integrated <- df_filtered |> 
-    group_by(STATION_NAME, PARAMETER) |> 
-    summarize(
-      n_hours = n(),
-      n_na = sum(is.na(REPORTED_VALUE)),
-      pct_valid = 100 * (n_hours - n_na) / n_hours,
-      mean_conc = if_else(n_hours == n_na, NA_real_, mean(REPORTED_VALUE, na.rm = TRUE)),
-      max_conc = if_else(n_hours == n_na, NA_real_, max(REPORTED_VALUE, na.rm = TRUE)),
-      start_dt = min(DATE_PST),
-      end_dt = max(DATE_PST),
-      .groups = "drop"
-    ) |> 
-    mutate(
-      mean_conc = na_if(mean_conc, pct_valid < COMPLETE_THRESHOLD_PCT),
-      max_conc = na_if(max_conc, pct_valid < COMPLETE_THRESHOLD_PCT)
-    )
-
-  stationByParameterList <- read_rds(sprintf("./src/stations_%s.rds", tolower(pollutant)))
-
-  # Join with station info using STATION_NAME
-  integrated <- integrated |> 
-    left_join(
-      stationByParameterList |> select(STATION_NAME, COMMUNITY),
-      by = "STATION_NAME"
-    )
-
-  # ---- Format wide table ----
-  table2 <- integrated |> 
-    mutate(
-      mean_conc = ifelse(is.finite(mean_conc), sprintf("%.1f", mean_conc), "NA"),
-      max_conc = ifelse(is.finite(max_conc), sprintf("%.1f", max_conc), "NA")
-    ) |> 
-    pivot_wider(
-      names_from = PARAMETER,
-      id_cols = c(STATION_NAME, COMMUNITY),
-      values_from = c(mean_conc, max_conc)
-    ) |> 
-    rename(location = STATION_NAME, Community = COMMUNITY)
-
-  # ---- Clean up table: remove suffixes ----
-  table2 <- table2 |> 
-    rename_with(~ gsub(sprintf("_%s", pollutant), "", .x), everything())
-
-  table2 <- table2[ , -1]
-
-  # ---- Transpose and finalize ----
-  pt2 <- t(table2) |>  as.data.frame() |>  rownames_to_column()
-  colnames(pt2) <- pt2[1, ]
-  pt3 <- pt2[-c(1), ]
-  
-  pt3 <- as.data.frame(pt3, stringsAsFactors = FALSE)
-
-
-  if (pollutant != "O3") {
-  pt4 <- pt3 |>  filter(Community != "max_conc")
-  } else {
-  pt4 <- pt3
-  }
-
-  # ---- Final format ----
-  final_table <- pt4 |> 
-    mutate(Community = case_when(
-      Community == "mean_conc" ~ sprintf("%s average (%s)", lookup[pollutant, "avgtimelabel"], lookup[pollutant, "units"]),
-      Community == "max_conc" ~ sprintf("Max. within %s (%s)", gsub("-", " ", lookup[pollutant, "avgtimelabel"]), lookup[pollutant, "units"]),
-      TRUE ~ Community
-    ))
-
-  results[[paste0("final_table", i)]] <- final_table
-}
-
-# Expose them as final_table1, final_table2, etc.
-list2env(results, envir = .GlobalEnv)
 ```
 
 ```{r include=FALSE}

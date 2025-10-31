@@ -57,4 +57,5 @@ cities <- cities |>
   tidyr::extract(geometry, c('lng', 'lat'), '\\((.*), (.*)\\)', convert = TRUE)  # to do: extract() has been superseded by separate_wider_regex()
 
 # shiny app runs on a server with UTC. Specify tz to ensure local date assigned to dates and file names
-today <- as.Date(Sys.Date(), tz = "⁠America/Los_Angeles")
+today <- as.Date(Sys.Date(), tz = "America/Vancouver")
+
