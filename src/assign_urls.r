@@ -12,7 +12,7 @@
 
 
 
-## URLs assignments (issueSmokySkies_module.r)
+## URLs assignments (module_issue_wildfire_smoke.r)
 
 bcwfs_fire_layer <- "https://services6.arcgis.com/ubm4tcTYICKBpist/arcgis/rest/services/BCWS_ActiveFires_PublicView/FeatureServer/0"
 current_weather <- "https://geo.weather.gc.ca/geomet"
@@ -21,11 +21,3 @@ goes_vis_sat <- "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi"
 nrcan_fire_perim <- "http://cwfis.cfs.nrcan.gc.ca/geoserver/ows"
 nrcan_cwfis_attribution <- "https://cwfis.cfs.nrcan.gc.ca/datamart/metadata/fm3buffered"
 
-## URL assignments (Smoky-Skies_Issue (.qmd|.rnw))
-aq_advisory_page <- "https://www.gov.bc.ca/airqualityadvisories"
-env_advisory_page_vanityurl <- "gov.bc.ca/airqualityadvisories"
-
-mvrd_advisory_page <- "https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories"
-
-aqhi_page_vanityurl <- "gov.bc.ca/airqualityhealthindex"
-aqhi_page <- "https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html"
