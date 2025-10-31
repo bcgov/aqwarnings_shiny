@@ -188,9 +188,9 @@ issueLocalEmissions <- function(input, output, session){
         
         output_file_name <- sprintf("%s_%s_%s", input$ice, pollutant_clean, location_clean) 
         
-      } else { # burn restriction
+      } else { # burn restriction; obp = open burning prohibition
         
-        output_file_name <- sprintf("%s_%s_%s_%s", input$ice, pollutant_clean, "open_burn_restriction", location_clean) 
+        output_file_name <- sprintf("%s_%s_%s_%s", input$ice, pollutant_clean, "obp", location_clean) 
         
       }
       
