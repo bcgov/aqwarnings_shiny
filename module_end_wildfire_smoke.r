@@ -27,7 +27,7 @@ endWildfireSmokeUI <- function(id) {
     fluidRow(
 
       box(
-        width = 6,
+        width = 3,
         status = "primary",
 
         h4(tags$b("1. Complete fields below")),
@@ -67,7 +67,7 @@ endWildfireSmokeUI <- function(id) {
         
         selectizeInput(
           inputId = ns("location"),
-          label = paste(h4(tags$b("2. Describe regions affected")), h4("(for warnings table on website)")),
+          label = h4(HTML("<b>2. Describe affected regions</b> (for warnings table on website)")),
           selected = "",
           choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
           width = "100%",
@@ -79,12 +79,12 @@ endWildfireSmokeUI <- function(id) {
         actionButton(
          inputId = ns("genWarning"),
          label = "Go!",
-         style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+         style = "width: 75%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
        ),
        
        hr(),
        ## Add the download button here:
-       downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
+       downloadButton(ns("download_report"), "Download Files", style = "width: 75%"),
 
        hr(),
        actionButton(
