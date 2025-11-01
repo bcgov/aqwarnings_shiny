@@ -5,7 +5,7 @@ title: "`r paste0(
   'in effect for ',
   params$location)`"
 type: "local_emissions"
-date: today
+date: "`r Sys.Date()`"
 params: 
   ice: "Issue" # Issue; Continue
   pollutant: "PM25 & PM10"
@@ -157,16 +157,9 @@ for (i in seq_along(pollutants)) {
     left_join(station_metadata, by = "station_name")
   
   # ---- Define most recent hour of data and express as 12 hour clock and local time 
-  # function to assign local time zone based on location
-  local_tz <- function(x) {
-    if (x %in% c("Cranbrook", "Golden", "Invermere")) {
-      "America/Edmonton"  
-    } else if (x %in% c("Fort St John", "Dawson Creek", "Fort Nelson", "Creston")) {
-      "America/Fort_Nelson"
-    } else {
-      "America/Vancouver"
-    }
-  }
+  
+  # set system to local time of params$location
+  Sys.setenv(TZ = local_tz(params$location))
   
   local_time <- integrated |> 
     filter(location == params$location) |> 
@@ -381,7 +374,7 @@ if (params$burnRestrictions > 0) {
     params$customMessageBanArea,
     " No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
-    "> Date issued: ", today, "\n\n",
+    "> Date issued: ", Sys.Date(), "\n\n",
     "> " , signature_path, "\n\n",
     "> ", name_line, "\n\n",
     "> ", title_line1, "\n\n",
@@ -507,9 +500,9 @@ logos_combined <- magick::image_append(logos) |>
         
       }
        
-      pdf_file_name <- paste0(as.character(today), "_", output_file_name, ".pdf")
+      pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
       
-      pdf_path <- paste0("//warnings/", as.character(today), "_", output_file_name, ".pdf")
+      pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
       mandatory_text <- paste0("Please see the ", "[PDF version of this Air Quality Warning](",pdf_path, ") for the statutory decision-maker sign-off.")
       
 ```
