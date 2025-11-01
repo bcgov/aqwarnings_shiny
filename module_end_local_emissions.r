@@ -59,8 +59,8 @@ endLocalEmissionsUI <- function(id) {
               
               dateInput(inputId = ns("issuedate"),
                         label = h4("Date warning was first issued:"),
-                        max = today,
-                        value = today -1,
+                        max = Sys.Date(),
+                        value = Sys.Date() -1,
                         startview = "month",
                         weekstart = 0,
                         width = "50%"
@@ -129,7 +129,7 @@ endLocalEmissions <- function(input, output, session){
   
       # generate warning: markdown and pdf formats
       quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
-                            output_file = sprintf("%s_%s.md", as.character(today), output_file_name),
+                            output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
                             output_format = "markdown",
                             execute_params = list(
                               sel_aqMet = input$sel_aqMet,
@@ -142,7 +142,7 @@ endLocalEmissions <- function(input, output, session){
       
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
-                            output_file = sprintf("%s_%s.pdf", as.character(today), output_file_name),
+                            output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
                             output_format = "pdf",
                             execute_params = list(
                               sel_aqMet = input$sel_aqMet,
@@ -156,10 +156,10 @@ endLocalEmissions <- function(input, output, session){
     
     # move the .md and .pdf to outputs/
     # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-    markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", as.character(today), output_file_name), full.names = TRUE)
+    markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), output_file_name), full.names = TRUE)
     fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
     
-    pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), output_file_name), full.names = TRUE)
+    pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), output_file_name), full.names = TRUE)
     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
     
     progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
@@ -172,13 +172,13 @@ endLocalEmissions <- function(input, output, session){
     
      filename = function() {
       # Set output file name
-      sprintf("%s_local_emissions.zip", as.character(today))
+      sprintf("%s_local_emissions.zip", Sys.Date())
     },
     content = function(file) {
       # find files with today's date; "*" allows multiple locations to be included in one zip file
       files_to_zip <- list.files(
         path = here::here("outputs"),
-        pattern = paste0("^", as.character(today), ".*\\.(pdf|md)$"),
+        pattern = paste0("^", Sys.Date(), ".*\\.(pdf|md)$"),
         full.names = TRUE
       )
       

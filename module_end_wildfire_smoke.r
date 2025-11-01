@@ -42,8 +42,8 @@ endWildfireSmokeUI <- function(id) {
 
         dateInput(inputId = ns("lastWarning"),
           label = h4("Date last warning was issued"),
-          max = today,
-          value = today -1,
+          max = Sys.Date(),
+          value = Sys.Date()-1,
           startview = "month",
           weekstart = 0,
           width = "50%"
@@ -125,7 +125,7 @@ endWildfireSmoke <- function(input, output, session){
       # generate warning: markdown and pdf formats
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
-                            output_file = sprintf("%s_%s.md", as.character(today), endBasename),
+                            output_file = sprintf("%s_%s.md", Sys.Date(), endBasename),
                             output_format = "markdown",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   lastWarning = input$lastWarning,
@@ -138,7 +138,7 @@ endWildfireSmoke <- function(input, output, session){
 
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
-                            output_file = sprintf("%s_%s.pdf", as.character(today), endBasename),
+                            output_file = sprintf("%s_%s.pdf", Sys.Date(), endBasename),
                             output_format = "pdf",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   lastWarning = input$lastWarning,
@@ -152,10 +152,10 @@ endWildfireSmoke <- function(input, output, session){
       
       # move the .md and .pdf to outputs/
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", as.character(today), endBasename), full.names = TRUE)
+      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
-      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), endBasename), full.names = TRUE)
+      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
       progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
