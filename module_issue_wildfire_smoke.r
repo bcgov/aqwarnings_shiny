@@ -96,12 +96,12 @@ issueWildfireSmokeUI <- function(id) {
         actionButton(
           inputId = ns("genWarning"),
           label = "Go!",
-          style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+          style = "width: 75%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
         ),
        
         hr(),
         
-        downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
+        downloadButton(ns("download_report"), "Download Files", style = "width: 75%"),
         
         hr(),
         
