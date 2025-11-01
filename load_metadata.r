@@ -56,6 +56,10 @@ cities <- bcmaps::bc_cities() |>
 cities <- cities |>  
   tidyr::extract(geometry, c('lng', 'lat'), '\\((.*), (.*)\\)', convert = TRUE)  # to do: extract() has been superseded by separate_wider_regex()
 
-# shiny app runs on a server with UTC. Specify tz to ensure local date assigned to dates and file names
-today <- as.Date(Sys.Date(), tz = "America/Vancouver")
+
+#load functions
+source(here::here("functions", "local_tz.r"))
+
+# shiny app runs on a server with UTC. Specify local tz to ensure local date is applied
+Sys.setenv(TZ = "America/Vancouver")
 
