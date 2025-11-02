@@ -121,13 +121,12 @@ endLocalEmissions <- function(input, output, session){
       
       # Clean location name for file name
       location_clean <- gsub("\\s+", "_", input$location)
+      pollutant_clean <- gsub(" ", "", gsub("&", "_", input$pollutant))
       
-      # Set output file name
-      output_file_name <- sprintf("%s_%s_%s", "End", input$pollutant, location_clean)
-      
-      progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
+      output_file_name <- sprintf("%s_%s_%s", input$ice, pollutant_clean, location_clean) 
   
       # generate warning: markdown and pdf formats
+      progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
                             output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
                             output_format = "markdown",

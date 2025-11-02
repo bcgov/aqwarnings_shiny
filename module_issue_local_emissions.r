@@ -175,10 +175,20 @@ issueLocalEmissions <- function(input, output, session){
       showNotification("No location selected; please select a location", type = "error")
     } else {
 
+      # create progress object; ensure it closes when reactive exits
       progress <- shiny::Progress$new()
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
     
+      # Clean location name for file name
+      location_clean <- gsub("\\s+", "_", input$location)
+      pollutant_clean <- gsub(" ", "", gsub("&", "_", input$pollutant))
+      
+      # create progress object; ensure it closes when reactive exits
+      progress <- shiny::Progress$new()
+      on.exit(progress$close())
+      progress$set(message = "Preparing files...", value = 0)
+      
       # Clean location name for file name
       location_clean <- gsub("\\s+", "_", input$location)
       pollutant_clean <- gsub(" ", "", gsub("&", "_", input$pollutant))
@@ -190,7 +200,7 @@ issueLocalEmissions <- function(input, output, session){
         
       } else { # burn restriction; obp = open burning prohibition
         
-        output_file_name <- sprintf("%s_%s_%s_%s", input$ice, pollutant_clean, "obp", location_clean) 
+        output_file_name <- sprintf("%s_%s_%s_%s", input$ice, pollutant_clean, "obr", location_clean) 
         
       }
       
