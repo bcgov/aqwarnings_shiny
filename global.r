@@ -14,7 +14,6 @@
 
 # Load meta data, maps and functions
 source(file.path("load_metadata.r"))
-source(file.path("functions.r"))
 
 # Load  modules
 source(file.path("module_issue_wildfire_smoke.r"))

@@ -53,6 +53,7 @@ library(readr)
 library(xtable)
 
 source(here::here("load_metadata.r"))
+source(here::here(file.path("functions", "local_tz.r")))
 ```
 
 ```{r ENVcontact, include=FALSE}
