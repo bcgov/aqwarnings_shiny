@@ -87,44 +87,6 @@ HAcontact <- health_contact |>
     summarise(html_string = paste(contact, collapse = sep_type))
 ```
 
-```{r additional_info, include=FALSE}
-
-additional_info_PM25 <- paste0(
-    "The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
-
-additional_info_PM10 <- paste0(
-  "The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
-
-additional_info_O3 <- paste0(
-  "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
-  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-)
-```
-
-```{r pollutant_specific_clauses, include=FALSE}
-pollutant_tbl <- tribble(
-  ~pollutant,~pollutantExpansion,
-  "PM25","fine particulate matter",
-  "PM10","coarse particulate matter",
-  "PM25 & PM10","fine particulate matter and coarse particulate matter",
-  "O3","ground level ozone"
-)
-
-# Pick the row for the current pollutant
-pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
-
-# Assign values
-pollutantExpansion  <- pollutant_info$pollutantExpansion
-
-first_paragraph <- paste0(
-    "The Ministry of Environment and Parks in collaboration with the ",
-    HAauth, " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
-    " due to elevated levels of ", pollutantExpansion, "."
-  )
-```
-
 ```{r table-setup, include=FALSE}
 pollutants <- strsplit(params$pollutant, "&")[[1]] |> trimws()
 min_data_capture_pct <- 75
@@ -264,6 +226,44 @@ for (i in seq_along(pollutants)) {
 
 # Expose them as final_table1, final_table2, etc.
 list2env(results, envir = .GlobalEnv)
+```
+
+```{r additional_info, include=FALSE}
+
+additional_info_PM25 <- paste0(
+    "The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  )
+
+additional_info_PM10 <- paste0(
+  "The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  )
+
+additional_info_O3 <- paste0(
+  "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
+  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+)
+```
+
+```{r pollutant_specific_clauses, include=FALSE}
+pollutant_tbl <- tribble(
+  ~pollutant,~pollutantExpansion,
+  "PM25","fine particulate matter",
+  "PM10","coarse particulate matter",
+  "PM25 & PM10","fine particulate matter and coarse particulate matter",
+  "O3","ground level ozone"
+)
+
+# Pick the row for the current pollutant
+pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
+
+# Assign values
+pollutantExpansion  <- pollutant_info$pollutantExpansion
+
+first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ",
+    HAauth, " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
+    " due to elevated levels of ", pollutantExpansion, "."
+  )
 ```
 
 ```{r}
