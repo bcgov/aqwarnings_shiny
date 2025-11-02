@@ -422,10 +422,10 @@ issueWildfireSmoke <- function(input, output, session){
       
       usermap <- user_created_map()
       
-      html_map <- sprintf("%s_%s_map.html", as.character(today), issueBasename)
+      html_map <- sprintf("%s_%s_map.html", Sys.Date(), issueBasename)
       htmlwidgets::saveWidget(usermap, html_map)
       
-      png_map <- sprintf("%s_%s_map.png", as.character(today), issueBasename)
+      png_map <- sprintf("%s_%s_map.png", Sys.Date(), issueBasename)
       webshot(url = html_map,
               file = png_map,
               cliprect = cliprect
