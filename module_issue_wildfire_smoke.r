@@ -434,7 +434,7 @@ issueWildfireSmoke <- function(input, output, session){
       # generate markdown via Quarto
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
-                            output_file = sprintf("%s_%s.md", as.character(today), issueBasename),
+                            output_file = sprintf("%s_%s.md", Sys.Date(), issueBasename),
                             output_format = "markdown",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
@@ -448,16 +448,16 @@ issueWildfireSmoke <- function(input, output, session){
       
       # move the .md and .html to outputs/
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub-directory
-      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", as.character(today), issueBasename), full.names = TRUE)
+      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
-      map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", as.character(today), issueBasename), full.names = TRUE)
+      map_output_file <- list.files(pattern = sprintf("%s_%s_map.html", Sys.Date(), issueBasename), full.names = TRUE)
       fs::file_move(path = paste0(map_output_file), new_path = here::here("outputs"))
       
       # generate pdf via Quarto 
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
-                            output_file = sprintf("%s_%s.pdf", as.character(today), issueBasename),
+                            output_file = sprintf("%s_%s.pdf", Sys.Date(), issueBasename),
                             output_format = "pdf",
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
@@ -471,7 +471,7 @@ issueWildfireSmoke <- function(input, output, session){
      
      # move the .pdf to outputs/
      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", as.character(today), issueBasename), full.names = TRUE)
+     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), issueBasename), full.names = TRUE)
      fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
      progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
