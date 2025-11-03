@@ -103,9 +103,7 @@ endWildfireSmokeUI <- function(id) {
 
 endWildfireSmoke <- function(input, output, session){
   
-  completeNotificationIDs <- character(0)
-  
-  # Generate report: markdown and pdf
+  # Generate warning
   observeEvent(input$genWarning, {
     
     if (input$sel_aqMet == "") {
@@ -116,13 +114,14 @@ endWildfireSmoke <- function(input, output, session){
       showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
       
+      # create progress object; ensure it closes when reactive exits
       progress <- shiny::Progress$new()
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
       
       endBasename <- "wildfire_smoke_end"
 
-      # generate warning: markdown and pdf formats
+      # generate markdown via Quarto
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.md", Sys.Date(), endBasename),
@@ -131,11 +130,16 @@ endWildfireSmoke <- function(input, output, session){
                                                   lastWarning = input$lastWarning,
                                                   customMessage = input$customMessage,
                                                   sel_healthAuth = input$sel_healthAuth,
-                                                  ice = "End",
                                                   location = input$location,
                                                   outputFormat = "markdown"),
                             debug = FALSE)
-
+      
+      # move the .md to outputs/
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), endBasename), full.names = TRUE)
+      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
+      
+      # generate pdf via Quarto
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), endBasename),
@@ -144,62 +148,60 @@ endWildfireSmoke <- function(input, output, session){
                                                   lastWarning = input$lastWarning,
                                                   customMessage = input$customMessage,
                                                   sel_healthAuth = input$sel_healthAuth,
-                                                  ice = "End",
                                                   location = input$location,
                                                   outputFormat = "pdf"),
                             debug = FALSE)
-    }
+  
       
-      # move the .md and .pdf to outputs/
+      # move the .pdf to outputs/
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), endBasename), full.names = TRUE)
-      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
-      
       pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
       progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
       Sys.sleep(5)
+      
+    } #end else
+  }) #end observeEvent
+  
+  # Download files
+  output$download_report <- downloadHandler(
+    filename = function() {
+      sprintf("%s_wildfire_smoke_end.zip", Sys.Date())
+    },
+    content = function(file) {
+      # Build file paths correctly using sprintf()
+      files_to_zip <- c(file.path("outputs", sprintf(
+        "%s_wildfire_smoke_end.md", Sys.Date()
+      )),
+      file.path("outputs", sprintf(
+        "%s_wildfire_smoke_end.pdf", Sys.Date()
+      )))
+      
+      # Zip the files into the download target
+      zip::zip(zipfile = file,
+               files = files_to_zip,
+               mode = "cherry-pick")
+    },
+    contentType = "application/zip"
+  )
+  
+  # Clean up directories
+  observeEvent(input$cleanupdir, {
+    output_files <- dir(path = here::here("outputs"), full.names = TRUE)
+    temp_files <- dir(full.names = TRUE, pattern = ".png")
+    
+    filesToRemove <- c(output_files, temp_files)
+    
+    nfiles <- length(filesToRemove)
+    if (nfiles == 0) {
+      showNotification("No files or directories to remove", type = "message")
+    } else {
+      
+      file.remove(filesToRemove)
+      
+      showNotification(paste("Files removed:", nfiles, "."), type = "message")  
+    }
   })
-
-      # Download files
-      output$download_report <- downloadHandler(
-        filename = function() {
-          sprintf("%s_wildfire_smoke_end.zip", Sys.Date())
-        },
-        content = function(file) {
-          # Build file paths correctly using sprintf()
-          files_to_zip <- c(file.path("outputs", sprintf(
-            "%s_wildfire_smoke_end.md", Sys.Date()
-          )),
-          file.path("outputs", sprintf(
-            "%s_wildfire_smoke_end.pdf", Sys.Date()
-          )))
-          
-          # Zip the files into the download target
-          zip::zip(zipfile = file,
-                   files = files_to_zip,
-                   mode = "cherry-pick")
-        },
-        contentType = "application/zip"
-      )
-      
-      # Clean up directories
-      observeEvent(input$cleanupdir, {
-        output_files <- dir(path = here::here("outputs"), full.names = TRUE)
-        temp_files <- dir(full.names = TRUE, pattern = ".png")
-        
-        filesToRemove <- c(output_files, temp_files)
-        
-        nfiles <- length(filesToRemove)
-        if (nfiles == 0) {
-          showNotification("No files or directories to remove", type = "message")
-        } else {
-          
-          file.remove(filesToRemove)
-          
-          showNotification(paste("Files removed:", nfiles, "."), type = "message")  
-        }
-      })
-      
+  
 }

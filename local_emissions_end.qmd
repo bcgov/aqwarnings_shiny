@@ -11,7 +11,7 @@ params:
   issuedate: "2025-07-09"
   outputFormat: "markdown"
   customMessage: ""
-ice: End
+ice: "End"
 author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`"
 customMessageBanArea: "`r params$customMessageBanArea`"  # confirm if this field is needed for "end" warnings
@@ -54,37 +54,6 @@ library(xtable)
 
 source(here::here("load_metadata.r"))
 source(here::here(file.path("functions", "local_tz.r")))
-```
-
-```{r ENVcontact, include=FALSE}
-#| label: ENVcontact
-#| results: asis
-#| strip.white: false
-
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
-# AQ met information
-ENVcontact <- aq_mets |>
-  filter(fullname == params$sel_aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
-  pull(contact) 
-```
-
-```{r HAcontact, include=FALSE}
-#| label: HAcontact
-#| results: asis
-
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
-HAauth <- match_health_city |> 
-  filter(location == params$location) |> 
-  pull(health_city)
-
-HAcontact <- health_contact |>
-    filter(authority == HAauth) |>
-    select(authority, contact) |>
-    group_by(authority) |>
-    summarise(html_string = paste(contact, collapse = sep_type))
 ```
 
 ```{r table-setup, include=FALSE}
@@ -228,6 +197,35 @@ for (i in seq_along(pollutants)) {
 list2env(results, envir = .GlobalEnv)
 ```
 
+```{r ENVcontact, include=FALSE}
+#| results: asis
+#| strip.white: false
+
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+
+# AQ met information
+ENVcontact <- aq_mets |>
+  filter(fullname == params$sel_aqMet) |>
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
+  pull(contact) 
+```
+
+```{r HAcontact, include=FALSE}
+#| results: asis
+
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+
+HAauth <- match_health_city |> 
+  filter(location == params$location) |> 
+  pull(health_city)
+
+HAcontact <- health_contact |>
+    filter(authority == HAauth) |>
+    select(authority, contact) |>
+    group_by(authority) |>
+    summarise(html_string = paste(contact, collapse = sep_type))
+```
+
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
@@ -266,8 +264,7 @@ first_paragraph <- paste0(
   )
 ```
 
-```{r}
-#| label: create-logo-list
+```{r create-logo-list}
 
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
 # This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
@@ -341,8 +338,7 @@ logos_combined <- magick::image_append(logos) |>
 
 [`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
-```{r}
-#| label: print-logos
+```{r print-logos}
 #| results: asis
 
 # `cat` is used to avoid extra processing

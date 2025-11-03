@@ -8,11 +8,10 @@ params:
   customMessage: "`Custom message.`" 
   location: "Multiple locations in B.C."
   outputFormat: "markdown"
-  ice: "End" 
   sel_healthAuth: 
     - First Nations Health Authority 
     - Northern Health 
-ice: "`r params$ice`" 
+ice: "End" 
 author: "`r params$sel_aqMet`" 
 customMessage: "`r params$customMessage`" 
 lastWarning: "`r params$lastWarning`" 

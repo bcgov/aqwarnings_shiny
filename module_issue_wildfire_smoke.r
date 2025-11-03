@@ -284,24 +284,6 @@ issueWildfireSmoke <- function(input, output, session){
   # create a vector of reactive values to store the the selected polygons
   selRegions <- reactiveValues(ids = vector())
   
-  # clean up directories
-  observeEvent(input$cleanupdir, {
-    output_files <- dir(path = here::here("outputs"), full.names = TRUE)
-    temp_files <- dir(full.names = TRUE, pattern = ".png|.html")
-    
-    filesToRemove <- c(output_files, temp_files)
-    
-    nfiles <- length(filesToRemove)
-    if (nfiles == 0) {
-      showNotification("No files or directories to remove", type = "message")
-    } else {
-      
-      file.remove(filesToRemove)
-      
-      showNotification(paste("Files removed:", nfiles, "."), type = "message")  
-    }
-  })
-
   #create map as viewed by user
   observeEvent(input$map_shape_click, {
 
@@ -400,8 +382,7 @@ issueWildfireSmoke <- function(input, output, session){
 
    })
 
-
-# Generate report
+# Generate warning
   observeEvent(input$genWarning, {
     
     if (input$sel_aqMet == "") {
@@ -411,6 +392,17 @@ issueWildfireSmoke <- function(input, output, session){
     } else if (input$location == "") {
         showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
+      
+      ncomplete <- length(completeNotificationIDs)
+      if (ncomplete > 0) {
+        # remove the notification for completed steps if the genWarning
+        # button is clicked again
+        for (i in seq(ncomplete)) {
+          # must remove these individually
+          removeNotification(completeNotificationIDs[i])
+        }
+        completeNotificationIDs <<- completeNotificationIDs[-c(seq(ncomplete))]
+      }
 
       progress <- shiny::Progress$new()
       on.exit(progress$close())
@@ -478,8 +470,26 @@ issueWildfireSmoke <- function(input, output, session){
      Sys.sleep(5)
 
     } #end else
-    }) #end observeEvent for generating report
-
+    }) #end observeEvent
+  
+  # clean up directories
+  observeEvent(input$cleanupdir, {
+    output_files <- dir(path = here::here("outputs"), full.names = TRUE)
+    temp_files <- dir(full.names = TRUE, pattern = ".png|.html")
+    
+    filesToRemove <- c(output_files, temp_files)
+    
+    nfiles <- length(filesToRemove)
+    if (nfiles == 0) {
+      showNotification("No files or directories to remove", type = "message")
+    } else {
+      
+      file.remove(filesToRemove)
+      
+      showNotification(paste("Files removed:", nfiles, "."), type = "message")  
+    }
+  })
+  
 ## Download files
 
   output$download_report <- downloadHandler(

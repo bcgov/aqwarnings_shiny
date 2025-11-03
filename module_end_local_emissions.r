@@ -17,8 +17,6 @@ library(shinydashboard)
 library(zip)
 library(dplyr)
 
-source(here::here("load_metadata.r"))
-
 #--------------------------------------------------
 # UI
 #--------------------------------------------------
@@ -123,7 +121,7 @@ endLocalEmissions <- function(input, output, session){
       location_clean <- gsub("\\s+", "_", input$location)
       pollutant_clean <- gsub(" ", "", gsub("&", "_", input$pollutant))
       
-      output_file_name <- sprintf("%s_%s_%s", input$ice, pollutant_clean, location_clean) 
+      output_file_name <- sprintf("%s_%s_%s", "End", pollutant_clean, location_clean) 
   
       # generate warning: markdown and pdf formats
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
@@ -139,6 +137,11 @@ endLocalEmissions <- function(input, output, session){
                               outputFormat = "markdown"),
                             debug = FALSE)
       
+      # move the .md to outputs/
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), output_file_name), full.names = TRUE)
+      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
+      
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
@@ -152,19 +155,16 @@ endLocalEmissions <- function(input, output, session){
                               outputFormat = "pdf"),
                             debug = FALSE)
     
-    
-    # move the .md and .pdf to outputs/
+    # move the .pdf to outputs/
     # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-    markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), output_file_name), full.names = TRUE)
-    fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
-    
     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), output_file_name), full.names = TRUE)
     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
     
     progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
     Sys.sleep(5)
-    }
-  })
+    
+    } # end else
+  }) # end observeEvent
   
   # Download files
   output$download_report <- downloadHandler(

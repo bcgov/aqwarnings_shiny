@@ -410,9 +410,7 @@ ENVcontact <- aq_mets |>
   pull(contact) 
 ```
 
-```{r}
-#| label: create-logo-list
-
+```{r create-logo-list}
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
 # This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
 logos_list <- list(
@@ -479,9 +477,7 @@ logos_combined <- magick::image_append(logos) |>
 }
 ```
 
-```{r}
-#| label: create-pdf-filepath
-
+```{r create-pdf-filepath}
 ### TEMPORARY - until SDM signature is sorted
 
 # create file path for PDF output
@@ -513,8 +509,7 @@ logos_combined <- magick::image_append(logos) |>
 
 [`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
-```{r}
-#| label: print-logos
+```{r print-logos}
 #| results: asis
 
 # `cat` is used to avoid extra processing

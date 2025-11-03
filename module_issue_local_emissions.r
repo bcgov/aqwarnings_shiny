@@ -17,8 +17,6 @@ library(shinydashboard)
 library(zip)
 library(dplyr)
 
-source(here::here("load_metadata.r"))
-
 #--------------------------------------------------
 # UI
 #--------------------------------------------------
@@ -162,7 +160,7 @@ issueLocalEmissions <- function(input, output, session){
     }
   })
   
- # Generate report: markdown and pdf
+  # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
     
     if (input$sel_aqMet == "") {
@@ -174,15 +172,6 @@ issueLocalEmissions <- function(input, output, session){
     } else if (input$location == "") {
       showNotification("No location selected; please select a location", type = "error")
     } else {
-
-      # create progress object; ensure it closes when reactive exits
-      progress <- shiny::Progress$new()
-      on.exit(progress$close())
-      progress$set(message = "Preparing files...", value = 0)
-    
-      # Clean location name for file name
-      location_clean <- gsub("\\s+", "_", input$location)
-      pollutant_clean <- gsub(" ", "", gsub("&", "_", input$pollutant))
       
       # create progress object; ensure it closes when reactive exits
       progress <- shiny::Progress$new()
@@ -198,7 +187,7 @@ issueLocalEmissions <- function(input, output, session){
         
         output_file_name <- sprintf("%s_%s_%s", input$ice, pollutant_clean, location_clean) 
         
-      } else { # burn restriction; obp = open burning prohibition
+      } else { # burn restriction; obr = open burning restriction
         
         output_file_name <- sprintf("%s_%s_%s_%s", input$ice, pollutant_clean, "obr", location_clean) 
         
@@ -222,6 +211,11 @@ issueLocalEmissions <- function(input, output, session){
                               outputFormat = "markdown"),
                             debug = FALSE)
       
+      # move the .md to outputs/
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), output_file_name), full.names = TRUE)
+      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
+      
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
@@ -238,19 +232,17 @@ issueLocalEmissions <- function(input, output, session){
                               customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "pdf"),
                             debug = FALSE)
-    }
-    
-    # move the .md and .pdf to outputs/
-    # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-    markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), output_file_name), full.names = TRUE)
-    fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
-    
-    pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), output_file_name), full.names = TRUE)
-    fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
-    
-    progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
-    Sys.sleep(5)
-  })
+      
+      # move the .pdf to outputs/
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), output_file_name), full.names = TRUE)
+      fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
+      
+      progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
+      Sys.sleep(5)
+      
+    } #else
+  }) #observeEvent
   
   # Download files
   output$download_report <- downloadHandler(
