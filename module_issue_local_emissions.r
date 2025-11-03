@@ -24,7 +24,6 @@ library(dplyr)
 issueLocalEmissionsUI <- function(id) {
   ns <- NS(id)
   tabItem(tabName = "issue",
-          shinyjs::useShinyjs(),
           fluidRow(
             box(
               width = 6,
@@ -38,7 +37,7 @@ issueLocalEmissionsUI <- function(id) {
                 selected = "",
                 choices = c("", aq_mets$fullname),
                 width = "50%"
-              ),
+            ),
               
               radioButtons(
                 inputId = ns("ice"),
@@ -50,7 +49,8 @@ issueLocalEmissionsUI <- function(id) {
               ),
               
               shinyjs::hidden(
-                dateInput(inputId = ns("issuedate"),
+                dateInput(
+                  inputId = ns("issuedate"),
                           label = h4("Date warning was first issued:"),
                           max = Sys.Date(),
                           value = Sys.Date() - 1,
@@ -58,8 +58,8 @@ issueLocalEmissionsUI <- function(id) {
                           weekstart = 0,
                           width = "50%"
                 )
-              ),
-              
+                ),
+            
               selectInput(
                 inputId = ns("pollutant"),
                 label = h4("Pollutant:"),
@@ -74,10 +74,13 @@ issueLocalEmissionsUI <- function(id) {
                 selected = "",
                 choices = c("", match_health_city$location),
                 width = "50%"
-              ),
+                ),
+            
+            box(
+              width = 6,
+              background = "light-blue",
               
-              shinyjs:: hidden(
-                radioButtons(
+             radioButtons(
                 inputId = ns("burnRestrictions"),
                 label = h4("Burn prohibition issued:"),
                 choices = list(
@@ -87,21 +90,46 @@ issueLocalEmissionsUI <- function(id) {
                 selected = 0,
                 width = "50%",
                 inline = TRUE
-                )
               ),
               
               shinyjs::hidden(
-                textAreaInput(inputId = ns("customMessageBanArea"),
-                              label = h4("Burn prohibition details: location and end date/time"),
-                              value = "<location> until <mmmm, dd, yyyy hh:mm AM/PM> local time.",
-                              width = "100%",
-                              height = "80px",
-                              resize = "vertical"
-                )
+                textAreaInput(
+                  inputId = ns("burnRestrictionArea"),
+                  label = HTML("<h4>Burn prohibition details:<br><br> The Director has prohibited open burning within</h4>"),
+                  value = "<location>",
+                  width = "75%",
+                  height = "40px",
+                  resize = "vertical"
+              )
               ),
-              
-              dateInput(inputId = ns("nextUpdate"),
-                        label = h4("Date of next update: "),
+            
+          splitLayout(
+            cellWidths = c("50%", "50%"),
+            shinyjs::hidden(
+               dateInput(
+               inputId = ns("burnRestrictionEndDate"),
+               startview = "month",
+               weekstart = 0,
+               label = h4("until"),
+               value = Sys.Date() + 1,
+               min = Sys.Date(),
+               width = "50%"
+               )
+               ),
+             
+             shinyjs::hidden(
+               textInput(
+                inputId = ns("burnRestrictionEndTime"), 
+                label = h4("HH:00 AM/PM"),
+                value = format(Sys.time(), "%l:00 %p"),
+                width = "50%"
+                )
+              )
+          )
+          ),
+          
+             dateInput(inputId = ns("nextUpdate"),
+                        label = h4("Warning next updated: "),
                         max = Sys.Date() + 7,
                         value = Sys.Date() + 1,
                         startview = "month",
@@ -134,10 +162,9 @@ issueLocalEmissionsUI <- function(id) {
                 inputId = ns("cleanupdir"),
                 label = "clean dir"
               )
-              
             )
-          )
-  )
+          ) #fluidRow
+          ) # tabItem
 } 
 
 #--------------------------------------------------
@@ -146,6 +173,7 @@ issueLocalEmissionsUI <- function(id) {
 
 issueLocalEmissions <- function(input, output, session){
   
+  # show/hide conditional inputs
   observeEvent(input$pollutant, {
     if (input$pollutant == "O3") {
       shinyjs::hide("burnRestrictions") 
@@ -156,9 +184,13 @@ issueLocalEmissions <- function(input, output, session){
   
   observeEvent(input$burnRestrictions, {
     if (input$burnRestrictions > 0) {
-      shinyjs::show("customMessageBanArea") 
+      shinyjs::show("burnRestrictionArea")
+      shinyjs::show("burnRestrictionEndDate")
+      shinyjs::show("burnRestrictionEndTime")
     } else {
-      shinyjs::hide("customMessageBanArea")
+      shinyjs::hide("burnRestrictionArea")
+      shinyjs::hide("burnRestrictionEndDate")
+      shinyjs::hide("burnRestrictionEndTime")
       }
   })
   
@@ -214,10 +246,12 @@ issueLocalEmissions <- function(input, output, session){
                               ice = input$ice,
                               location = input$location,
                               burnRestrictions = input$burnRestrictions,
+                              burnRestrictionArea = input$burnRestrictionArea,
+                              burnRestrictionEndDate = input$burnRestrictionEndDate,
+                              burnRestrictionEndTime = input$burnRestrictionEndTime,
                               issuedate = input$issuedate,
                               nextUpdate = input$nextUpdate,
                               customMessage = input$customMessage,
-                              customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "markdown"),
                             debug = FALSE)
       
@@ -236,10 +270,12 @@ issueLocalEmissions <- function(input, output, session){
                               ice = input$ice,
                               location = input$location,
                               burnRestrictions = input$burnRestrictions,
+                              burnRestrictionArea = input$burnRestrictionArea,
+                              burnRestrictionEndDate = input$burnRestrictionEndDate,
+                              burnRestrictionEndTime = input$burnRestrictionEndTime,
                               issuedate = input$issuedate,
                               nextUpdate = input$nextUpdate,
                               customMessage = input$customMessage,
-                              customMessageBanArea = input$customMessageBanArea,
                               outputFormat = "pdf"),
                             debug = FALSE)
       
