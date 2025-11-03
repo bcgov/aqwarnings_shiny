@@ -9,18 +9,19 @@ date: "`r Sys.Date()`"
 params: 
   ice: "Issue" # Issue; Continue
   pollutant: "PM25 & PM10"
-  burnRestrictions: 0   # 0 = No; 1 = Yes (Ben); 2 = Yes (Arvind)
   sel_aqMet: "Sakshi Jain"
   location: "Prince George"
   issuedate: "2025-07-20"
   nextUpdate: "2025-09-28"
   outputFormat: "markdown"
   customMessage: ""
-  customMessageBanArea: ""
+  burnRestrictions: 0   # 0 = No; 1 = Yes (Ben); 2 = Yes (Arvind)
+  burnRestrictionArea: ""
+  burnRestrictionEndDate: "2025-09-28"
+  burnRestrictionEndTime: "12:00 PM"
 ice: "`r params$ice`"
 author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`"
-customMessageBanArea: "`r params$customMessageBanArea`"
 location: "`r params$location`"
 outputFormat: "`r params$outputFormat`" 
 format:
@@ -370,23 +371,20 @@ if (params$burnRestrictions > 0) {
     title_line2 <- "Environmental Monitoring and Analysis Branch"
   }
   
-  burn_ban <- paste0(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning ",
-    params$customMessageBanArea,
-    " No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
+  burn_ban <- paste(
+    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$customMessageBanArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
-    "> Date issued: ", Sys.Date(), "\n\n",
+    "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
     "> " , signature_path, "\n\n",
     "> ", name_line, "\n\n",
     "> ", title_line1, "\n\n",
     "> ", title_line2, "\n\n"
 )
 
- ###TEMPORARY - until SDM signature is sorted out; see commented code above for long-term solution. 
-    burn_ban_md_temp <- paste0(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning ",
-    params$customMessageBanArea,
-    " No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
+ ###TEMPORARY - until SDM signature is sorted out
+    burn_ban_md_temp <- paste(
+    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$customMessageBanArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
+    
 } else {
   
   mandatory_reductions_heading <- NULL
