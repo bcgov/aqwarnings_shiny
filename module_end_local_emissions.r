@@ -43,10 +43,11 @@ endLocalEmissionsUI <- function(id) {
               selectInput(
                 inputId = ns("pollutant"),
                 label = h4("Pollutant:"),
-                selected = "",
-                choices = c("", "PM25", "PM10", "O3", "PM25 & PM10"),
+                selected = "PM25",
+                choices = c("PM25", "PM10", "O3", "PM25 & PM10"),
                 width = "50%"
               ),
+              
               selectInput(
                 inputId = ns("location"),
                 label = h4("Location:"),
