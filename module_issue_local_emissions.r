@@ -63,8 +63,8 @@ issueLocalEmissionsUI <- function(id) {
               selectInput(
                 inputId = ns("pollutant"),
                 label = h4("Pollutant:"),
-                selected = "",
-                choices = c("", "PM25", "PM10", "O3", "PM25 & PM10"),
+                selected = "PM25",
+                choices = c("PM25", "PM10", "O3", "PM25 & PM10"),
                 width = "50%"
               ),
               
@@ -76,7 +76,8 @@ issueLocalEmissionsUI <- function(id) {
                 width = "50%"
               ),
               
-              radioButtons(
+              shinyjs:: hidden(
+                radioButtons(
                 inputId = ns("burnRestrictions"),
                 label = h4("Burn prohibition issued:"),
                 choices = list(
@@ -86,6 +87,7 @@ issueLocalEmissionsUI <- function(id) {
                 selected = 0,
                 width = "50%",
                 inline = TRUE
+                )
               ),
               
               shinyjs::hidden(
@@ -143,6 +145,14 @@ issueLocalEmissionsUI <- function(id) {
 #--------------------------------------------------
 
 issueLocalEmissions <- function(input, output, session){
+  
+  observeEvent(input$pollutant, {
+    if (input$pollutant == "O3") {
+      shinyjs::hide("burnRestrictions") 
+    } else {
+      shinyjs::show("burnRestrictions")
+    }
+  })
   
   observeEvent(input$burnRestrictions, {
     if (input$burnRestrictions > 0) {
