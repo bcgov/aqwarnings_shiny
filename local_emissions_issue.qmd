@@ -214,10 +214,10 @@ list2env(results, envir = .GlobalEnv)
 ```{r additional_info, include=FALSE, results='asis'}
 
 additional_info_PM25 <- paste0(
-    "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
+  "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
     
 The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
+)
 
 additional_info_PM10 <- paste0(
   "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers ($\\mu$m). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 $\\mu$m or less), these particles are referred to as PM$_{10}$. Sources of PM$_{10}$ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM$_{10}$ can easily penetrate indoors because of their small size.
@@ -225,7 +225,7 @@ additional_info_PM10 <- paste0(
   The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.
   
   The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
+)
 
 additional_info_O3 <- paste0(
   "Ground-level ozone is formed when chemicals (such as nitrogen oxides and volatile organic compounds) react in the air when there is sunlight. Nitrogen oxides are emitted from vehicles, boilers, building heating, and other combustion processes. VOCs are emitted from burning fossil fuels, evaporation of solvents (including paint, varnishes and thinners), refining and storing fuel and agricultural activities. VOCs also come from natural sources such as vegetation.
@@ -235,20 +235,20 @@ The highest concentrations of ground-level ozone usually happen between mid-afte
 The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality warnings. Air quality warnings for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. 
 
 The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
+)
 
 ```
 
 ```{r volunary_reduction, include=FALSE}
 
 voluntary_reduction_PM25 <- paste0(
-   if (current_month %in% c(10:12, 1:4)) {
+  if (current_month %in% c(10:12, 1:4)) {
     "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n"
   } else {
     ""
   },
- "- Reduce vehicle use where possible and avoid idling vehicles.\n",
-    sep=""
+  "- Reduce vehicle use where possible and avoid idling vehicles.\n",
+  sep=""
 )
 
 voluntary_reduction_PM10 <- paste0(
@@ -279,10 +279,10 @@ HAauth <- match_health_city |>
   pull(health_city)
 
 HAcontact <- health_contact |>
-    filter(authority == HAauth) |>
-    select(authority, contact) |>
-    group_by(authority) |>
-    summarise(html_string = paste(contact, collapse = sep_type))
+  filter(authority == HAauth) |>
+  select(authority, contact) |>
+  group_by(authority) |>
+  summarise(html_string = paste(contact, collapse = sep_type))
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -379,12 +379,12 @@ if (params$burnRestrictions > 0) {
     "> ", name_line, "\n\n",
     "> ", title_line1, "\n\n",
     "> ", title_line2, "\n\n"
-)
-
- ###TEMPORARY - until SDM signature is sorted out
-    burn_ban_md_temp <- paste(
+  )
+  
+  ###TEMPORARY - until SDM signature is sorted out
+  burn_ban_md_temp <- paste(
     "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
-    
+  
 } else {
   
   mandatory_reductions_heading <- NULL
@@ -437,10 +437,10 @@ logos_combined <- c()
 # Set logo path based on output format
 if (params$outputFormat == "markdown") {
   logo_path <- " logo](//assets/logo_"
-
+  
   # Build a vector of quarto lines to insert image for each logo
   # It is more efficient to use `sapply` but this might be more readable
-
+  
   # Add each logo's insert line to the vector
   for (logo_name in names(logos_selected)) {
     logo_image_line <- c(logo_image_line,
@@ -459,19 +459,19 @@ if (params$outputFormat == "pdf") {
       paste0(logo_path,
              logos_selected[[logo_name]],
              ".png?raw=true"
-             )
+      )
     )
   }
-
-# format logos
-logos <- magick::image_read(logo_urls) |> 
-  magick::image_trim() |> # remove all white space
-  magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
-  magick::image_scale("x200") # scale
-
-# Combine logos into single image and scale
-logos_combined <- magick::image_append(logos) |> 
-  magick::image_write(path = "logo.png")
+  
+  # format logos
+  logos <- magick::image_read(logo_urls) |> 
+    magick::image_trim() |> # remove all white space
+    magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
+    magick::image_scale("x200") # scale
+  
+  # Combine logos into single image and scale
+  logos_combined <- magick::image_append(logos) |> 
+    magick::image_write(path = "logo.png")
 }
 ```
 
@@ -480,26 +480,26 @@ logos_combined <- magick::image_append(logos) |>
 
 # create file path for PDF output
 
- # Clean location name for file name
-      location_clean <- gsub("\\s+", "_", params$location)
-      pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", params$pollutant)))
-      
-      # Set output file name
-      if (params$burnRestrictions < 1) {  # no burn restriction
-        
-        output_file_name <- sprintf("%s_%s_%s", tolower(params$ice), pollutant_clean, location_clean) 
-        
-      } else { # burn restriction; obp = open burning prohibition
-        
-        output_file_name <- sprintf("%s_%s_%s_%s", tolower(params$ice), pollutant_clean, "obp", location_clean) 
-        
-      }
-       
-      pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
-      
-      pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
-      mandatory_text <- paste0("Please see the ", "[PDF version of this Air Quality Warning](",pdf_path, ") for the statutory decision-maker sign-off.")
-      
+# Clean location name for file name
+location_clean <- gsub("\\s+", "_", params$location)
+pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", params$pollutant)))
+
+# Set output file name
+if (params$burnRestrictions < 1) {  # no burn restriction
+  
+  output_file_name <- sprintf("%s_%s_%s", tolower(params$ice), pollutant_clean, location_clean) 
+  
+} else { # burn restriction; obr = open burning prohibition
+  
+  output_file_name <- sprintf("%s_%s_%s_%s", tolower(params$ice), pollutant_clean, "obr", location_clean) 
+  
+}
+
+pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
+
+pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
+mandatory_text <- paste0("Please see the ", "[PDF version of this Air Quality Warning](",pdf_path, ") for the statutory decision-maker sign-off related to open burning restrictions.")
+
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
@@ -520,9 +520,7 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 :::{.content-visible when-format = "markdown"}
 
 {{< inline_alert_start>}}
-
 `r mandatory_text`
-
 {{< inline_alert_end >}}
 
 :::
@@ -534,18 +532,18 @@ Exposure to `r pollutantExpansion` is particularly a concern for infants, older 
 ```{r, results='asis', echo=FALSE}
 if (params$burnRestrictions > 0) {
   cat(
-    "Open burning restrictions are now in effect ", params$burnRestrictionArea,
-    " No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.",
+    "Open burning restrictions are now in effect within", params$burnRestrictionArea,
+    ". No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.",
     sep = ""
   )
 }
 ```
 
-Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
-
 `r params$customMessage`
 
 The next update will be on `r format(as.Date(params$nextUpdate), "%B %d, %Y")` and posted to the province’s [Air Quality Warnings webpage](https://www.gov.bc.ca/airquality).
+
+Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 
 # Actions you can take
 
@@ -654,10 +652,8 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
   cat(additional_info_PM25, "\n\n")
   print(knitr::kable(final_table1, row.names = FALSE))
   
-  cat("\n\n")  # spacing
-  
   # PM10
-  cat(additional_info_PM10, "\n\n")
+  cat("\n\n", additional_info_PM10, "\n\n")
   print(knitr::kable(final_table2, row.names = FALSE))
 }
 
