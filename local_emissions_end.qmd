@@ -407,20 +407,22 @@ logos_combined <- magick::image_append(logos) |>
         
         output_file_name <- sprintf("%s_%s_%s", "end", pollutant_clean, location_clean) 
         
-      } else if(params$burnRestrictionStatus == 1) { # warning and open burn restrictions both
+      } else if(params$burnRestrictionStatus == 1) { # warning and open burn restrictions end
         
         output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr", location_clean) 
         
-      } else {
+      } else { # warning ends open burn restrictions continue
         
-        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr_continue", location_clean) 
+        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr_continue", location_clean)
+        pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
+        mandatory_text <- paste0("Please see the ", "[PDF version of this Air Quality Warning](",
+                                 pdf_path, 
+                                 ") for the statutory decision-maker sign-off related to open burning restrictions."
+        )
         
       }
        
       pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
-      
-      pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
-      mandatory_text <- paste0("Please see the ", "[PDF version of this Air Quality Warning](",pdf_path, ") for the statutory decision-maker sign-off related to open burning restrictions.")
       
 ```
 

@@ -492,13 +492,15 @@ if (params$burnRestrictions < 1) {  # no burn restriction
 } else { # burn restriction; obr = open burning prohibition
   
   output_file_name <- sprintf("%s_%s_%s_%s", tolower(params$ice), pollutant_clean, "obr", location_clean) 
-  
+  pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
+  mandatory_text <- paste0("Please see the ", 
+                           "[PDF version of this Air Quality Warning](",
+                           pdf_path, 
+                           ") for the statutory decision-maker sign-off related to open burning restrictions."
+                           )
 }
 
 pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
-
-pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
-mandatory_text <- paste0("Please see the ", "[PDF version of this Air Quality Warning](",pdf_path, ") for the statutory decision-maker sign-off related to open burning restrictions.")
 
 ```
 
@@ -532,7 +534,7 @@ Exposure to `r pollutantExpansion` is particularly a concern for infants, older 
 ```{r, results='asis', echo=FALSE}
 if (params$burnRestrictions > 0) {
   cat(
-    "Open burning restrictions are now in effect within", params$burnRestrictionArea,
+    "Open burning restrictions are now in effect within ", params$burnRestrictionArea,
     ". No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.",
     sep = ""
   )
