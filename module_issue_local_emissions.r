@@ -37,7 +37,7 @@ issueLocalEmissionsUI <- function(id) {
                 selected = "",
                 choices = c("", aq_mets$fullname),
                 width = "50%"
-            ),
+              ),
               
               radioButtons(
                 inputId = ns("ice"),
@@ -51,15 +51,15 @@ issueLocalEmissionsUI <- function(id) {
               shinyjs::hidden(
                 dateInput(
                   inputId = ns("issuedate"),
-                          label = h4("Date warning was first issued:"),
-                          max = Sys.Date(),
-                          value = Sys.Date() - 1,
-                          startview = "month",
-                          weekstart = 0,
-                          width = "50%"
+                  label = h4("Date warning was first issued:"),
+                  max = Sys.Date(),
+                  value = Sys.Date() - 1,
+                  startview = "month",
+                  weekstart = 0,
+                  width = "50%"
                 )
-                ),
-            
+              ),
+              
               selectInput(
                 inputId = ns("pollutant"),
                 label = h4("Pollutant:"),
@@ -74,74 +74,72 @@ issueLocalEmissionsUI <- function(id) {
                 selected = "",
                 choices = c("", match_health_city$location),
                 width = "50%"
+              ),
+              
+              box(
+                width = 12,
+                background = "light-blue",
+                
+                radioButtons(
+                  inputId = ns("burnRestrictions"),
+                  label = h4("Burn prohibition issued:"),
+                  choices = list(
+                    "No" = 0, 
+                    "Yes (Ben)" = 1,
+                    "Yes (Arvind)" = 2),
+                  selected = 0,
+                  width = "50%",
+                  inline = TRUE
                 ),
-            
-            box(
-              width = 12,
-              background = "light-blue",
+                
+                shinyjs::hidden(
+                  textAreaInput(
+                    inputId = ns("burnRestrictionArea"),
+                    label = HTML("<h4>Burn prohibition details:<br><br> The Director has prohibited open burning within</h4>"),
+                    value = "<location>",
+                    width = "75%",
+                    height = "40px",
+                    resize = "vertical"
+                  )
+                ),
+                
+                splitLayout(
+                  cellWidths = c("50%", "50%"),
+                  shinyjs::hidden(
+                    dateInput(
+                      inputId = ns("burnRestrictionEndDate"),
+                      startview = "month",
+                      weekstart = 0,
+                      label = h4("until"),
+                      value = Sys.Date() + 1,
+                      min = Sys.Date(),
+                      width = "50%"
+                    )
+                  ),
+                  
+                  shinyjs::hidden(
+                    textInput(
+                      inputId = ns("burnRestrictionEndTime"), 
+                      label = h4("HH:00 AM/PM"),
+                      value = format(Sys.time(), "%l:00 %p"),
+                      width = "50%"
+                    )
+                  )
+                ) # splitLayout
+              ), # box
               
-             radioButtons(
-                inputId = ns("burnRestrictions"),
-                label = h4("Burn prohibition issued:"),
-                choices = list(
-                  "No" = 0, 
-                  "Yes (Ben)" = 1,
-                  "Yes (Arvind)" = 2),
-                selected = 0,
-                width = "50%",
-                inline = TRUE
-              ),
-              
-              shinyjs::hidden(
-                textAreaInput(
-                  inputId = ns("burnRestrictionArea"),
-                  label = HTML("<h4>Burn prohibition details:<br><br> The Director has prohibited open burning within</h4>"),
-                  value = "<location>",
-                  width = "75%",
-                  height = "40px",
-                  resize = "vertical"
-              )
-              ),
-            
-          splitLayout(
-            cellWidths = c("50%", "50%"),
-            shinyjs::hidden(
-               dateInput(
-               inputId = ns("burnRestrictionEndDate"),
-               startview = "month",
-               weekstart = 0,
-               label = h4("until"),
-               value = Sys.Date() + 1,
-               min = Sys.Date(),
-               width = "50%"
-               )
-               ),
-             
-             shinyjs::hidden(
-               textInput(
-                inputId = ns("burnRestrictionEndTime"), 
-                label = h4("HH:00 AM/PM"),
-                value = format(Sys.time(), "%l:00 %p"),
+              dateInput(
+                inputId = ns("nextUpdate"),
+                label = h4("Warning next updated: "),
+                max = Sys.Date() + 7,
+                value = Sys.Date() + 1,
+                startview = "month",
+                weekstart = 0,
                 width = "50%"
-                )
-              )
-          ) # splitLayout
-          ), # box
-          
-          dateInput(
-            inputId = ns("nextUpdate"),
-            label = h4("Warning next updated: "),
-            max = Sys.Date() + 7,
-            value = Sys.Date() + 1,
-            startview = "month",
-            weekstart = 0,
-            width = "50%"
-          ),
-          
-              helpText("Add an optional custom message below. The default message can be retained, edited or deleted."),
+              ),
               
               textAreaInput(inputId = ns("customMessage"),
-                            label = h4("Custom outlook message:"),
+                            label = h4("Custom message (optional): retain, edit or delete"),
                             value = "Current conditions are expected to persist until weather conditions change and/or local emissions are reduced.",
                             width = "100%",
                             height = "80px",
@@ -165,7 +163,7 @@ issueLocalEmissionsUI <- function(id) {
               )
             )
           ) #fluidRow
-          ) # tabItem
+  ) # tabItem
 } 
 
 #--------------------------------------------------
