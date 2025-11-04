@@ -77,7 +77,7 @@ issueLocalEmissionsUI <- function(id) {
                 ),
             
             box(
-              width = 6,
+              width = 12,
               background = "light-blue",
               
              radioButtons(
@@ -125,18 +125,19 @@ issueLocalEmissionsUI <- function(id) {
                 width = "50%"
                 )
               )
-          )
+          ) # splitLayout
+          ), # box
+          
+          dateInput(
+            inputId = ns("nextUpdate"),
+            label = h4("Warning next updated: "),
+            max = Sys.Date() + 7,
+            value = Sys.Date() + 1,
+            startview = "month",
+            weekstart = 0,
+            width = "50%"
           ),
           
-             dateInput(inputId = ns("nextUpdate"),
-                        label = h4("Warning next updated: "),
-                        max = Sys.Date() + 7,
-                        value = Sys.Date() + 1,
-                        startview = "month",
-                        weekstart = 0,
-                        width = "50%"
-              ),
-              
               helpText("Add an optional custom message below. The default message can be retained, edited or deleted."),
               
               textAreaInput(inputId = ns("customMessage"),
@@ -222,16 +223,16 @@ issueLocalEmissions <- function(input, output, session){
       
       # Clean location name for file name
       location_clean <- gsub("\\s+", "_", input$location)
-      pollutant_clean <- gsub(" ", "", gsub("&", "_", input$pollutant))
+      pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", input$pollutant)))
       
       # Set output file name
       if (input$burnRestrictions < 1) {  # no burn restriction
         
-        output_file_name <- sprintf("%s_%s_%s", input$ice, pollutant_clean, location_clean) 
+        output_file_name <- sprintf("%s_%s_%s", tolower(input$ice), pollutant_clean, location_clean) 
         
       } else { # burn restriction; obr = open burning restriction
         
-        output_file_name <- sprintf("%s_%s_%s_%s", input$ice, pollutant_clean, "obr", location_clean) 
+        output_file_name <- sprintf("%s_%s_%s_%s", tolower(input$ice), pollutant_clean, "obr", location_clean) 
         
       }
       

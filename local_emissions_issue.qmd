@@ -372,7 +372,7 @@ if (params$burnRestrictions > 0) {
   }
   
   burn_ban <- paste(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$customMessageBanArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
+    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
     "\n\n",
     "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
     "> " , signature_path, "\n\n",
@@ -383,7 +383,7 @@ if (params$burnRestrictions > 0) {
 
  ###TEMPORARY - until SDM signature is sorted out
     burn_ban_md_temp <- paste(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$customMessageBanArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
+    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
     
 } else {
   
@@ -476,22 +476,22 @@ logos_combined <- magick::image_append(logos) |>
 ```
 
 ```{r create-pdf-filepath}
-### TEMPORARY - until SDM signature is sorted
+### TEMPORARY - until SDM signature is sorted -- also review lines 613:622
 
 # create file path for PDF output
 
  # Clean location name for file name
       location_clean <- gsub("\\s+", "_", params$location)
-      pollutant_clean <- gsub(" ", "", gsub("&", "_", params$pollutant))
+      pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", params$pollutant)))
       
       # Set output file name
       if (params$burnRestrictions < 1) {  # no burn restriction
         
-        output_file_name <- sprintf("%s_%s_%s", params$ice, pollutant_clean, location_clean) 
+        output_file_name <- sprintf("%s_%s_%s", tolower(params$ice), pollutant_clean, location_clean) 
         
       } else { # burn restriction; obp = open burning prohibition
         
-        output_file_name <- sprintf("%s_%s_%s_%s", params$ice, pollutant_clean, "obp", location_clean) 
+        output_file_name <- sprintf("%s_%s_%s_%s", tolower(params$ice), pollutant_clean, "obp", location_clean) 
         
       }
        
@@ -534,7 +534,7 @@ Exposure to `r pollutantExpansion` is particularly a concern for infants, older 
 ```{r, results='asis', echo=FALSE}
 if (params$burnRestrictions > 0) {
   cat(
-    "Open burning restrictions are now in effect ", params$customMessageBanArea,
+    "Open burning restrictions are now in effect ", params$burnRestrictionArea,
     " No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.",
     sep = ""
   )

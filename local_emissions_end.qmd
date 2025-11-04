@@ -1,20 +1,28 @@
 ---
-title: "`r paste0(
-  'Air quality warning ended for ', params$location)`"  # removed "open burning restrictions" - requires user input, which doesn't exist; discuss with team if inclusion of open burning restrictions is required for "end" warnings
+title: "`r if (params$burnRestrictionStatus == 0) { 
+            paste('Air quality warning ended for', params$location)
+                } else if (params$burnRestrictionStatus == 1) {
+        paste('Air quality warning and open burning restrictions ended for', params$location)
+        } else {
+        paste('Air quality warning ended for', params$location, '-- open burning restrictions remain in effect')
+        }`"
 type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
   pollutant: "PM25 & PM10"
-  burnRestrictions: "Yes"
   sel_aqMet: "Sakshi Jain"
   location: "Whistler"
   issuedate: "2025-07-09"
+  burnRestrictionStatus: 0 # 0 = warning ended (no burn restrictions); 1 = warning and burn restrictions ended; 2 = warning ended; burn restrictions continue
+  burnRestrictionSDM: "Ben"
+  burnRestrictionArea: ""
+  burnRestrictionEndDate: "2025-09-28"
+  burnRestrictionEndTime: "12:00 PM"
   outputFormat: "markdown"
   customMessage: ""
 ice: "End"
 author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`"
-customMessageBanArea: "`r params$customMessageBanArea`"  # confirm if this field is needed for "end" warnings
 location: "`r params$location`"
 outputFormat: "`r params$outputFormat`" 
 format:
@@ -226,6 +234,50 @@ HAcontact <- health_contact |>
     summarise(html_string = paste(contact, collapse = sep_type))
 ```
 
+```{r burn_ban, results='asis', echo=FALSE}
+
+if (params$burnRestrictionStatus == 2) {
+  
+  # Define signature and title info depending on who it is
+  if (params$burnRestrictionSDM == 1) {
+    signature_path <- ifelse(params$outputFormat == "markdown", 
+                             paste0("![](//assets/SignatureBW.jpg){width=150px}\n\n"), 
+                             paste0("![](", file.path("src", "signatures", "SignatureBW.jpg"), "){width=150px}\n\n")
+    )
+    name_line <- "Benjamin Weinstein"
+    title_line1 <- "For Director, Environmental Management Act"
+    title_line2 <- "Environmental Monitoring and Analysis Branch"
+  } else if (params$burnRestrictionSDM == 2) {
+    signature_path <- ifelse(params$outputFormat == "markdown",
+                             paste0("![](//assets/SignatureAS.png){width=150px}\n\n"), 
+                             paste0("![](", file.path("src", "signatures", "SignatureAS.png"), "){width=150px}\n\n")
+    )
+    name_line <- "Arvind Saraswat"
+    title_line1 <- "Director, Environmental Management Act"
+    title_line2 <- "Environmental Monitoring and Analysis Branch"
+  }
+  
+  burn_ban <- paste(
+    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
+    "\n\n",
+    "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
+    "> " , signature_path, "\n\n",
+    "> ", name_line, "\n\n",
+    "> ", title_line1, "\n\n",
+    "> ", title_line2, "\n\n"
+)
+
+ ###TEMPORARY - until SDM signature is sorted out
+    burn_ban_md_temp <- paste(
+    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
+
+} else {
+  burn_ban <- NULL
+  burn_ban_md_temp <- NULL
+}
+
+```
+
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
@@ -257,11 +309,20 @@ pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
 # Assign values
 pollutantExpansion  <- pollutant_info$pollutantExpansion
 
+if (params$burnRestrictionStatus == 0 | params$burnRestrictionStatus == 2) {
 first_paragraph <- paste0(
-    "The Ministry of Environment and Parks in collaboration with the ",
-    HAauth, " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
+    "The Ministry of Environment and Parks in collaboration with the ", HAauth,
+    " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
     " due to elevated levels of ", pollutantExpansion, "."
   )
+} else {
+  first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ", HAauth, 
+    " has ended the Air Quality Warning and open burning restrictions that were issued on ", 
+    format(as.Date(params$issuedate), "%B %d, %Y"), " for ",
+    params$location," due to elevated levels of ", pollutantExpansion, "."
+  )
+}
 ```
 
 ```{r create-logo-list}
@@ -332,6 +393,36 @@ logos_combined <- magick::image_append(logos) |>
 }
 ```
 
+```{r create-pdf-filepath}
+### TEMPORARY - until SDM signature is sorted -- also review lines 613:622
+
+# create file path for PDF output
+
+ # Clean location name for file name
+      location_clean <- gsub("\\s+", "_", params$location)
+      pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", params$pollutant)))
+      
+      # Set output file name
+      if (params$burnRestrictionStatus == 0) {  # no burn restriction
+        
+        output_file_name <- sprintf("%s_%s_%s", "end", pollutant_clean, location_clean) 
+        
+      } else if(params$burnRestrictionStatus == 1) { # warning and open burn restrictions both
+        
+        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr", location_clean) 
+        
+      } else {
+        
+        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr_continue", location_clean) 
+        
+      }
+       
+      pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
+      
+      pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
+      mandatory_text <- paste0("Please see the ", "[PDF version of this Air Quality Warning](",pdf_path, ") for the statutory decision-maker sign-off.")
+      
+```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
 <!-- the trailing slash means the text in square brackets is alt text -->
@@ -348,11 +439,32 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-The Ministry of Environment and Parks in collaboration with the `r HAauth` has ended the air quality warning that was issued `r format(as.Date(params$issuedate), '%B %d, %Y')` for `r params$location` due to elevated concentrations of `r pollutantExpansion`. 
+`r first_paragraph`
 
 `r params$customMessage`
 
-Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
+```{r, results='asis', echo=FALSE}
+if (params$burnRestrictionStatus == 2) {
+  cat(
+    "Open burning restrictions remain in effect within ", params$burnRestrictionArea,
+    ". No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.\n\n",
+    sep = ""
+  )
+  
+  cat("# Mandatory emission reduction actions\n")
+}
+
+```
+
+:::{.content-visible when-format = "markdown"}
+`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban_md_temp)`
+`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", mandatory_text)`
+:::
+
+:::{.content-visible when-format = "pdf"}
+`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban)`
+:::
+
 
 # More information
 
@@ -390,6 +502,8 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 }
 
 ```
+
+Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 
 # Contact information
 

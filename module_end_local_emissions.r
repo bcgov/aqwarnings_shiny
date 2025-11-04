@@ -56,32 +56,98 @@ endLocalEmissionsUI <- function(id) {
                 width = "50%"
               ),
               
-              dateInput(inputId = ns("issuedate"),
-                        label = h4("Date warning was first issued:"),
-                        max = Sys.Date(),
-                        value = Sys.Date() -1,
-                        startview = "month",
-                        weekstart = 0,
-                        width = "50%"
+              dateInput(
+                inputId = ns("issuedate"),
+                label = h4("Date warning was first issued:"),
+                max = Sys.Date(),
+                value = Sys.Date() -1,
+                startview = "month",
+                weekstart = 0,
+                width = "50%"
               ),
               
-              helpText("Add an optional custom message below. The default message can be retained, edited or deleted."),
-              
-              textAreaInput(inputId = ns("customMessage"),
-                            label = h4("Custom smoke outlook message:"),
-                            value = "Local air quality has improved due to changing meteorological conditions.",
-                            width = "100%",
-                            height = "80px",
-                            resize = "vertical"),
-              
+              textAreaInput(
+                inputId = ns("customMessage"),
+                label = h4("Custom message (optional): retain, edit or delete"),
+                value = "Local air quality has improved due to changing meteorological conditions.",
+                width = "100%",
+                height = "40px",
+                resize = "vertical"
+              ),
+
+              box(
+                width = 12,
+                background = "light-blue",
+                
+                radioButtons(
+                  inputId = ns("burnRestrictionStatus"),
+                  label = h4("Burn prohibition was:"),
+                  choices = list(
+                    "not issued" = 0, 
+                    "issued but ends with this warning" = 1,
+                    "issued and remains in effect beyond this warning" = 2),
+                  selected = 0,
+                  width = "100%"
+                ),
+                
+                shinyjs::hidden(
+                  radioButtons(
+                  inputId = ns("burnRestrictionSDM"),
+                  label = h4("Statuatory decision maker:"),
+                  choices = c(
+                    "Ben" = 1,
+                    "Arvind" = 2),
+                  selected = 1,
+                  width = "100%",
+                  inline = TRUE
+                )
+                ),
+                
+                shinyjs::hidden(
+                  textAreaInput(
+                    inputId = ns("burnRestrictionArea"),
+                    label = HTML("<h4>Burn prohibition details:</h4><h5>The Director has prohibited open burning within</h5>"),
+                    value = "<location>",
+                    width = "100%",
+                    height = "40px",
+                    resize = "vertical"
+                  )
+                ),
+                
+                splitLayout(
+                  cellWidths = c("50%", "50%"),
+                  shinyjs::hidden(
+                    dateInput(
+                      inputId = ns("burnRestrictionEndDate"),
+                      startview = "month",
+                      weekstart = 0,
+                      label = h5("until"),
+                      value = Sys.Date() + 1,
+                      min = Sys.Date(),
+                      width = "50%"
+                    )
+                  ),
+                  
+                  shinyjs::hidden(
+                    textInput(
+                      inputId = ns("burnRestrictionEndTime"), 
+                      label = h5("HH:00 AM/PM"),
+                      value = format(Sys.time(), "%l:00 %p"),
+                      width = "50%"
+                    )
+                  )
+                ) # splitLayout
+                ), # box
+
               h4(tags$b("2. Generate Warning")),
-              actionButton(
-                inputId = ns("genWarning"),
-                label = "Go!",
-                style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
-              ),
-              
+                actionButton(
+                  inputId = ns("genWarning"),
+                  label = "Go!",
+                  style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+                ),
+ 
               hr(),
+              
               ## Add the download button here:
               downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
               
@@ -91,9 +157,9 @@ endLocalEmissionsUI <- function(id) {
                 label = "clean dir"
               )
               
-            )
-          )
-  )
+            ) # box
+          ) # fluidRow
+          ) # tabItem
 } 
 
 #--------------------------------------------------
@@ -101,6 +167,31 @@ endLocalEmissionsUI <- function(id) {
 #--------------------------------------------------
 
 endLocalEmissions <- function(input, output, session){
+  
+  
+  # show/hide conditional inputs
+  observeEvent(input$pollutant, {
+    if (input$pollutant == "O3") {
+      shinyjs::hide("burnRestrictionStatus") 
+    } else {
+      shinyjs::show("burnRestrictionStatus")
+    }
+  })
+  
+  observeEvent(input$burnRestrictionStatus, {
+    if (input$burnRestrictionStatus == 2) {
+      shinyjs::showElement("burnRestrictionSDM")
+      shinyjs::showElement("burnRestrictionArea")
+      shinyjs::showElement("burnRestrictionEndDate")
+      shinyjs::showElement("burnRestrictionEndTime")
+    } else {
+    #  shinyjs::show("burnRestrictionSDM")
+      shinyjs::hideElement("burnRestrictionSDM")
+      shinyjs::hideElement("burnRestrictionArea")
+      shinyjs::hideElement("burnRestrictionEndDate")
+      shinyjs::hideElement("burnRestrictionEndTime")
+    }
+  })
   
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
@@ -120,10 +211,23 @@ endLocalEmissions <- function(input, output, session){
       
       # Clean location name for file name
       location_clean <- gsub("\\s+", "_", input$location)
-      pollutant_clean <- gsub(" ", "", gsub("&", "_", input$pollutant))
+      pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", input$pollutant)))
       
-      output_file_name <- sprintf("%s_%s_%s", "End", pollutant_clean, location_clean) 
-  
+      # Set output file name
+      if (input$burnRestrictionStatus == 0) {  # no burn restriction
+        
+        output_file_name <- sprintf("%s_%s_%s", "end", pollutant_clean, location_clean) 
+        
+      } else if(input$burnRestrictionStatus == 1) { # warning and open burn restrictions both
+        
+        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr", location_clean) 
+        
+      } else {
+        
+        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr_continue", location_clean) 
+        
+      }
+      
       # generate warning: markdown and pdf formats
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("local_emissions_end.qmd"),
@@ -133,6 +237,11 @@ endLocalEmissions <- function(input, output, session){
                               sel_aqMet = input$sel_aqMet,
                               pollutant = input$pollutant,
                               location = input$location,
+                              burnRestrictionStatus = input$burnRestrictionStatus,
+                              burnRestrictionSDM = input$burnRestrictionSDM,
+                              burnRestrictionArea = input$burnRestrictionArea,
+                              burnRestrictionEndDate = input$burnRestrictionEndDate,
+                              burnRestrictionEndTime = input$burnRetsrictionEndTime,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               outputFormat = "markdown"),
@@ -151,6 +260,11 @@ endLocalEmissions <- function(input, output, session){
                               sel_aqMet = input$sel_aqMet,
                               pollutant = input$pollutant,
                               location = input$location,
+                              burnRestrictionStatus = input$burnRestrictionStatus,
+                              burnRestrictionSDM = input$burnRestrictionSDM,
+                              burnRestrictionArea = input$burnRestrictionArea,
+                              burnRestrictionEndDate = input$burnRestrictionEndDate,
+                              burnRestrictionEndTime = input$burnRetsrictionEndTime,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               outputFormat = "pdf"),
