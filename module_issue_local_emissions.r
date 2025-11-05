@@ -77,7 +77,7 @@ issueLocalEmissionsUI <- function(id) {
               ),
               
               box(
-                width = 12,
+                width = 8,
                 background = "light-blue",
                 
                 radioButtons(
@@ -200,6 +200,35 @@ issueLocalEmissions <- function(input, output, session){
       shinyjs::hide("issuedate")
     }
   })
+  
+  # reset burn restriction info when pollutant changed; action button but didn't seem to work? Consider uiOuput to streamline?
+  observeEvent(input$pollutant, {
+    
+    updateRadioButtons(
+      session,
+      inputId = "burnRestrictions",
+      selected = 0
+    )
+    
+    updateTextAreaInput(
+      session,
+      inputId = "burnRestrictionArea",
+      value = "<location>"
+    )
+    
+    updateDateInput(
+      session,
+      inputId = "burnRestrictionEndDate",
+      value = Sys.Date() + 1
+    )
+    
+    updateTextInput(
+      session,
+      inputId = "burnRestrictionEndTime",
+      value = format(Sys.time(), "%l:00 %p"))
+    
+  })
+  
   
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
