@@ -488,8 +488,9 @@ pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", params$pollutant)))
 if (params$burnRestrictions < 1) {  # no burn restriction
   
   output_file_name <- sprintf("%s_%s_%s", tolower(params$ice), pollutant_clean, location_clean) 
+  mandatory_text <- NULL
   
-} else { # burn restriction; obr = open burning prohibition
+} else { # burn restriction in effect; obr = open burning prohibition
   
   output_file_name <- sprintf("%s_%s_%s_%s", tolower(params$ice), pollutant_clean, "obr", location_clean) 
   pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
@@ -497,7 +498,7 @@ if (params$burnRestrictions < 1) {  # no burn restriction
                            "[PDF version of this Air Quality Warning](",
                            pdf_path, 
                            ") for the statutory decision-maker sign-off related to open burning restrictions."
-                           )
+  )
 }
 
 pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
@@ -519,13 +520,14 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-:::{.content-visible when-format = "markdown"}
+<!-- Start: Temporary - until SDM signature is sorted -->
+`r if (params$burnRestrictions == 0 | params$outputFormat == "pdf") ":::{.content-hidden}"`
 
-{{< inline_alert_start>}}
-`r mandatory_text`
-{{< inline_alert_end >}}
+{{< inline_alert_start>}} `r mandatory_text` {{< inline_alert_end >}}
 
-:::
+`r if (params$burnRestrictions == 0 | params$outputFormat == "pdf") ":::"`
+<!-- End: Temporary - until SDM signature is sorted -->
+
 
 `r first_paragraph`
 

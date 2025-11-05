@@ -394,7 +394,7 @@ logos_combined <- magick::image_append(logos) |>
 ```
 
 ```{r create-pdf-filepath}
-### TEMPORARY - until SDM signature is sorted -- also review lines 613:622
+### TEMPORARY - until SDM signature is sorted -- also remove lines 444-450, 471
 
 # create file path for PDF output
 
@@ -406,10 +406,12 @@ logos_combined <- magick::image_append(logos) |>
       if (params$burnRestrictionStatus == 0) {  # no burn restriction
         
         output_file_name <- sprintf("%s_%s_%s", "end", pollutant_clean, location_clean) 
+        mandatory_text <- NULL
         
       } else if(params$burnRestrictionStatus == 1) { # warning and open burn restrictions end
         
         output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr", location_clean) 
+        mandatory_text <- NULL
         
       } else { # warning ends open burn restrictions continue
         
@@ -441,13 +443,13 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-:::{.content-visible when-format = "markdown"}
+<!-- Start: Temporary - until SDM signature is sorted -->
+`r if (params$burnRestrictionStatus < 2 | params$outputFormat == "pdf") ":::{.content-hidden}"`
 
-{{< inline_alert_start>}}
-`r mandatory_text`
-{{< inline_alert_end >}}
+{{< inline_alert_start>}} `r mandatory_text` {{< inline_alert_end >}}
 
-:::
+`r if (params$burnRestrictionStatus < 2 | params$outputFormat == "pdf") ":::"`
+<!-- End: Temporary - until SDM signature is sorted -->
 
 `r first_paragraph`
 
