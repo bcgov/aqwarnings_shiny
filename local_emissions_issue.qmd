@@ -91,7 +91,7 @@ for (i in seq_along(pollutants)) {
   
   # ---- Lookup table for units and averaging times ----
   lookup <- data.frame(
-    units = c("$\\mu$g/m$^{3}$", "$\\mu$g/m$^{3}$", "ppb"),
+    units = c("μg/m^3^", "μg/m^3^", "ppb"),
     hours = c(24, 24, 8),
     row.names = c("PM25", "PM10", "O3")
   ) |> 
@@ -214,17 +214,17 @@ list2env(results, envir = .GlobalEnv)
 ```{r additional_info, include=FALSE, results='asis'}
 
 additional_info_PM25 <- paste0(
-  "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers ($\\mu$m) or less.  PM$_{2.5}$ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM$_{2.5}$ can easily penetrate indoors because of their small size. Common sources of PM$_{2.5}$ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
+  "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
     
-The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
 )
 
 additional_info_PM10 <- paste0(
-  "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers ($\\mu$m). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 $\\mu$m or less), these particles are referred to as PM$_{10}$. Sources of PM$_{10}$ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM$_{10}$ can easily penetrate indoors because of their small size.
+  "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers (μm). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 μm or less), these particles are referred to as PM~10~. Sources of PM~10~ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM~10~ can easily penetrate indoors because of their small size.
   
   The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.
   
-  The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
 )
 
 additional_info_O3 <- paste0(
@@ -494,11 +494,7 @@ if (params$burnRestrictions < 1) {  # no burn restriction
   
   output_file_name <- sprintf("%s_%s_%s_%s", tolower(params$ice), pollutant_clean, "obr", location_clean) 
   pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
-  mandatory_text <- paste0("Please see the ", 
-                           "[PDF version of this Air Quality Warning](",
-                           pdf_path, 
-                           ") for the statutory decision-maker sign-off related to open burning restrictions."
-  )
+  mandatory_text <- paste0("Please see the [PDF version of this Air Quality Warning](", pdf_path, ") for the statutory decision-maker sign-off related to open burning restrictions.")
 }
 
 pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
@@ -523,7 +519,11 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 <!-- Start: Temporary - until SDM signature is sorted -->
 `r if (params$burnRestrictions == 0 | params$outputFormat == "pdf") ":::{.content-hidden}"`
 
-{{< inline_alert_start>}} `r mandatory_text` {{< inline_alert_end >}}
+{{< inline_alert_start>}} 
+
+`r mandatory_text` 
+
+{{< inline_alert_end >}}
 
 `r if (params$burnRestrictions == 0 | params$outputFormat == "pdf") ":::"`
 <!-- End: Temporary - until SDM signature is sorted -->
@@ -549,13 +549,23 @@ The next update will be on `r format(as.Date(params$nextUpdate), "%B %d, %Y")` a
 
 Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 
-# Actions you can take
+## Actions you can take
 
 As air contaminant levels increase, health risks increase. Consider reducing or rescheduling outdoor sports, activities and events.
 
 People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
 
-## Follow your common sense
+::: {.content-visible when-format="markdown"}
+
+{{< accordion_controls >}}
+
+{{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
+
+:::
+
+::: {.content-visible when-format="pdf"}
+### Follow your common sense
+:::
 
 - Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
 
@@ -569,7 +579,14 @@ if (current_month %in% 6:8) {
 - Always carry any rescue medications with you.
 - Make sure that children and others who cannot care for themselves follow the same advice.
 
-## Monitor your symptoms
+::: {.content-visible when-format="markdown"}
+{{< accordion_end >}}
+{{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+### Monitor your symptoms
+:::
 
 - Different people have different responses to elevated levels of air contaminants.
 - Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the air contaminants return to typical levels.
@@ -578,7 +595,14 @@ if (current_month %in% 6:8) {
 - If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
 - If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
 
-## Tips to reduce your exposure to air pollution
+::: {.content-visible when-format="markdown"}
+{{< accordion_end >}}
+{{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+### Tips to reduce your exposure to air pollution
+:::
 
 - Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
 - When indoors, keep windows and doors closed as much as possible.
@@ -609,26 +633,57 @@ if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in%
 }
 ```
 
-# Mandatory emission reduction actions
+::: {.content-visible when-format="markdown"}
+{{< accordion_end >}}
+:::
+
+## Emission reduction actions
+
+::: {.content-visible when-format="markdown"}
+{{< accordion_start title="Mandatory actions" initiallyOpen="true" >}}
 
 - Facilities with air discharge authorizations under the Environmental Management Act are required to follow trigger actions within their permit related to Air Quality Warnings and are encouraged to reduce any other emissions where possible.
 
-:::{.content-visible when-format = "markdown"}
 `r if (!is.null(bylaws) && nzchar(bylaws)) paste0("- ", bylaws)`
 `r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban_md_temp)`
 `r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", mandatory_text)`
+
+{{< accordion_end >}}
 :::
 
-:::{.content-visible when-format = "pdf"}
+::: {.content-visible when-format="pdf"}
+
+### Mandatory actions
+- Facilities with air discharge authorizations under the Environmental Management Act are required to follow trigger actions within their permit related to Air Quality Warnings and are encouraged to reduce any other emissions where possible.
+
 `r if (!is.null(bylaws) && nzchar(bylaws)) paste0("- ", bylaws)`
 `r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban)`
+
 :::
 
-# Voluntary emission reduction actions
+::: {.content-visible when-format="markdown"}
+{{< accordion_start title="Voluntary actions" initiallyOpen="true" >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+### Voluntary actions
+:::
 
 `r voluntary_reduction`
 
-# More information
+::: {.content-visible when-format="markdown"}
+{{< accordion_end >}}
+:::
+
+## More information
+
+::: {.content-visible when-format="markdown"}
+{{< accordion_start title="Current conditions" initiallyOpen="true" >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+### Current conditions
+:::
 
 ```{r final-table, results='asis', echo=FALSE}
 
@@ -663,23 +718,71 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 ```
 
-## For general information about air quality in British Columbia: 
+::: {.content-visible when-format="markdown"}
+{{< accordion_end >}}
+:::
 
-- Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
+::: {.content-visible when-format="pdf"}
+### For additional information about air quality in British Columbia
+:::
+
+::: {.content-visible when-format="markdown"}
+**For additional information about air quality in British Columbia:**
+
+<div class="bcds-card-wrapper"> 
+{{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
+
+[What's the air like today?] {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+
+[Latest air quality data] {{< card_end >}}{{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
+
+[Air quality data and warnings] {{< card_end >}}
+</div>
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
 - View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
 - Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
+- Visit the provincial [air quality data webpage][Air quality data] for more information about air quality in B.C.
 - [Metro Vancouver’s Air Quality Data and Warnings][Air quality data and warnings]
 
-[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
 [What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
 [Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
+[Air quality data]:(https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality)
+[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
 
-# Contact information
+:::
 
-**Media questions regarding health implications of this Air Quality Warning:**
+## Contact
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"} `r ENVcontact` [{{< card_end >}}]{.content-visible when-format="markdown"}
+::: {.content-visible when-format="pdf"}
+### Media questions regarding this Air Quality Warning
+:::
 
-**Media questions regarding health implications of this Air Quality Warning:**
+::: {.content-visible when-format="markdown"}
+**Media questions regarding this Air Quality Warning:**
+{{< card_start width="wide" >}}
+:::
 
-[{{< card_start  width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
+`r ENVcontact` 
+
+::: {.content-visible when-format="markdown"}
+{{< card_end >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+### Media questions regarding health implications when air quality is degraded
+:::
+
+::: {.content-visible when-format="markdown"}
+**Media questions regarding health implications when air quality is degraded:**
+{{< card_start  width="wide" >}}
+:::
+
+`r paste(HAcontact$html_string, collapse = "\n\n")`
+
+::: {.content-visible when-format="markdown"}
+{{< card_end >}}
+:::

@@ -85,7 +85,7 @@ for (i in seq_along(pollutants)) {
   
   # ---- Lookup table for units and averaging times ----
   lookup <- data.frame(
-    units = c("$\\mu$g/m$^{3}$", "$\\mu$g/m$^{3}$", "ppb"),
+    units = c("μg/m^3^", "μg/m^3^", "ppb"),
     hours = c(24, 24, 8),
     row.names = c("PM25", "PM10", "O3")
   ) |> 
@@ -281,11 +281,11 @@ if (params$burnRestrictionStatus == 2) {
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
-    "The provincial air quality objective for PM$_{2.5}$ is 25 micrograms per cubic metre ($\\mu$g/m$^{3}$) averaged over 24 hours. 24-hour average PM$_{2.5}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+    "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
   )
 
 additional_info_PM10 <- paste0(
-  "The provincial air quality objective for PM$_{10}$ is 50 micrograms per cubic metre ($\\mu$g/m$^{3}$), averaged over 24 hours. 24-hour average PM$_{10}$ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  "The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
   )
 
 additional_info_O3 <- paste0(
@@ -417,10 +417,7 @@ logos_combined <- magick::image_append(logos) |>
         
         output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr_continue", location_clean)
         pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
-        mandatory_text <- paste0("Please see the ", "[PDF version of this Air Quality Warning](",
-                                 pdf_path, 
-                                 ") for the statutory decision-maker sign-off related to open burning restrictions."
-        )
+        mandatory_text <- paste0("Please see the [PDF version of this Air Quality Warning](", pdf_path, ") for the statutory decision-maker sign-off related to open burning restrictions.")
         
       }
        
@@ -446,7 +443,11 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 <!-- Start: Temporary - until SDM signature is sorted -->
 `r if (params$burnRestrictionStatus < 2 | params$outputFormat == "pdf") ":::{.content-hidden}"`
 
-{{< inline_alert_start>}} `r mandatory_text` {{< inline_alert_end >}}
+{{< inline_alert_start>}} 
+
+`r mandatory_text` 
+
+{{< inline_alert_end >}}
 
 `r if (params$burnRestrictionStatus < 2 | params$outputFormat == "pdf") ":::"`
 <!-- End: Temporary - until SDM signature is sorted -->
@@ -463,22 +464,39 @@ if (params$burnRestrictionStatus == 2) {
     sep = ""
   )
   
-  cat("# Mandatory emission reduction actions\n")
+  cat("\n")
 }
 
 ```
 
-:::{.content-visible when-format = "markdown"}
+::: {.content-visible when-format="pdf"}
+
+`r if (params$burnRestrictionStatus < 2) ":::{.content-hidden}"`
+## Mandatory emission reduction actions
+`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban)`
+`r if (params$burnRestrictionStatus < 2) ":::"`
+
+:::
+
+::: {.content-visible when-format="markdown"}
+
+`r if (params$burnRestrictionStatus < 2) ":::{.content-hidden}"`
+## Mandatory emission reduction actions
 `r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban_md_temp)`
 `r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", mandatory_text)`
+`r if (params$burnRestrictionStatus < 2) ":::"`
+
 :::
 
-:::{.content-visible when-format = "pdf"}
-`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban)`
+## More information
+
+::: {.content-visible when-format="markdown"}
+{{< accordion_start title="Current conditions" initiallyOpen="true" >}}
 :::
 
-
-# More information
+::: {.content-visible when-format="pdf"}
+### Current conditions
+:::
 
 ```{r final-table, results='asis', echo=FALSE}
 
@@ -517,12 +535,38 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 
-# Contact information
+::: {.content-visible when-format="markdown"}
+{{< accordion_end >}}
+:::
 
-**Media questions regarding health implications of this Air Quality Warning:**
+## Contact
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"} `r ENVcontact` [{{< card_end >}}]{.content-visible when-format="markdown"}
+::: {.content-visible when-format="pdf"}
+### Media questions regarding this Air Quality Warning
+:::
 
-**Media questions regarding health implications of this Air Quality Warning:**
+::: {.content-visible when-format="markdown"}
+**Media questions regarding this Air Quality Warning:**
+{{< card_start width="wide" >}}
+:::
 
-[{{< card_start  width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
+`r ENVcontact` 
+
+::: {.content-visible when-format="markdown"}
+{{< card_end >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+### Media questions regarding health implications related to degraded air quality
+:::
+
+::: {.content-visible when-format="markdown"}
+**Media questions regarding health implications when air quality is degraded:**
+{{< card_start  width="wide" >}}
+:::
+
+`r paste(HAcontact$html_string, collapse = "\n\n")`
+
+::: {.content-visible when-format="markdown"}
+{{< card_end >}}
+:::
