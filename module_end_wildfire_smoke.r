@@ -27,7 +27,7 @@ endWildfireSmokeUI <- function(id) {
     fluidRow(
 
       box(
-        width = 3,
+        width = 6,
         status = "primary",
 
         h4(tags$b("1. Complete fields below")),
@@ -53,8 +53,8 @@ endWildfireSmokeUI <- function(id) {
           label = h4("Custom message:"),
           value = "Wildfire smoke concentrations have reduced over the past 24 hours.",
           placeholder = "(example) Wildfire smoke concentrations have reduced over the past 24 hours.",
-          width = "100%",
-          height = "100%",
+          width = "50%",
+          height = "80px",
           resize = "vertical"
         ),
 
@@ -62,29 +62,32 @@ endWildfireSmokeUI <- function(id) {
           inputId = ns("sel_healthAuth"),
           label = h4("Health Authorities included on last warning (select all that apply; FNHA is automatically selected):"),
           choices = unique(health_contact$authority)[unique(health_contact$authority) != "First Nations Health Authority"],   #exclude FNHA as a choice - exists on all bulletins
-          width = "100%"
+          width = "50%"
         ),
+        
+        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         
         selectizeInput(
           inputId = ns("location"),
           label = h4(HTML("<b>2. Describe affected regions</b> (for warnings table on website)")),
           selected = "",
           choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
-          width = "100%",
+          width = "50%",
           options = list(create = TRUE)
         ),
         
-
+        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+        
         h4(tags$b("3. Generate Warning")),
         actionButton(
          inputId = ns("genWarning"),
          label = "Go!",
-         style = "width: 75%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+         style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
        ),
        
        hr(),
        ## Add the download button here:
-       downloadButton(ns("download_report"), "Download Files", style = "width: 75%"),
+       downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
 
        hr(),
        actionButton(

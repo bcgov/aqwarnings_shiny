@@ -77,7 +77,7 @@ issueLocalEmissionsUI <- function(id) {
               ),
               
               box(
-                width = 8,
+                width = 6,
                 background = "light-blue",
                 
                 radioButtons(
@@ -110,7 +110,7 @@ issueLocalEmissionsUI <- function(id) {
                       inputId = ns("burnRestrictionEndDate"),
                       startview = "month",
                       weekstart = 0,
-                      label = h4("until"),
+                      label = h5("until"),
                       value = Sys.Date() + 1,
                       min = Sys.Date(),
                       width = "50%"
@@ -120,13 +120,21 @@ issueLocalEmissionsUI <- function(id) {
                   shinyjs::hidden(
                     textInput(
                       inputId = ns("burnRestrictionEndTime"), 
-                      label = h4("HH:00 AM/PM"),
-                      value = format(Sys.time(), "%l:00 %p"),
+                      label = h5("HH:00 AM/PM"),
+                      value = "HH:00 AM",
                       width = "50%"
                     )
                   )
                 ) # splitLayout
               ), # box
+              
+              textAreaInput(
+                inputId = ns("customMessage"),
+                label = h4("Custom message (optional): retain, edit or delete"),
+                value = "Current conditions are expected to persist until weather conditions change and/or local emissions are reduced.",
+                width = "50%",
+                height = "80px",
+                resize = "vertical"),
               
               dateInput(
                 inputId = ns("nextUpdate"),
@@ -138,14 +146,9 @@ issueLocalEmissionsUI <- function(id) {
                 width = "50%"
               ),
               
-              textAreaInput(inputId = ns("customMessage"),
-                            label = h4("Custom message (optional): retain, edit or delete"),
-                            value = "Current conditions are expected to persist until weather conditions change and/or local emissions are reduced.",
-                            width = "100%",
-                            height = "80px",
-                            resize = "vertical"),
-              
+              tags$div(style = "margin-top: 40px;"),  # Adds vertical space
               h4(tags$b("2. Generate Warning")),
+              
               actionButton(
                 inputId = ns("genWarning"),
                 label = "Go!",
@@ -225,10 +228,10 @@ issueLocalEmissions <- function(input, output, session){
     updateTextInput(
       session,
       inputId = "burnRestrictionEndTime",
-      value = format(Sys.time(), "%l:00 %p"))
+      value = "HH:00 PM"
+      )
     
   })
-  
   
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {

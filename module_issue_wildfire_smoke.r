@@ -79,9 +79,11 @@ issueWildfireSmokeUI <- function(id) {
                       width = "100%",
                       height = "80px",
                       resize = "vertical"),
-
+        
+        tags$div(style = "margin-top: 20px;"),  # Adds vertical space
         h4(tags$b("2. Select regions on map")),
         
+        tags$div(style = "margin-top: 20px;"),  # Adds vertical space
         selectizeInput(
           inputId = ns("location"),
           selected = "",
@@ -91,17 +93,18 @@ issueWildfireSmokeUI <- function(id) {
           options = list(create = TRUE)
         ),
         
+        tags$div(style = "margin-top: 20px;"),  # Adds vertical space
         h4(tags$b("4. Generate Warning")),
 
         actionButton(
           inputId = ns("genWarning"),
           label = "Go!",
-          style = "width: 75%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+          style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
         ),
        
         hr(),
         
-        downloadButton(ns("download_report"), "Download Files", style = "width: 75%"),
+        downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
         
         hr(),
         

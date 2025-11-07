@@ -25,8 +25,7 @@ endLocalEmissionsUI <- function(id) {
   ns <- NS(id)
   tabItem(tabName = "end",
           fluidRow(
-            
-            box(
+           box(
               width = 6,
               status = "primary",
               
@@ -66,17 +65,8 @@ endLocalEmissionsUI <- function(id) {
                 width = "50%"
               ),
               
-              textAreaInput(
-                inputId = ns("customMessage"),
-                label = h4("Custom message (optional): retain, edit or delete"),
-                value = "Local air quality has improved due to changing meteorological conditions.",
-                width = "100%",
-                height = "40px",
-                resize = "vertical"
-              ),
-
               box(
-                width = 12,
+                width = 6,
                 background = "light-blue",
                 
                 radioButtons(
@@ -108,8 +98,8 @@ endLocalEmissionsUI <- function(id) {
                     inputId = ns("burnRestrictionArea"),
                     label = HTML("<h4>Burn prohibition details:</h4><h5>The Director has prohibited open burning within</h5>"),
                     value = "<location>",
-                    width = "100%",
-                    height = "40px",
+                    width = "50%",
+                    height = "80px",
                     resize = "vertical"
                   )
                 ),
@@ -132,14 +122,25 @@ endLocalEmissionsUI <- function(id) {
                     textInput(
                       inputId = ns("burnRestrictionEndTime"), 
                       label = h5("HH:00 AM/PM"),
-                      value = format(Sys.time(), "%l:00 %p"),
+                      value = "HH:00 AM",
                       width = "50%"
                     )
                   )
                 ) # splitLayout
                 ), # box
 
+              textAreaInput(
+                inputId = ns("customMessage"),
+                label = h4("Custom message (optional): retain, edit or delete"),
+                value = "Local air quality has improved due to changing meteorological conditions.",
+                width = "50%",
+                height = "80px",
+                resize = "vertical"
+              ),
+              
+              tags$div(style = "margin-top: 40px;"),  # Adds vertical space
               h4(tags$b("2. Generate Warning")),
+              
                 actionButton(
                   inputId = ns("genWarning"),
                   label = "Go!",
@@ -180,17 +181,20 @@ endLocalEmissions <- function(input, output, session){
   
   observeEvent(input$burnRestrictionStatus, {
     if (input$burnRestrictionStatus == 2) {
+      
       shinyjs::showElement("burnRestrictionSDM")
       shinyjs::showElement("burnRestrictionArea")
       shinyjs::showElement("burnRestrictionEndDate")
       shinyjs::showElement("burnRestrictionEndTime")
-    } else {
-    #  shinyjs::show("burnRestrictionSDM")
+    
+      } else {
+    
       shinyjs::hideElement("burnRestrictionSDM")
       shinyjs::hideElement("burnRestrictionArea")
       shinyjs::hideElement("burnRestrictionEndDate")
       shinyjs::hideElement("burnRestrictionEndTime")
-    }
+    
+      }
   })
   
   # reset burn restriction info when pollutant changed; action button but didn't seem to work? Consider uiOuput to streamline?
@@ -223,7 +227,8 @@ endLocalEmissions <- function(input, output, session){
     updateTextInput(
       session,
       inputId = "burnRestrictionEndTime",
-      value = format(Sys.time(), "%l:00 %p"))
+      value = "HH:00 PM"
+      )
     
   })
   
@@ -275,7 +280,7 @@ endLocalEmissions <- function(input, output, session){
                               burnRestrictionSDM = input$burnRestrictionSDM,
                               burnRestrictionArea = input$burnRestrictionArea,
                               burnRestrictionEndDate = input$burnRestrictionEndDate,
-                              burnRestrictionEndTime = input$burnRetsrictionEndTime,
+                              burnRestrictionEndTime = input$burnRestrictionEndTime,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               outputFormat = "markdown"),
@@ -298,7 +303,7 @@ endLocalEmissions <- function(input, output, session){
                               burnRestrictionSDM = input$burnRestrictionSDM,
                               burnRestrictionArea = input$burnRestrictionArea,
                               burnRestrictionEndDate = input$burnRestrictionEndDate,
-                              burnRestrictionEndTime = input$burnRetsrictionEndTime,
+                              burnRestrictionEndTime = input$burnRestrictionEndTime,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               outputFormat = "pdf"),
