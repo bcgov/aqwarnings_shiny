@@ -615,7 +615,7 @@ if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
   )
 }
 
-if (params$pollutant == "PM10") {
+if (params$pollutant == "PM10" && current_month %in% 6:8) {
   cat("- Avoid busy roadways.\n")
 }
 
