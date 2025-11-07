@@ -49,7 +49,7 @@ knitr::opts_chunk$set(echo=FALSE,
                       message=FALSE,
                       warning=FALSE)
 
-library(tidyverse)
+library(tidyverse)   #could this be streamlined?
 library(knitr)
 library(data.table)
 library(shiny)
@@ -62,7 +62,6 @@ library(dplyr)
 
 source(here::here("load_metadata.r"))
 source(here::here(file.path("functions", "local_tz.r")))
-
 
 # date/time information 
 current_month <- as.numeric(format(Sys.Date(), "%m"))
@@ -99,7 +98,7 @@ for (i in seq_along(pollutants)) {
   
   # ---- Read in CSV from FTP ----
   columndefs <- cols_only(
-    DATE_PST = col_character(),  # time zone assigned below; col_datetime does not support time zone assignment
+    DATE_PST = col_character(),  # time zone assigned later; col_datetime does not support time zone assignment
     STATION_NAME = col_factor(),
     INSTRUMENT = col_factor(),  #is instrument necessary?
     REPORTED_VALUE = col_double(),
@@ -211,65 +210,20 @@ for (i in seq_along(pollutants)) {
 list2env(results, envir = .GlobalEnv)
 ```
 
-```{r additional_info, include=FALSE, results='asis'}
+```{r ENVcontact, include=FALSE}
+#| results: asis
+#| strip.white: false
 
-additional_info_PM25 <- paste0(
-  "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
-    
-The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-)
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
-additional_info_PM10 <- paste0(
-  "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers (μm). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 μm or less), these particles are referred to as PM~10~. Sources of PM~10~ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM~10~ can easily penetrate indoors because of their small size.
-  
-  The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.
-  
-  The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-)
-
-additional_info_O3 <- paste0(
-  "Ground-level ozone is formed when chemicals (such as nitrogen oxides and volatile organic compounds) react in the air when there is sunlight. Nitrogen oxides are emitted from vehicles, boilers, building heating, and other combustion processes. VOCs are emitted from burning fossil fuels, evaporation of solvents (including paint, varnishes and thinners), refining and storing fuel and agricultural activities. VOCs also come from natural sources such as vegetation.
-  
-The highest concentrations of ground-level ozone usually happen between mid-afternoon and early evening on summer days.
-  
-The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality warnings. Air quality warnings for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. 
-
-The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-)
-
+# AQ met information
+ENVcontact <- aq_mets |>
+  filter(fullname == params$sel_aqMet) |>
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
+  pull(contact) 
 ```
 
-```{r volunary_reduction, include=FALSE}
-
-voluntary_reduction_PM25 <- paste0(
-  if (current_month %in% c(10:12, 1:4)) {
-    "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n"
-  } else {
-    ""
-  },
-  "- Reduce vehicle use where possible and avoid idling vehicles.\n",
-  sep=""
-)
-
-voluntary_reduction_PM10 <- paste0(
-  "- Avoid driving on the road shoulder or other areas where road traction material has accumulated.\n",
-  "-  When cleaning driveways and parking lots, lightly wet the area before sweeping. Avoid using leaf blowers to clean up dirt during spring clean up.\n"
-)
-
-voluntary_reduction_PM <- paste0(
-  voluntary_reduction_PM25,
-  voluntary_reduction_PM10,
-  sep = "\n\n"
-)
-
-voluntary_reduction_O3 <- paste0(
-  "- Fuel your vehicle in the cooler evening hours or after dark.\n",
-  "- Reduce or reschedule using other gasoline and diesel equipment, such as lawn mowers, trimmers and leaf blowers.\n"
-)
-```
-
-```{r include=FALSE}
-#| label: HAcontact
+```{r HAcontact, include=FALSE}
 #| results: asis
 
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
@@ -283,6 +237,35 @@ HAcontact <- health_contact |>
   select(authority, contact) |>
   group_by(authority) |>
   summarise(html_string = paste(contact, collapse = sep_type))
+```
+
+```{r voluntary_reduction, include=FALSE}
+
+voluntary_reduction_PM25 <- paste0(
+  if (current_month %in% c(10:12, 1:4)) {
+    "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n"
+  } else {
+    ""
+  },
+  "- Reduce vehicle use where possible and avoid idling vehicles.\n",
+  sep=""
+)
+
+voluntary_reduction_PM10 <- paste0(
+  "- Avoid driving on the road shoulder or other areas where road traction material has accumulated.\n",
+  "- When cleaning driveways and parking lots, lightly wet the area before sweeping. Avoid using leaf blowers to clean up dirt during spring clean up.\n"
+)
+
+voluntary_reduction_PM <- paste0(
+  voluntary_reduction_PM25,
+  voluntary_reduction_PM10,
+  sep = "\n\n"
+)
+
+voluntary_reduction_O3 <- paste0(
+  "- Fuel your vehicle in the cooler evening hours or after dark.\n",
+  "- Reduce or reschedule using other gasoline and diesel equipment, such as lawn mowers, trimmers and leaf blowers.\n"
+)
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -318,6 +301,34 @@ if (params$ice == "Issue") {
     ". The warning remains in effect due to elevated ", pollutantExpansion, "."
   )
 }
+
+```
+
+```{r additional_info, include=FALSE, results='asis'}
+
+additional_info_PM25 <- paste0(
+  "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
+    
+The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+)
+
+additional_info_PM10 <- paste0(
+  "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers (μm). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 μm or less), these particles are referred to as PM~10~. Sources of PM~10~ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM~10~ can easily penetrate indoors because of their small size.
+  
+  The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.
+  
+  The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+)
+
+additional_info_O3 <- paste0(
+  "Ground-level ozone is formed when chemicals (such as nitrogen oxides and volatile organic compounds) react in the air when there is sunlight. Nitrogen oxides are emitted from vehicles, boilers, building heating, and other combustion processes. VOCs are emitted from burning fossil fuels, evaporation of solvents (including paint, varnishes and thinners), refining and storing fuel and agricultural activities. VOCs also come from natural sources such as vegetation.
+  
+The highest concentrations of ground-level ozone usually happen between mid-afternoon and early evening on summer days.
+  
+The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality warnings. Air quality warnings for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. 
+
+The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+)
 
 ```
 
@@ -386,26 +397,10 @@ if (params$burnRestrictions > 0) {
     "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
   
 } else {
-  
-  mandatory_reductions_heading <- NULL
   burn_ban <- NULL
   burn_ban_md_temp <- NULL
 }
 
-```
-
-```{r include=FALSE}
-#| label: ENVcontact
-#| results: asis
-#| strip.white: false
-
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
-# AQ met information
-ENVcontact <- aq_mets |>
-  filter(fullname == params$sel_aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
-  pull(contact) 
 ```
 
 ```{r create-logo-list}
