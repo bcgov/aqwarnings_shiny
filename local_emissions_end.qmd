@@ -13,13 +13,13 @@ params:
   sel_aqMet: "Sakshi Jain"
   location: "Whistler"
   issuedate: "2025-07-09"
-  burnRestrictionStatus: 0 # 0 = warning ended (no burn restrictions); 1 = warning and burn restrictions ended; 2 = warning ended; burn restrictions continue
+  outputFormat: "markdown"
+  customMessage: ""
+  burnRestrictionStatus: 0 # 0 = warning ended; 1 = warning and burn restrictions ended; 2 = warning ended; burn restrictions continue
   burnRestrictionSDM: "Ben"
   burnRestrictionArea: ""
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
-  outputFormat: "markdown"
-  customMessage: ""
 ice: "End"
 author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`"
@@ -234,6 +234,53 @@ HAcontact <- health_contact |>
     summarise(html_string = paste(contact, collapse = sep_type))
 ```
 
+```{r pollutant_specific_clauses, include=FALSE}
+pollutant_tbl <- tribble(
+  ~pollutant,~pollutantExpansion,
+  "PM25","fine particulate matter",
+  "PM10","coarse particulate matter",
+  "PM25 & PM10","fine particulate matter and coarse particulate matter",
+  "O3","ground level ozone"
+)
+
+# Pick the row for the current pollutant
+pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
+
+# Assign values
+pollutantExpansion  <- pollutant_info$pollutantExpansion
+
+if (params$burnRestrictionStatus == 0 | params$burnRestrictionStatus == 2) {
+first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ", HAauth,
+    " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
+    " due to elevated levels of ", pollutantExpansion, "."
+  )
+} else {
+  first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ", HAauth, 
+    " has ended the Air Quality Warning and open burning restrictions that were issued on ", 
+    format(as.Date(params$issuedate), "%B %d, %Y"), " for ",
+    params$location," due to elevated levels of ", pollutantExpansion, "."
+  )
+}
+```
+
+```{r additional_info, include=FALSE}
+
+additional_info_PM25 <- paste0(
+    "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  )
+
+additional_info_PM10 <- paste0(
+  "The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  )
+
+additional_info_O3 <- paste0(
+  "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
+  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+)
+```
+
 ```{r burn_ban, results='asis', echo=FALSE}
 
 if (params$burnRestrictionStatus == 2) {
@@ -276,53 +323,6 @@ if (params$burnRestrictionStatus == 2) {
   burn_ban_md_temp <- NULL
 }
 
-```
-
-```{r additional_info, include=FALSE}
-
-additional_info_PM25 <- paste0(
-    "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
-
-additional_info_PM10 <- paste0(
-  "The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
-
-additional_info_O3 <- paste0(
-  "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
-  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-)
-```
-
-```{r pollutant_specific_clauses, include=FALSE}
-pollutant_tbl <- tribble(
-  ~pollutant,~pollutantExpansion,
-  "PM25","fine particulate matter",
-  "PM10","coarse particulate matter",
-  "PM25 & PM10","fine particulate matter and coarse particulate matter",
-  "O3","ground level ozone"
-)
-
-# Pick the row for the current pollutant
-pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
-
-# Assign values
-pollutantExpansion  <- pollutant_info$pollutantExpansion
-
-if (params$burnRestrictionStatus == 0 | params$burnRestrictionStatus == 2) {
-first_paragraph <- paste0(
-    "The Ministry of Environment and Parks in collaboration with the ", HAauth,
-    " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
-    " due to elevated levels of ", pollutantExpansion, "."
-  )
-} else {
-  first_paragraph <- paste0(
-    "The Ministry of Environment and Parks in collaboration with the ", HAauth, 
-    " has ended the Air Quality Warning and open burning restrictions that were issued on ", 
-    format(as.Date(params$issuedate), "%B %d, %Y"), " for ",
-    params$location," due to elevated levels of ", pollutantExpansion, "."
-  )
-}
 ```
 
 ```{r create-logo-list}
@@ -472,8 +472,10 @@ if (params$burnRestrictionStatus == 2) {
 ::: {.content-visible when-format="pdf"}
 
 `r if (params$burnRestrictionStatus < 2) ":::{.content-hidden}"`
+
 ## Mandatory emission reduction actions
 `r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban)`
+
 `r if (params$burnRestrictionStatus < 2) ":::"`
 
 :::
@@ -481,9 +483,11 @@ if (params$burnRestrictionStatus == 2) {
 ::: {.content-visible when-format="markdown"}
 
 `r if (params$burnRestrictionStatus < 2) ":::{.content-hidden}"`
+
 ## Mandatory emission reduction actions
 `r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban_md_temp)`
 `r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", mandatory_text)`
+
 `r if (params$burnRestrictionStatus < 2) ":::"`
 
 :::
