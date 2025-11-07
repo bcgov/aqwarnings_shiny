@@ -77,7 +77,7 @@ issueLocalEmissionsUI <- function(id) {
               ),
               
               box(
-                width = 6,
+                width = 8,
                 background = "light-blue",
                 
                 radioButtons(
@@ -88,7 +88,7 @@ issueLocalEmissionsUI <- function(id) {
                     "Yes (Ben)" = 1,
                     "Yes (Arvind)" = 2),
                   selected = 0,
-                  width = "50%",
+                  width = "100%",
                   inline = TRUE
                 ),
                 
@@ -97,7 +97,7 @@ issueLocalEmissionsUI <- function(id) {
                     inputId = ns("burnRestrictionArea"),
                     label = HTML("<h4>Burn prohibition details:<br><br> The Director has prohibited open burning within</h4>"),
                     value = "<location>",
-                    width = "75%",
+                    width = "100%",
                     height = "40px",
                     resize = "vertical"
                   )
@@ -132,7 +132,7 @@ issueLocalEmissionsUI <- function(id) {
                 inputId = ns("customMessage"),
                 label = h4("Custom message (optional): retain, edit or delete"),
                 value = "Current conditions are expected to persist until weather conditions change and/or local emissions are reduced.",
-                width = "50%",
+                width = "75%",
                 height = "80px",
                 resize = "vertical"),
               
@@ -143,7 +143,7 @@ issueLocalEmissionsUI <- function(id) {
                 value = Sys.Date() + 1,
                 startview = "month",
                 weekstart = 0,
-                width = "50%"
+                width = "75%"
               ),
               
               tags$div(style = "margin-top: 40px;"),  # Adds vertical space

@@ -66,7 +66,7 @@ endLocalEmissionsUI <- function(id) {
               ),
               
               box(
-                width = 6,
+                width = 8,
                 background = "light-blue",
                 
                 radioButtons(
@@ -98,7 +98,7 @@ endLocalEmissionsUI <- function(id) {
                     inputId = ns("burnRestrictionArea"),
                     label = HTML("<h4>Burn prohibition details:</h4><h5>The Director has prohibited open burning within</h5>"),
                     value = "<location>",
-                    width = "50%",
+                    width = "100%",
                     height = "80px",
                     resize = "vertical"
                   )
@@ -133,7 +133,7 @@ endLocalEmissionsUI <- function(id) {
                 inputId = ns("customMessage"),
                 label = h4("Custom message (optional): retain, edit or delete"),
                 value = "Local air quality has improved due to changing meteorological conditions.",
-                width = "50%",
+                width = "75%",
                 height = "80px",
                 resize = "vertical"
               ),
