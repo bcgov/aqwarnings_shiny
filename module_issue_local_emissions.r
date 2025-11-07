@@ -113,7 +113,7 @@ issueLocalEmissionsUI <- function(id) {
                       label = h5("until"),
                       value = Sys.Date() + 1,
                       min = Sys.Date(),
-                      width = "50%"
+                      width = "75%"
                     )
                   ),
                   
@@ -122,7 +122,7 @@ issueLocalEmissionsUI <- function(id) {
                       inputId = ns("burnRestrictionEndTime"), 
                       label = h5("HH:00 AM/PM"),
                       value = "HH:00 AM",
-                      width = "50%"
+                      width = "75%"
                     )
                   )
                 ) # splitLayout
