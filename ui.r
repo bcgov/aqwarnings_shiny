@@ -30,24 +30,36 @@ sidebar <- dashboardSidebar(
     menuSubItem("Issue",
                 icon = icon("pen"),
                 tabName = "issue-wildfire"
-                ),
+    ),
     menuSubItem("End",
                 icon = icon("pen"),
                 tabName = "end-wildfire"
-                ),
+    ),
     menuItem("", tabName = NULL), # Empty item for spacing
     menuItem("Community Warnings"),
     menuSubItem("Issue",
                 icon = icon("pencil"),
                 tabName = "issue-community"
-                ),
+    ),
     menuSubItem(
       "End",
       icon = icon("pencil"),
       tabName = "end-community"
-    )
-    )
+    ),
+  menuItem("", tabName = NULL), # Empty item for spacing
+  menuItem("Pollution Prevention Notice"),
+  menuSubItem("Issue",
+              icon = icon("pencil"),
+              tabName = "issue-pollution-prevention"
+  ),
+  menuSubItem(
+    "End",
+    icon = icon("pencil"),
+    tabName = "end-pollution-prevention"
   )
+)
+)
+  
 
 body <- dashboardBody(
   shinyjs::useShinyjs(),
@@ -58,10 +70,12 @@ body <- dashboardBody(
                     "))
     ), 
   tabItems(
-    tabItem(tabName = "issue-wildfire", issueWildfireSmokeUI("issue_wildfire_smoke")),
-    tabItem(tabName = "end-wildfire", endWildfireSmokeUI("end_wildfire_smoke")),
-    tabItem(tabName = "issue-community", issueLocalEmissionsUI("issue_local_emissions")),
-    tabItem(tabName = "end-community", endLocalEmissionsUI("end_local_emissions"))
+    tabItem(tabName = "issue-wildfire", issueWildfireSmokeUI(id = "issue_wildfire_smoke")),
+    tabItem(tabName = "end-wildfire", endWildfireSmokeUI(id = "end_wildfire_smoke")),
+    tabItem(tabName = "issue-community", issueLocalEmissionsUI(id = "issue_local_emissions")),
+    tabItem(tabName = "end-community", endLocalEmissionsUI(id = "end_local_emissions")),
+    tabItem(tabName = "issue-pollution-prevention", issuePollutionPreventionUI(id = "issue_pollution_prevention")),
+    tabItem(tabName = "end-pollution-prevention", endPollutionPreventionUI(id = "end_pollution_prevention"))
   )
  )
 
