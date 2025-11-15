@@ -15,7 +15,9 @@
 shinyServer(function(input, output, session) {
   callModule(issueWildfireSmoke, id = "issue_wildfire_smoke")
   callModule(endWildfireSmoke, id = "end_wildfire_smoke")
-  callModule(issueLocalEmissions, id= "issue_local_emissions")
-  callModule(endLocalEmissions, id= "end_local_emissions")
+  callModule(issueLocalEmissions, id = "issue_local_emissions")
+  callModule(endLocalEmissions, id = "end_local_emissions")
+  callModule(issuePollutionPrevention, id = "issue_pollution_prevention")
+  callModule(endPollutionPrevention, id = "end_pollution_prevention")
   }
 )
