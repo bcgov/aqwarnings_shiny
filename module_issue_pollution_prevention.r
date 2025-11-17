@@ -51,7 +51,7 @@ issuePollutionPreventionUI <- function(id) {
               shinyjs::hidden(
                 dateInput(
                   inputId = ns("issuedate"),
-                  label = h4("Date burn prohibition was first issued:"),
+                  label = h4("Date pollution prevention notice was first issued:"),
                   max = Sys.Date(),
                   value = Sys.Date() - 1,
                   startview = "month",
