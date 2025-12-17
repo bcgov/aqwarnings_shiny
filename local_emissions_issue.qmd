@@ -34,6 +34,7 @@ format:
     fontsize: "12pt"
     urlcolor: bcblue
 ---
+
 ```{=html}
 <!--
 Copyright 2025 Province of British Columbia
@@ -355,7 +356,7 @@ bylaws <- if (params$location == "Burns Lake") {
   - **5.1**: A person will not use a wood-burning appliance at any time when an air quality advisory is in effect, except to heat premises that are equipped with no heating source other than the wood burning appliance.\n\n
   - Contact the Valemount municipal office at [250-566-4435](tel:2505664435) or visit [https://valemount.ca](https://valemount.ca) for more information on wood stove restrictions."
 } else {
-  NULL
+  bylaws <- NULL
 }
 ```
 
@@ -363,42 +364,36 @@ bylaws <- if (params$location == "Burns Lake") {
 
 if (params$burnRestrictions > 0) {
   
-  # Define signature and title info depending on who it is
+  # Define statutory decision maker (sdm)
   if (params$burnRestrictions == 1) {
-    signature_path <- ifelse(params$outputFormat == "markdown", 
-                             paste0("![](//assets/SignatureBW.jpg){width=150px}\n\n"), 
-                             paste0("![](", file.path("src", "signatures", "SignatureBW.jpg"), "){width=150px}\n\n")
-    )
     name_line <- "Benjamin Weinstein"
     title_line1 <- "For Director, Environmental Management Act"
-    title_line2 <- "Environmental Monitoring and Analysis Branch"
+    title_line2 <- "Environmental Monitoring and Analysis Branch" 
+
   } else if (params$burnRestrictions == 2) {
-    signature_path <- ifelse(params$outputFormat == "markdown",
-                             paste0("![](//assets/SignatureAS.png){width=150px}\n\n"), 
-                             paste0("![](", file.path("src", "signatures", "SignatureAS.png"), "){width=150px}\n\n")
-    )
-    name_line <- "Arvind Saraswat"
-    title_line1 <- "Director, Environmental Management Act"
-    title_line2 <- "Environmental Monitoring and Analysis Branch"
+   name_line <- "Arvind Saraswat"
+   title_line1 <- "Director, Environmental Management Act"
+   title_line2 <- "Environmental Monitoring and Analysis Branch"
   }
-  
-  burn_ban <- paste(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
-    "\n\n",
-    "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
-    "> " , signature_path, "\n\n",
-    "> ", name_line, "\n\n",
-    "> ", title_line1, "\n\n",
-    "> ", title_line2, "\n\n"
+
+  # to do: improve formatting - single line spacing for sdm information, \n and <br> don't seem to work; rather than using paste could this text be added to a conditional code block directly in the document?
+burn_ban <- paste0(
+  "- NOTICE of DIRECTOR under s.30 Open Burning Smoke Control Regulation:\n\n",
+  "> As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within ",
+  params$burnRestrictionArea, 
+  " until ", 
+  format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), 
+  " ",
+  params$burnRestrictionEndTime, 
+  " local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n",
+  "&emsp;&emsp;&nbsp;Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
+  "&emsp;&emsp;&nbsp;", name_line, "\n\n",  
+  "&emsp;&emsp;&nbsp;", title_line1, "\n\n",
+  "&emsp;&emsp;&nbsp;", title_line2
   )
-  
-  ###TEMPORARY - until SDM signature is sorted out
-  burn_ban_md_temp <- paste(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
   
 } else {
   burn_ban <- NULL
-  burn_ban_md_temp <- NULL
 }
 
 ```
@@ -482,14 +477,12 @@ pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", params$pollutant)))
 # Set output file name
 if (params$burnRestrictions < 1) {  # no burn restriction
   
-  output_file_name <- sprintf("%s_%s_%s", tolower(params$ice), pollutant_clean, location_clean) 
-  mandatory_text <- NULL
+  output_file_name <- sprintf("%s_%s_%s", tolower(params$ice), pollutant_clean, location_clean)
   
 } else { # burn restriction in effect; obr = open burning prohibition
   
   output_file_name <- sprintf("%s_%s_%s_%s", tolower(params$ice), pollutant_clean, "obr", location_clean) 
   pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
-  mandatory_text <- paste0("Please see the [PDF version of this Air Quality Warning](", pdf_path, ") for the statutory decision-maker sign-off related to open burning restrictions.")
 }
 
 pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
@@ -497,6 +490,7 @@ pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
+
 <!-- the trailing slash means the text in square brackets is alt text -->
 
 [`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
@@ -510,19 +504,6 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
-
-<!-- Start: Temporary - until SDM signature is sorted -->
-`r if (params$burnRestrictions == 0 | params$outputFormat == "pdf") ":::{.content-hidden}"`
-
-{{< inline_alert_start>}} 
-
-`r mandatory_text` 
-
-{{< inline_alert_end >}}
-
-`r if (params$burnRestrictions == 0 | params$outputFormat == "pdf") ":::"`
-<!-- End: Temporary - until SDM signature is sorted -->
-
 
 `r first_paragraph`
 
@@ -551,15 +532,9 @@ As air contaminant levels increase, health risks increase. Consider reducing or 
 People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
 
 ::: {.content-visible when-format="markdown"}
-
 {{< accordion_controls >}}
 
 {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
-
-:::
-
-::: {.content-visible when-format="pdf"}
-### Follow your common sense
 :::
 
 - Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
@@ -575,8 +550,7 @@ if (current_month %in% 6:8) {
 - Make sure that children and others who cannot care for themselves follow the same advice.
 
 ::: {.content-visible when-format="markdown"}
-{{< accordion_end >}}
-{{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
+{{< accordion_end >}} {{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -591,8 +565,7 @@ if (current_month %in% 6:8) {
 - If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
 
 ::: {.content-visible when-format="markdown"}
-{{< accordion_end >}}
-{{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}
+{{< accordion_end >}} {{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -636,24 +609,19 @@ if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in%
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_start title="Mandatory actions" initiallyOpen="true" >}}
-
-- Facilities with air discharge authorizations under the Environmental Management Act are required to follow trigger actions within their permit related to Air Quality Warnings and are encouraged to reduce any other emissions where possible.
-
-`r if (!is.null(bylaws) && nzchar(bylaws)) paste0("- ", bylaws)`
-`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban_md_temp)`
-`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", mandatory_text)`
-
-{{< accordion_end >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
-
 ### Mandatory actions
-- Facilities with air discharge authorizations under the Environmental Management Act are required to follow trigger actions within their permit related to Air Quality Warnings and are encouraged to reduce any other emissions where possible.
+:::
 
-`r if (!is.null(bylaws) && nzchar(bylaws)) paste0("- ", bylaws)`
-`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban)`
+-   Facilities with air discharge authorizations under the Environmental Management Act are required to follow trigger actions within their permit related to Air Quality Warnings and are encouraged to reduce any other emissions where possible.
 
+`r if (!is.null(bylaws) && nzchar(bylaws)) paste("-", bylaws)`
+`r if (params$burnRestrictions > 0) paste(burn_ban)`
+
+::: {.content-visible when-format="markdown"}
+{{< accordion_end >}}
 :::
 
 ::: {.content-visible when-format="markdown"}
@@ -721,33 +689,25 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 ### For additional information about air quality in British Columbia
 :::
 
-::: {.content-visible when-format="markdown"}
+:::: {.content-visible when-format="markdown"}
 **For additional information about air quality in British Columbia:**
 
-<div class="bcds-card-wrapper"> 
+::: bcds-card-wrapper
 {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
 
-[What's the air like today?] {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+[What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
 
-[Latest air quality data] {{< card_end >}}{{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
+[Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}}{{\< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" \>}} Warnings and a map of air quality and weather data.
 
-[Air quality data and warnings] {{< card_end >}}
-</div>
-
+[Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
 :::
+::::
 
 ::: {.content-visible when-format="pdf"}
-
-- View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
-- Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
-- Visit the provincial [air quality data webpage][Air quality data] for more information about air quality in B.C.
-- [Metro Vancouver’s Air Quality Data and Warnings][Air quality data and warnings]
-
-[What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
-[Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
-[Air quality data]:(https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality)
-[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
-
+- View the latest [Air Quality Health Index (AQHI) and forecast](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html)
+- Visit the provincial [air quality map](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) to view real-time air quality measurements
+- Visit the provincial [air quality data webpage]( "https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality") for more information about air quality in B.C.
+- Visit Metro Vancouver's [air quality data and warnings page](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories)
 :::
 
 ## Contact
@@ -757,11 +717,10 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 :::
 
 ::: {.content-visible when-format="markdown"}
-**Media questions regarding this Air Quality Warning:**
-{{< card_start width="wide" >}}
+**Media questions regarding this Air Quality Warning:** {{< card_start width="wide" >}}
 :::
 
-`r ENVcontact` 
+`r ENVcontact`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}
@@ -772,8 +731,7 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 :::
 
 ::: {.content-visible when-format="markdown"}
-**Media questions regarding health implications when air quality is degraded:**
-{{< card_start  width="wide" >}}
+**Media questions regarding health implications when air quality is degraded:** {{< card_start width="wide" >}}
 :::
 
 `r paste(HAcontact$html_string, collapse = "\n\n")`
