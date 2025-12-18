@@ -371,7 +371,7 @@ if (params$burnRestrictions > 0) {
     title_line2 <- "Environmental Monitoring and Analysis Branch" 
 
   } else if (params$burnRestrictions == 2) {
-   name_line <- "Arvind Saraswat"
+   name_line <- "TBD"
    title_line1 <- "Director, Environmental Management Act"
    title_line2 <- "Environmental Monitoring and Analysis Branch"
   }

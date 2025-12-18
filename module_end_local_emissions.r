@@ -85,8 +85,9 @@ endLocalEmissionsUI <- function(id) {
                   inputId = ns("burnRestrictionSDM"),
                   label = h4("Statuatory decision maker:"),
                   choices = c(
-                    "Ben" = 1,
-                    "Arvind" = 2),
+                    "Ben" = 1
+                    #"TBD" = 2
+                    ),
                   selected = NULL,
                   width = "100%",
                   inline = TRUE

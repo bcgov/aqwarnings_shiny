@@ -76,8 +76,9 @@ issuePollutionPreventionUI <- function(id) {
                   inputId = ns("burnRestrictions"),
                   label = h4("Burn prohibition issued:"),
                   choices = list(
-                    "Yes (Ben)" = 1,
-                    "Yes (Arvind)" = 2),
+                    "Yes (Ben)" = 1
+                    #"Yes (TBD)" = 2
+                    ),
                   selected = 1,
                   width = "100%",
                   inline = TRUE

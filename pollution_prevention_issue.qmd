@@ -10,7 +10,7 @@ params:
   nextUpdate: "2025-09-28"
   outputFormat: "markdown"
   customMessage: ""
-  burnRestrictions: 1   # 1 = Yes (Ben); 2 = Yes (Arvind)
+  burnRestrictions: 1   # 1 = Yes (Ben); 2 = Yes (TBD)
   burnRestrictionArea: ""
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
@@ -291,36 +291,30 @@ The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metr
 
 # Define signature and title info depending on who it is
   if (params$burnRestrictions == 1) {
-    signature_path <- ifelse(params$outputFormat == "markdown", 
-                             paste0("![](//assets/SignatureBW.jpg){width=150px}\n\n"), 
-                             paste0("![](", file.path("src", "signatures", "SignatureBW.jpg"), "){width=150px}\n\n")
-    )
     name_line <- "Benjamin Weinstein"
     title_line1 <- "For Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
   } else if (params$burnRestrictions == 2) {
-    signature_path <- ifelse(params$outputFormat == "markdown",
-                             paste0("![](//assets/SignatureAS.png){width=150px}\n\n"), 
-                             paste0("![](", file.path("src", "signatures", "SignatureAS.png"), "){width=150px}\n\n")
-    )
-    name_line <- "Arvind Saraswat"
+    name_line <- "TBD"
     title_line1 <- "Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
   }
   
-  burn_ban <- paste(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
-    "\n\n",
-    "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
-    "> " , signature_path, "\n\n",
-    "> ", name_line, "\n\n",
-    "> ", title_line1, "\n\n",
-    "> ", title_line2, "\n\n"
+# to do: improve formatting - single line spacing for sdm information, \n and <br> don't seem to work; rather than using paste could this text be added to a conditional code block directly in the document?
+burn_ban <- paste0(
+  "- NOTICE of DIRECTOR under s.30 Open Burning Smoke Control Regulation:\n\n",
+  "> As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within ",
+  params$burnRestrictionArea, 
+  " until ", 
+  format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), 
+  " ",
+  params$burnRestrictionEndTime, 
+  " local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n",
+  "&emsp;&emsp;&nbsp;Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
+  "&emsp;&emsp;&nbsp;", name_line, "\n\n",  
+  "&emsp;&emsp;&nbsp;", title_line1, "\n\n",
+  "&emsp;&emsp;&nbsp;", title_line2
   )
-  
-  ###TEMPORARY - until SDM signature is sorted out
-  burn_ban_md_temp <- paste(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
 
 ```
 
@@ -422,19 +416,6 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-<!-- Start: Temporary - until SDM signature is sorted -->
-`r if (params$burnRestrictions == 0 | params$outputFormat == "pdf") ":::{.content-hidden}"`
-
-{{< inline_alert_start>}} 
-
-`r mandatory_text` 
-
-{{< inline_alert_end >}}
-
-`r if (params$burnRestrictions == 0 | params$outputFormat == "pdf") ":::"`
-<!-- End: Temporary - until SDM signature is sorted -->
-
-
 `r first_paragraph`
 
 ```{r, results='asis', echo=FALSE}
@@ -531,18 +512,13 @@ if (current_month %in% 6:8) {
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_start title="Mandatory actions" initiallyOpen="true" >}}
-
-`r paste0("- ", burn_ban_md_temp)`
-`r paste0("- ", mandatory_text)`
-
+`r if (params$burnRestrictions > 0) paste(burn_ban)`
 {{< accordion_end >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
-
 ### Mandatory actions
-`r paste0("- ", burn_ban)`
-
+`r if (params$burnRestrictions > 0) paste(burn_ban)`
 :::
 
 ::: {.content-visible when-format="markdown"}
@@ -605,7 +581,7 @@ if (current_month %in% 6:8) {
 - View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
 - Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
 - Visit the provincial [air quality data webpage][Air quality data] for more information about air quality in B.C.
-- [Metro Vancouver’s Air Quality Data and Warnings][Air quality data and warnings]
+- Visit Metro Vancouver's [air quality data and warnings page][Air quality data and warnings]
 
 [What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
 [Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html

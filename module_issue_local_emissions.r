@@ -85,8 +85,9 @@ issueLocalEmissionsUI <- function(id) {
                   label = h4("Burn prohibition issued:"),
                   choices = list(
                     "No" = 0, 
-                    "Yes (Ben)" = 1,
-                    "Yes (Arvind)" = 2),
+                    "Yes (Ben)" = 1
+                    #"Yes (Arvind)" = 2
+                    ),
                   selected = 0,
                   width = "100%",
                   inline = TRUE

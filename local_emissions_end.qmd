@@ -287,40 +287,33 @@ if (params$burnRestrictionStatus == 2) {
   
   # Define signature and title info depending on who it is
   if (params$burnRestrictionSDM == 1) {
-    signature_path <- ifelse(params$outputFormat == "markdown", 
-                             paste0("![](//assets/SignatureBW.jpg){width=150px}\n\n"), 
-                             paste0("![](", file.path("src", "signatures", "SignatureBW.jpg"), "){width=150px}\n\n")
-    )
     name_line <- "Benjamin Weinstein"
     title_line1 <- "For Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
   } else if (params$burnRestrictionSDM == 2) {
-    signature_path <- ifelse(params$outputFormat == "markdown",
-                             paste0("![](//assets/SignatureAS.png){width=150px}\n\n"), 
-                             paste0("![](", file.path("src", "signatures", "SignatureAS.png"), "){width=150px}\n\n")
-    )
-    name_line <- "Arvind Saraswat"
+    name_line <- "TBD"
     title_line1 <- "Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
   }
   
-  burn_ban <- paste(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.",
-    "\n\n",
-    "> Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
-    "> " , signature_path, "\n\n",
-    "> ", name_line, "\n\n",
-    "> ", title_line1, "\n\n",
-    "> ", title_line2, "\n\n"
-)
-
- ###TEMPORARY - until SDM signature is sorted out
-    burn_ban_md_temp <- paste(
-    "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within", params$burnRestrictionArea, "until", format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), params$burnRestrictionEndTime, "local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n")
+# to do: improve formatting - single line spacing for sdm information, \n and <br> don't seem to work; rather than using paste could this text be added to a conditional code block directly in the document?
+burn_ban <- paste0(
+  "- NOTICE of DIRECTOR under s.30 Open Burning Smoke Control Regulation:\n\n",
+  "> As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within ",
+  params$burnRestrictionArea, 
+  " until ", 
+  format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), 
+  " ",
+  params$burnRestrictionEndTime, 
+  " local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n",
+  "&emsp;&emsp;&nbsp;Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
+  "&emsp;&emsp;&nbsp;", name_line, "\n\n",  
+  "&emsp;&emsp;&nbsp;", title_line1, "\n\n",
+  "&emsp;&emsp;&nbsp;", title_line2
+  )
 
 } else {
   burn_ban <- NULL
-  burn_ban_md_temp <- NULL
 }
 
 ```
@@ -440,18 +433,6 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-<!-- Start: Temporary - until SDM signature is sorted -->
-`r if (params$burnRestrictionStatus < 2 | params$outputFormat == "pdf") ":::{.content-hidden}"`
-
-{{< inline_alert_start>}} 
-
-`r mandatory_text` 
-
-{{< inline_alert_end >}}
-
-`r if (params$burnRestrictionStatus < 2 | params$outputFormat == "pdf") ":::"`
-<!-- End: Temporary - until SDM signature is sorted -->
-
 `r first_paragraph`
 
 `r params$customMessage`
@@ -469,31 +450,12 @@ if (params$burnRestrictionStatus == 2) {
 
 ```
 
-::: {.content-visible when-format="pdf"}
-
 `r if (params$burnRestrictionStatus < 2) ":::{.content-hidden}"`
-
 ## Mandatory emission reduction actions
-`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban)`
-
+`r paste(burn_ban)`
 `r if (params$burnRestrictionStatus < 2) ":::"`
-
-:::
-
-::: {.content-visible when-format="markdown"}
-
-`r if (params$burnRestrictionStatus < 2) ":::{.content-hidden}"`
-
-## Mandatory emission reduction actions
-`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", burn_ban_md_temp)`
-`r if (!is.null(burn_ban) && nzchar(burn_ban)) paste0("- ", mandatory_text)`
-
-`r if (params$burnRestrictionStatus < 2) ":::"`
-
-:::
 
 ## More information
-
 ::: {.content-visible when-format="markdown"}
 {{< accordion_start title="Current conditions" initiallyOpen="true" >}}
 :::
