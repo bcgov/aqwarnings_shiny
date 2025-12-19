@@ -51,6 +51,9 @@ library(xtable)
 
 source(here::here("load_metadata.r"))
 source(here::here(file.path("functions", "local_tz.r")))
+
+# create single line break based on output file format
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 ```
 
 ```{r table-setup, include=FALSE}
@@ -198,8 +201,6 @@ list2env(results, envir = .GlobalEnv)
 #| results: asis
 #| strip.white: false
 
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
 # AQ met information
 ENVcontact <- aq_mets |>
   filter(fullname == params$sel_aqMet) |>
@@ -210,17 +211,15 @@ ENVcontact <- aq_mets |>
 ```{r HAcontact, include=FALSE}
 #| results: asis
 
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
 HAauth <- match_health_city |> 
   filter(location == params$nearestMonitor) |> 
   pull(health_city)
 
 HAcontact <- health_contact |>
-    filter(authority == HAauth) |>
-    select(authority, contact) |>
-    group_by(authority) |>
-    summarise(html_string = paste(contact, collapse = sep_type))
+  filter(authority == HAauth) |>
+  select(authority, contact) |>
+  group_by(authority) |>
+  summarise(html_string = paste(contact, collapse = sep_type))
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -370,6 +369,7 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 
 ::: {.content-visible when-format="pdf"}
 ### Media questions regarding this Pollution Prevention Notice
+:::
 
 ::: {.content-visible when-format="markdown"}
 **Media questions regarding this Pollution Prevention Notice:**
@@ -383,7 +383,7 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 :::
 
 ::: {.content-visible when-format="pdf"}
-### Media questions regarding health implications related to degraded air quality
+### Media questions regarding health implications when air quality is degraded
 :::
 
 ::: {.content-visible when-format="markdown"}
