@@ -512,15 +512,16 @@ People more likely to be negatively impacted by outdoor air pollution should red
 {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
 :::
 
+::: {.content-visible when-format="pdf"}
+### Follow your common sense
+:::
 - Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
-
 ```{r, results='asis', echo=FALSE}
 
 if (current_month %in% 6:8) {
   cat("- During warm weather, stay cool and drink plenty of fluids.\n")
 }
 ```
-
 - Always carry any rescue medications with you.
 - Make sure that children and others who cannot care for themselves follow the same advice.
 
