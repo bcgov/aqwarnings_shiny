@@ -20,10 +20,12 @@ params:
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
 ice: "`r params$ice`"
+pollutant: "`r params$pollutant`"
 author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`"
 location: "`r params$location`"
-outputFormat: "`r params$outputFormat`" 
+outputFormat: "`r params$outputFormat`"
+burnRestrictions: "`r params$burnRestrictions`"
 format:
   markdown: default
   pdf:

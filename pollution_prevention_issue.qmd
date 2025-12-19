@@ -19,6 +19,7 @@ author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`"
 location: "`r params$nearestMonitor`"
 outputFormat: "`r params$outputFormat`"
+burnRestrictions: "`r params$burnRestrictions`"
 format:
   markdown: default
   pdf:
