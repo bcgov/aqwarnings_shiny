@@ -559,7 +559,7 @@ if (current_month %in% 6:8) {
 
 if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
   cat(
-    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are not available. For details, visit: https://rb.gy/epi7qv.\n",
+    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Control [fact sheet](https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf).\n", 
     "- If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n"
   )
 }
@@ -673,7 +673,7 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 [What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
 
-[Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}}{{\< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" \>}} Warnings and a map of air quality and weather data.
+[Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
 
 [Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
 :::
@@ -682,7 +682,7 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 ::: {.content-visible when-format="pdf"}
 - View the latest [Air Quality Health Index (AQHI) and forecast](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html)
 - Visit the provincial [air quality map](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) to view real-time air quality measurements
-- Visit the provincial [air quality data webpage]( "https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality") for more information about air quality in B.C.
+- Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for more information about air quality in B.C.
 - Visit Metro Vancouver's [air quality data and warnings page](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories)
 :::
 

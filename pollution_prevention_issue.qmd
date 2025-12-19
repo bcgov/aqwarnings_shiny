@@ -479,7 +479,7 @@ if (current_month %in% 6:8) {
 }
 
   cat(
-    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are not available. For details, visit: https://rb.gy/epi7qv.\n",
+    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Control [fact sheet](https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf).\n",
     "- If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n"
   )
 ```
@@ -492,13 +492,13 @@ if (current_month %in% 6:8) {
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_start title="Mandatory actions" initiallyOpen="true" >}}
-`r if (params$burnRestrictions > 0) paste(burn_ban)`
+`r if (params$burnRestrictions > 0) paste("-", burn_ban)`
 {{< accordion_end >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
 ### Mandatory actions
-`r if (params$burnRestrictions > 0) paste(burn_ban)`
+`r if (params$burnRestrictions > 0) paste("-", burn_ban)`
 :::
 
 ::: {.content-visible when-format="markdown"}
