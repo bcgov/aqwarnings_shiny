@@ -321,19 +321,6 @@ logos_combined <- magick::image_append(logos) |>
 }
 ```
 
-```{r create-pdf-filepath}
-### TEMPORARY - until SDM signature is sorted -- also remove lines 444-450, 471
-
-# create file path for PDF output
-
-      # Set output file name
-      output_file_name <- sprintf("%s_%s", "end", "pollution_prevention_notice") 
-      mandatory_text <- NULL
-        
-      pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
-      
-```
-
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
 <!-- the trailing slash means the text in square brackets is alt text -->
 

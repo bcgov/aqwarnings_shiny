@@ -62,6 +62,9 @@ library(xtable)
 
 source(here::here("load_metadata.r"))
 source(here::here(file.path("functions", "local_tz.r")))
+
+# create single line break based on output file format
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 ```
 
 ```{r table-setup, include=FALSE}
@@ -209,8 +212,6 @@ list2env(results, envir = .GlobalEnv)
 #| results: asis
 #| strip.white: false
 
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
 # AQ met information
 ENVcontact <- aq_mets |>
   filter(fullname == params$sel_aqMet) |>
@@ -220,8 +221,6 @@ ENVcontact <- aq_mets |>
 
 ```{r HAcontact, include=FALSE}
 #| results: asis
-
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
 HAauth <- match_health_city |> 
   filter(location == params$location) |> 
@@ -298,18 +297,18 @@ if (params$burnRestrictionStatus == 2) {
   
 # to do: improve formatting - single line spacing for sdm information, \n and <br> don't seem to work; rather than using paste could this text be added to a conditional code block directly in the document?
 burn_ban <- paste0(
-  "- NOTICE of DIRECTOR under s.30 Open Burning Smoke Control Regulation:\n\n",
-  "> As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within ",
+  "NOTICE of DIRECTOR under s.30 Open Burning Smoke Control Regulation:\n\n",
+  "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within ",
   params$burnRestrictionArea, 
   " until ", 
   format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), 
   " ",
   params$burnRestrictionEndTime, 
   " local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n",
-  "&emsp;&emsp;&nbsp;Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
-  "&emsp;&emsp;&nbsp;", name_line, "\n\n",  
-  "&emsp;&emsp;&nbsp;", title_line1, "\n\n",
-  "&emsp;&emsp;&nbsp;", title_line2
+  "Date issued: ", format(Sys.Date(), "%B %d, %Y"), sep_type,
+  name_line, sep_type,  
+  title_line1, sep_type,
+  title_line2
   )
 
 } else {
@@ -386,39 +385,8 @@ logos_combined <- magick::image_append(logos) |>
 }
 ```
 
-```{r create-pdf-filepath}
-### TEMPORARY - until SDM signature is sorted -- also remove lines 444-450, 471
-
-# create file path for PDF output
-
- # Clean location name for file name
-      location_clean <- gsub("\\s+", "_", params$location)
-      pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", params$pollutant)))
-      
-      # Set output file name
-      if (params$burnRestrictionStatus == 0) {  # no burn restriction
-        
-        output_file_name <- sprintf("%s_%s_%s", "end", pollutant_clean, location_clean) 
-        mandatory_text <- NULL
-        
-      } else if(params$burnRestrictionStatus == 1) { # warning and open burn restrictions end
-        
-        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr", location_clean) 
-        mandatory_text <- NULL
-        
-      } else { # warning ends open burn restrictions continue
-        
-        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr_continue", location_clean)
-        pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
-        mandatory_text <- paste0("Please see the [PDF version of this Air Quality Warning](", pdf_path, ") for the statutory decision-maker sign-off related to open burning restrictions.")
-        
-      }
-       
-      pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
-      
-```
-
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
+
 <!-- the trailing slash means the text in square brackets is alt text -->
 
 [`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}

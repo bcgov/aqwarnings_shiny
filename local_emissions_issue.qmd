@@ -66,6 +66,8 @@ source(here::here(file.path("functions", "local_tz.r")))
 
 # date/time information 
 current_month <- as.numeric(format(Sys.Date(), "%m"))
+# create single line break based on output file format
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
 ```
 
@@ -215,8 +217,6 @@ list2env(results, envir = .GlobalEnv)
 #| results: asis
 #| strip.white: false
 
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
 # AQ met information
 ENVcontact <- aq_mets |>
   filter(fullname == params$sel_aqMet) |>
@@ -226,8 +226,6 @@ ENVcontact <- aq_mets |>
 
 ```{r HAcontact, include=FALSE}
 #| results: asis
-
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
 HAauth <- match_health_city |> 
   filter(location == params$location) |> 
@@ -386,9 +384,9 @@ burn_ban <- paste0(
   " ",
   params$burnRestrictionEndTime, 
   " local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n",
-  "&emsp;&emsp;&nbsp;Date issued: ", format(Sys.Date(), "%B %d, %Y"), "\n\n",
-  "&emsp;&emsp;&nbsp;", name_line, "\n\n",  
-  "&emsp;&emsp;&nbsp;", title_line1, "\n\n",
+  "&emsp;&emsp;&nbsp;Date issued: ", format(Sys.Date(), "%B %d, %Y"), sep_type,
+  "&emsp;&emsp;&nbsp;", name_line, sep_type,  
+  "&emsp;&emsp;&nbsp;", title_line1, sep_type,
   "&emsp;&emsp;&nbsp;", title_line2
   )
   
@@ -399,6 +397,7 @@ burn_ban <- paste0(
 ```
 
 ```{r create-logo-list}
+
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
 # This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
 logos_list <- list(
@@ -463,30 +462,6 @@ if (params$outputFormat == "pdf") {
   logos_combined <- magick::image_append(logos) |> 
     magick::image_write(path = "logo.png")
 }
-```
-
-```{r create-pdf-filepath}
-### TEMPORARY - until SDM signature is sorted -- also review lines 613:622
-
-# create file path for PDF output
-
-# Clean location name for file name
-location_clean <- gsub("\\s+", "_", params$location)
-pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", params$pollutant)))
-
-# Set output file name
-if (params$burnRestrictions < 1) {  # no burn restriction
-  
-  output_file_name <- sprintf("%s_%s_%s", tolower(params$ice), pollutant_clean, location_clean)
-  
-} else { # burn restriction in effect; obr = open burning prohibition
-  
-  output_file_name <- sprintf("%s_%s_%s_%s", tolower(params$ice), pollutant_clean, "obr", location_clean) 
-  pdf_path <- paste0("//warnings/", Sys.Date(), "_", output_file_name, ".pdf")
-}
-
-pdf_file_name <- paste0(Sys.Date(), "_", output_file_name, ".pdf")
-
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
