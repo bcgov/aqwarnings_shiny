@@ -259,11 +259,11 @@ issueLocalEmissions <- function(input, output, session){
       # Set output file name
       if (input$burnRestrictions < 1) {  # no burn restriction
         
-        output_file_name <- sprintf("%s_%s_%s", tolower(input$ice), pollutant_clean, location_clean) 
+        output_file_name <- sprintf("%s_%s_%s", location_clean, tolower(input$ice), pollutant_clean) 
         
       } else { # burn restriction; obr = open burning restriction
         
-        output_file_name <- sprintf("%s_%s_%s_%s", tolower(input$ice), pollutant_clean, "obr", location_clean) 
+        output_file_name <- sprintf("%s_%s_%s_%s", location_clean, tolower(input$ice), pollutant_clean, "obr") 
         
       }
       

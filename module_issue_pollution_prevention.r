@@ -186,7 +186,7 @@ issuePollutionPrevention <- function(input, output, session){
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
       
-      output_file_name <- sprintf("%s_%s", tolower(input$ice), "pollution_prevention") 
+      output_file_name <- sprintf("%s_%s_%s", input$nearestMonitor, tolower(input$ice), "pollution_prevention") 
 
       # generate warning: markdown and pdf formats
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")

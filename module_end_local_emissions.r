@@ -256,15 +256,15 @@ endLocalEmissions <- function(input, output, session){
       # Set output file name
       if (input$burnRestrictionStatus == 0) {  # no burn restriction
         
-        output_file_name <- sprintf("%s_%s_%s", "end", pollutant_clean, location_clean) 
+        output_file_name <- sprintf("%s_%s_%s", location_clean, "end", pollutant_clean) 
         
       } else if(input$burnRestrictionStatus == 1) { # warning and open burn restrictions both
         
-        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr", location_clean) 
+        output_file_name <- sprintf("%s_%s_%s_%s", location_clean, "end", pollutant_clean, "and_obr") 
         
       } else {
         
-        output_file_name <- sprintf("%s_%s_%s_%s", "end", pollutant_clean, "obr_continue", location_clean) 
+        output_file_name <- sprintf("%s_%s_%s_%s", location_clean, "end", pollutant_clean, "obr_in_effect") 
         
       }
       
