@@ -10,14 +10,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## Air Quality Warning - Wildfire Smoke Server
+## functions
 
-shinyServer(function(input, output, session) {
-  callModule(issueWildfireSmoke, id = "issue_wildfire_smoke")
-  callModule(endWildfireSmoke, id = "end_wildfire_smoke")
-  callModule(issueLocalEmissions, id = "issue_local_emissions")
-  callModule(endLocalEmissions, id = "end_local_emissions")
-  callModule(issuePollutionPrevention, id = "issue_pollution_prevention")
-  callModule(endPollutionPrevention, id = "end_pollution_prevention")
+local_tz <- function(x) {
+  if (x %in% c("Cranbrook", "Golden", "Invermere")) {
+    "America/Edmonton"  
+  } else if (x %in% c("Fort St John", "Dawson Creek", "Fort Nelson", "Creston")) {
+    "America/Fort_Nelson"
+  } else {
+    "America/Vancouver"
   }
-)
+}

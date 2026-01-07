@@ -1,5 +1,5 @@
 ---
-title: "Air Quality Warning - Wildfire Smoke"
+title: "Air quality warning in effect for wildfire smoke"
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`"
 params:
@@ -9,6 +9,7 @@ params:
   ice: "Issue"
   nextUpdate: "2025-02-10"
   location: "Multiple locations in B.C."
+  outputFormat: "markdown"
   selRegionsIDs:
     - Watson Lake
     - Prince George
@@ -19,6 +20,16 @@ author: "`r params$sel_aqMet`"
 smokeDuration: "`r params$smokeDuration`"
 customMessage: "`r params$customMessage`"
 location: "`r params$location`"
+outputFormat: "`r params$outputFormat`" 
+format:
+  markdown: default
+  pdf:
+    mainfont: "Roboto"
+    date-format: long
+    include-in-header: 
+      - src/header.tex
+    fontsize: "12pt"
+    urlcolor: bcblue
 ---
 
 ```{=html}
@@ -30,28 +41,40 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0
 -->
 ```
 
-```{r setup, echo=FALSE, include=FALSE, warning=FALSE, message=FALSE}
+```{r}
+#| label: setup
+#| echo: FALSE
+#| include: FALSE
+#| warning: FALSE
+#| message: FALSE
 
-knitr::opts_chunk$set(echo=FALSE,
-                      message=FALSE,
-                      warning=FALSE)
+# Set options globally
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
 
+# Load packages
 library(dplyr)
-library(leaflet)
 
-#Import files in the quarto environment
+# Import files in the quarto environment
 source(here::here("load_metadata.r"))
 
 ```
 
-```{r lookup, results="asis", strip.white=FALSE}
-#AQ met information
+```{r}
+#| label: lookup
+#| results: asis
+#| strip.white: false
 
-#this may not be needed? test later
-ENVcontact <- aq_mets |>
-  filter(fullname == params$sel_aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
-  pull(contact)
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+
+  # AQ met information
+  ENVcontact <- aq_mets |>
+    filter(fullname == params$sel_aqMet) |>
+    mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
+    pull(contact) 
 
 # Check for first health authority
 a <- match_eccc_health |> 
@@ -60,24 +83,24 @@ a <- match_eccc_health |>
   pull(healthAuth1)
 
 # Check for second health authority
-b <-  match_eccc_health |> 
+b <- match_eccc_health |> 
   filter(eccc %in% params$selRegionsIDs) |> 
   distinct(healthAuth2) |> 
   pull(healthAuth2)
 
-# find unique health authorities between a and b; drop empty cases (""")
+# Find unique health authorities between a and b; drop empty cases (" ")
 unique_HA <- unique(c(a,b))
 unique_HA <- unique_HA [! unique_HA %in% ""]
 
-# filter health authorities, always include FNHA
+# Filter health authorities, always include FNHA
 HAcontact <- health_contact |> 
   filter(authority %in% c("First Nations Health Authority", unique_HA)) |> 
   mutate(authority = factor(authority))|> 
   select(authority, contact) |>
   group_by(authority) |> 
-  summarise(html_string = paste(contact, collapse="<br />" ))
+  summarise(html_string = paste(contact, collapse = sep_type))
 
-# retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
+# Retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
 bulletin_regions <- reg_description |> 
   filter(eccc %in% params$selRegionsIDs) |> 
@@ -90,13 +113,14 @@ description <- paste(bulletin_regions$description, collapse = "; ")
 
 region_output <- bulletin_regions |> 
   distinct(region_name, description) |> 
-  mutate(output_line = paste0("* ", region_name, ": ", description)) |> 
+  mutate(output_line = paste0("* **", region_name, ":** ", description)) |> 
   pull(output_line) |> 
   paste(collapse = "\n")
 
 ```
 
 ```{r}
+#| label: add-map
 #| results: asis
 
 initial_lat = 54.8
@@ -105,94 +129,162 @@ initial_long = -124.253144
 currentDate <- Sys.Date()
 issueBasename <- "wildfire_smoke_issue"
 
-#adding a dynamic map to the html file using area boundaries from ECCC. 
-m <- leaflet() |> 
-  addTiles() |> 
-  addPolygons(
-        data = eccc_map_env,
-        fillOpacity = 0.025,
-        opacity = 0.75,
-        color = "black",
-        fillColor = "grey",
-        stroke = TRUE,
-        weight = 1,
-        smoothFactor = 0.2,
-        layerId = ~NAME,
-        group = "regions",
-        label = ~NAME,
-        labelOptions = labelOptions(textsize = "15px"),
-        ) |> 
-  addPolygons(data = eccc_map_env[which(eccc_map_env$NAME %in% params$selRegionsIDs), ],
-                  fillOpacity = 0.65,
-                  opacity = 0.65,
-                  color = "black",
-                  weight = 1.75,
-                  fillColor = "grey",
-                  label = ~NAME,
-                  labelOptions = labelOptions(textsize = "15px"))
+# Add dynamic map to quarto environment using area boundaries from ECCC. 
+m <- leaflet::leaflet() |>
+  leaflet::addTiles() |>
+  leaflet::addPolygons(
+    data = eccc_map_env,
+    fillOpacity = 0.025,
+    opacity = 0.75,
+    color = "black",
+    fillColor = "grey",
+    stroke = TRUE,
+    weight = 1,
+    smoothFactor = 0.2,
+    layerId = ~ NAME,
+    group = "regions",
+    label = ~ NAME,
+    labelOptions = leaflet::labelOptions(textsize = "15px"),
+  ) |>
+  leaflet::addPolygons(
+    data = eccc_map_env[which(eccc_map_env$NAME %in% params$selRegionsIDs), ],
+    fillOpacity = 0.65,
+    opacity = 0.65,
+    color = "black",
+    weight = 1.75,
+    fillColor = "grey",
+    label = ~ NAME,
+    labelOptions = leaflet::labelOptions(textsize = "15px")
+  )
 
-map_html <- sprintf(file.path("%s_%s_map.html"), currentDate, issueBasename)
+map_html <- sprintf("%s_%s_map.html", currentDate, issueBasename)
+map_png <- sprintf("%s_%s_map.png", currentDate, issueBasename)
 m <- mapview::mapshot(m, url = map_html, cliprect = c(140, 147, 610, 480))
+
+map <- if (params$outputFormat == "markdown") map_html else map_png
 ```
 
 ```{r}
+#| label: add-ha-info
 # Add in extra information if Interior Health Authority (IH) is present in contacts
-HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
+
+if(params$outputFormat == "markdown") {
+  HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
   "{{< card_start title=\"Interior Health Authority\" logo=\"/assets/logo_IH_horizontal.png\" >}}
 Steps to prepare and manage wildfire-related issues.
 
 [Wildfire public information](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)
 {{< card_end >}}"
-} else {
-  NULL
-}
+    }}
+
+if (params$outputFormat == "pdf") {
+      HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
+      "* Interior Health Authority - [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
+}}
 
 ```
 
 ```{r}
+#| label: create-logo-list
+
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
 # This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
 logos_list <- list(
   "Government of British Columbia" = "BCID_V_RGB_pos",
   "First Nations Health Authority" = "FNHA",
-  "Interior Health Authority" = "IH", 
-  "Fraser Health Authority" = "FH", 
-  "Vancouver Coastal Health Authority" = "VCH", 
-  "Vancouver Island Health Authority" = "VIH", 
-  "Northern Health Authority" = "NH")
+  "Interior Health Authority" = "IH",
+  "Fraser Health Authority" = "FH",
+  "Vancouver Coastal Health Authority" = "VCH",
+  "Vancouver Island Health Authority" = "VIH",
+  "Northern Health Authority" = "NH"
+)
 
-# Logos selected by user and ordered as per logos_list
-logos_names_selected <- c("Government of British Columbia", "First Nations Health Authority",  unique_HA[order(match(unique_HA, names(logos_list)))]) # always select BC and FNHA and sort unique_HA to match logos_list
-logos_selected <- logos_list[logos_names_selected] # subset of logo_list
+# Logos selected by user, always select BC and FNHA, and sort as per logos_list
+logos_names_selected <- c("Government of British Columbia",
+                          "First Nations Health Authority",
+                          unique_HA[order(match(unique_HA, names(logos_list)))])
+logos_selected <- logos_list[logos_names_selected]
 
 # Count number of logos to display
 n_logos <- length(logos_selected)
 
-# Build a vector of quarto lines to insert image for each logo
-# It is more efficient to use `sapply` but this might be more readable
-logo_image_line <- c() # start with empty vector
-# Add each logo's insert line to the vector
-for(logo_name in names(logos_selected)) {
-   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](//assets/logo_", logos_selected[[logo_name]], ".png)\\"))
+logo_image_line <- c()
+logos_combined <- c()
+
+# Set logo path based on output format
+if (params$outputFormat == "markdown") {
+  logo_path <- " logo](//assets/logo_"
+
+  # Build a vector of quarto lines to insert image for each logo
+  # It is more efficient to use `sapply` but this might be more readable
+
+  # Add each logo's insert line to the vector
+  for (logo_name in names(logos_selected)) {
+    logo_image_line <- c(logo_image_line,
+                         paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png)\\"))
+  }}
+
+
+if (params$outputFormat == "pdf") {
+  
+  logo_path <- "https://github.com/bcgov/aqwarnings/blob/main/frontend/assets/logo_"
+  logo_urls <- c() #start with empty vector
+  
+  # create vector of urls
+  for (logo_name in names(logos_selected)) {
+    logo_urls <- c(
+      logo_urls, 
+      paste0(logo_path,
+             logos_selected[[logo_name]],
+             ".png?raw=true"
+             )
+    )
+  }
+
+# format logos
+logos <- magick::image_read(logo_urls) |> 
+  magick::image_trim() |> # remove all white space
+  magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
+  magick::image_scale("x200") # scale
+
+# Combine logos into single image and scale
+logos_combined <- magick::image_append(logos) |> 
+  magick::image_write(path = "logo.png")
 }
+
 ```
 
-<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov-->
-
+<!-- Logo header for markdown output, the layout-col should be set based on number of logos including FHNA and BCGov -->
 <!-- the trailing slash means the text in square brackets is alt text -->
+<!-- note: logos and title for PDF output handled in src/header.txt -->
 
-`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`
+[`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
 ```{r}
+#| label: print-logos
 #| results: asis
+
 # `cat` is used to avoid extra processing
 # `sep` argument adds the line break and then a new line as required
-cat(logo_image_line, sep="\n\n")
+if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
 ```
 
-`r paste(":::")`
+[`r paste(":::")`]{.content-visible when-format="markdown"}
 
 The Regions of BC highlighted on the map are being impacted or are likely to be impacted by wildfire smoke over the next `r params$smokeDuration`.
+
+::: {.content-visible when-format="pdf"}
+
+\begin{wrapfigure}{r, t}{0.5\textwidth}
+\centering
+\vspace{-0.5cm}
+\includegraphics[width= 0.55\textwidth]{`r map`}
+\captionsetup{width = 0.45\textwidth, font = footnotesize, labelformat = empty, justification = raggedright}
+\caption{Descriptions of the affected region(s) are provided at the end of this document. This Air Quality Warning excludes the area managed by Metro Vancouver. For air quality notifications issued by Metro Vancouver refer to Metro Vancouver's \href{https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories}{air quality data and warnings page}.}
+\vspace*{-2 cm}
+\end{wrapfigure}
+
+:::
 
 `r params$customMessage`
 
@@ -202,7 +294,11 @@ Monitor the situation for any wildfires near your area at [EmergencyInfoBC](http
 
 The next update will be available on `r format(as.Date(params$nextUpdate), '%B %d, %Y')` and made available on the Province's [Air Quality Warnings webpage](https://aqwarnings.gov.bc.ca/).
 
-![A description of Region(s) included in this Air Quality Warning is provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map_html`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
+::: {.content-visible when-format="markdown"}
+
+![Descriptions of affected region(s) are provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map_html`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
+
+:::
 
 ## Actions you can take
 As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
@@ -211,9 +307,19 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 ## During smoky conditions
 
+::: {.content-visible when-format="markdown"}
+
 {{< accordion_controls >}}
 
 {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+### Follow your common sense
+
+:::
 
 -   Stop or reduce your activity level if breathing becomes uncomfortable or you feel unwell.
 
@@ -223,9 +329,19 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   Make sure that children and others who cannot care for themselves follow the same advice.
 
+::: {.content-visible when-format="markdown"}
+
 {{< accordion_end >}}
 
 {{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+### Monitor your symptoms
+
+:::
 
 -   Different people have different responses to smoke.
 
@@ -239,9 +355,19 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
 
+::: {.content-visible when-format="markdown"}
+
 {{< accordion_end >}}
 
 {{< accordion_start title="Tips to reduce your smoke exposure" initiallyOpen="true" >}}
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+### Tips to reduce your smoke exposure
+
+:::
 
 -   Smoke levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
 
@@ -257,54 +383,147 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   Always follow guidance from local authorities. 
 
+::: {.content-visible when-format="markdown"}
+
 {{< accordion_end >}}
 
+:::
+
 ## More information
+
+::: {.content-visible when-format="markdown"}
 
 **For additional general information about wildfire smoke and air quality:**
 
 <div class="bcds-card-wrapper"> 
 {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
 
-[What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+[What's the air like today?] {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
 
-[Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
+[Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
 
-[Air quality forecast maps](https://weather.gc.ca/firework/index_e.html) {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
+[Smoke forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
 
-[Smoke forecasts](https://firesmoke.ca/forecasts/current/) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Advisories and map of air quality and weather data.
+[Smoke forecast map] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and map of air quality and weather data.
 
-[Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
+[Air quality data and warnings] {{< card_end >}}
 </div>
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+### For additional information about wildfire smoke and air quality
+
+Air quality notifications issued by Metro Vancouver
+
+- Visit Metro Vancouver's [air quality data and warnings page][Air quality data and warnings]
+
+Air quality data
+
+- View the latest [Air Quality Health Index (AQHI) and forecast][What's the air like today?]
+
+- Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
+
+Wildfire smoke forecasts
+
+- Environment and Climate Change Canada smoke forecasts - [FireWork][Smoke forecast maps]
+
+- BlueSky Canada smoke forecasts - [FireSmoke Canada][Smoke forecast map]
+
+:::
+
+[Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
+[What's the air like today?]: https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html
+[Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
+[Smoke forecast maps]: https://weather.gc.ca/firework/index_e.html
+[Smoke forecast map]: https://firesmoke.ca/forecasts/current/
+
+
+
+
+::: {.content-visible when-format="markdown"}
 
 **For additional general information about wildfire smoke and your health:**
 
 <div class="bcds-card-wrapper"> 
 {{< card_start title="BC Centre for Disease Control" logo="/assets/logo_BCCDC.png" >}} Fact sheets on wildfire smoke and its health impacts.
 
-[Wildfire smoke](http://www.bccdc.ca/health-info/prevention-public-health/wildfire-smoke) {{< card_end >}}`r HA_text`{{< card_start title="First Nations Health Authority" logo="/assets/logo_FNHA_horizontal.png" >}} Information and resources to help you prepare.
+[Wildfire smoke] {{< card_end >}}`r HA_text`{{< card_start title="First Nations Health Authority" logo="/assets/logo_FNHA_horizontal.png" >}} Information and resources to help you prepare.
 
-[Wildfire smoke health information](https://www.fnha.ca/about/news-and-events/news/wildfire-smoke-health-information) {{< card_end >}} {{< card_start title="HealthLink BC" logo="/assets/logo_BCID_HealthLinkBC_RGB_pos.png" >}} Learn and prepare for wildfires. Phone 8-1-1 for 24/7 health advice.
+[Wildfire smoke health information] {{< card_end >}} {{< card_start title="HealthLink BC" logo="/assets/logo_BCID_HealthLinkBC_RGB_pos.png" >}} Learn and prepare for wildfires. Phone 8-1-1 for 24/7 health advice.
 
-[Wildfires and your health](https://www.healthlinkbc.ca/health-library/health-features/wildfires-and-your-health) {{< card_end >}} {{< card_start title="Worksafe BC" logo="/assets/logo_worksafebc.jpg" >}} Info on working outdoors during smoky conditions.
+[Wildfires and your health] {{< card_end >}} {{< card_start title="Worksafe BC" logo="/assets/logo_worksafebc.jpg" >}} Info on working outdoors during smoky conditions.
 
-[Wildfire FAQ](https://www.worksafebc.com/en/resources/health-safety/information-sheets/wildfire-smoke-frequently-asked-questions-faq) {{< card_end >}}
+[Wildfire FAQ] {{< card_end >}}
 </div>
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+### For additional general information about wildfire smoke and your health
+
+BC Centre for Disease Control
+
+- Wildfire smoke and its health impacts - [Fact sheet][Wildfire smoke]
+ 
+Provincial Health Authorities
+
+- First Nations Health Authority - [Wildfire smoke health information][Wildfire smoke health information]
+
+`r HA_text`
+
+HealthLink BC
+
+- Learn about and prepare for wildfires - [Wildfires and your health resource][Wildfires and your health]
+
+- Phone 8-1-1 for 24/7 health advice 
+
+Worksafe BC
+
+- Working outdoors during smoky conditions - [Wildfires smoke FAQ][Wildfire FAQ]
+
+:::
+
+[Wildfire smoke]: http://www.bccdc.ca/health-info/prevention-public-health/wildfire-smoke
+[Wildfire smoke health information]: https://www.fnha.ca/about/news-and-events/news/wildfire-smoke-health-information
+[Wildfires and your health]: https://www.healthlinkbc.ca/health-library/health-features/wildfires-and-your-health
+[Wildfire FAQ]: https://www.worksafebc.com/en/resources/health-safety/information-sheets/wildfire-smoke-frequently-asked-questions-faq
 
 ## Contact
 
-**Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
+::: {.content-visible when-format="markdown"}
 
+**Media questions regarding air quality conditions related to this Air Quality Warning:**
 {{< card_start width="wide" >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+
+### Media questions regarding air quality conditions related to this Air Quality Warning
+:::
+
 `r ENVcontact`
+
+::: {.content-visible when-format="markdown"}
+
 {{< card_end >}}
 
-**Media questions regarding health implications of wildfires:**
+**Media questions regarding health implications of wildfire smoke:**
 
 {{< card_start  width="wide" >}}
-`r paste(HAcontact$html_string, collapse = "\n\n")`
-{{< card_end >}}
+
+:::
+
+::: {.content-visible when-format="pdf"}
+
+### Media questions regarding health implications of wildfire smoke
+
+:::
+
+`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
 
 ## Regions included under this Air Quality Warning
 
-`r paste(region_output)`
+`r region_output`

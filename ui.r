@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## Air Quality Warning - Wildfire Smoke UI
+# Air Quality Warning UI
 
 library(shiny)
 library(shinydashboard)
@@ -21,33 +21,62 @@ library(markdown)
 #--------------------------------------------------
 # 3 sections: header, sidebar, body
 
-header <- dashboardHeader(title = "Air Quality Warning - Wildfire Smoke")
+header <- dashboardHeader(title = "Air Quality Warnings")
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
     id = "tabs",
-    menuItem(
-      "Issue Warning",
+    menuItem("Wildfire Smoke Warnings"),
+    menuSubItem("Issue",
+                icon = icon("pen"),
+                tabName = "issue-wildfire"
+    ),
+    menuSubItem("End",
+                icon = icon("pen"),
+                tabName = "end-wildfire"
+    ),
+    menuItem("", tabName = NULL), # Empty item for spacing
+    menuItem("Community Warnings"),
+    menuSubItem("Issue",
+                icon = icon("pencil"),
+                tabName = "issue-community"
+    ),
+    menuSubItem(
+      "End",
       icon = icon("pencil"),
-      tabName = "issue"
-      ),
-    menuItem(
-      "End Warning",
-      icon = icon("pencil"),
-      tabName = "end"
-      )
-    )
+      tabName = "end-community"
+    ),
+  menuItem("", tabName = NULL), # Empty item for spacing
+  menuItem("Pollution Prevention Notice"),
+  menuSubItem("Issue",
+              icon = icon("pencil"),
+              tabName = "issue-pollution-prevention"
+  ),
+  menuSubItem(
+    "End",
+    icon = icon("pencil"),
+    tabName = "end-pollution-prevention"
   )
+)
+)
+  
 
 body <- dashboardBody(
   shinyjs::useShinyjs(),
   tags$head(
-    tags$style(HTML(".leaflet-container { background: white; }"))
+    tags$style(HTML("
+                    .leaflet-container { background: white; }
+                    .main-sidebar { font-size: 18px; }
+                    "))
     ), 
- tabItems(
-   issueWildfireSmokeUI("issue_wildfire_smoke"),
-   endWildfireSmokeUI("end_wildfire_smoke")
-   )
+  tabItems(
+    tabItem(tabName = "issue-wildfire", issueWildfireSmokeUI(id = "issue_wildfire_smoke")),
+    tabItem(tabName = "end-wildfire", endWildfireSmokeUI(id = "end_wildfire_smoke")),
+    tabItem(tabName = "issue-community", issueLocalEmissionsUI(id = "issue_local_emissions")),
+    tabItem(tabName = "end-community", endLocalEmissionsUI(id = "end_local_emissions")),
+    tabItem(tabName = "issue-pollution-prevention", issuePollutionPreventionUI(id = "issue_pollution_prevention")),
+    tabItem(tabName = "end-pollution-prevention", endPollutionPreventionUI(id = "end_pollution_prevention"))
+  )
  )
 
 shinyUI(dashboardPage(header, sidebar, body))

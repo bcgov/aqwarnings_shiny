@@ -1,0 +1,51 @@
+% Copyright 2025 Province of British Columbia
+% 
+% Licensed under the Apache License, Version 2.0 (the "License");
+% you may not use this file except in compliance with the License.
+% You may obtain a copy of the License at
+% 
+% http://www.apache.org/licenses/LICENSE-2.0
+% 
+% Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+% See the License for the specific language governing permissions and limitations under the License.
+ 
+ % Custom settings for PDF output
+
+% set custom color: bcblue
+\usepackage{xcolor}	% colours for title page and hyperlinks
+\definecolor{bcblue}{RGB}{0,0,128} % blue
+
+% set color of section headers to bcblue
+\addtokomafont{section}{\color{bcblue}}
+\addtokomafont{subsection}{\color{bcblue}}
+\addtokomafont{subsection}{\color{bcblue}}
+
+\usepackage{graphicx} % for images
+
+% page numbers
+\usepackage{lastpage} % for referencing the total number of pages
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\renewcommand{\headrulewidth}{0pt} % remove top horizontal rule
+\fancyfoot[R]{Page \thepage\ of \pageref*{LastPage}} % bottom right:X of Y
+
+% format header: insert logo, left align and title and date
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+\includegraphics[width = 1\textwidth]{logo.png}\\[\bigskipamount]
+\vspace{-0.4cm} % reduce vertical space between logos and title
+\begin{flushleft}
+{\color{bcblue}\LARGE\textbf{\@title}} \vspace{0.3cm} \newline
+{\color{bcblue}\Large\textbf{\@date}}
+\noindent\textcolor{bcblue}{\rule{\textwidth}{0.4pt}} % add line under title
+\end{flushleft}\egroup
+}
+\makeatother
+
+\usepackage[none]{hyphenat} % no hyphenation at end of line
+
+\usepackage{float}
+\usepackage{wrapfig} % to wrap text around map
+\usepackage{caption} % for map caption

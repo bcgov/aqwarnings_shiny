@@ -30,55 +30,56 @@ endWildfireSmokeUI <- function(id) {
         width = 6,
         status = "primary",
 
-        h5("1. Complete fields below:"),
+        h4(tags$b("1. Complete fields below")),
 
         selectInput(
           inputId = ns("sel_aqMet"),
-          label = h5("Author:"),
+          label = h4("Author:"),
           selected = "",
           choices = c("", aq_mets$fullname),
           width = "50%"
         ),
 
         dateInput(inputId = ns("lastWarning"),
-          label = h5("Date last warning was issued:"),
+          label = h4("Date last warning was issued"),
           max = Sys.Date(),
-          value = Sys.Date() -1,
+          value = Sys.Date()-1,
           startview = "month",
           weekstart = 0,
           width = "50%"
         ),
 
         textAreaInput(inputId = ns("customMessage"),
-          label = h5("Custom message:"),
+          label = h4("Custom message:"),
           value = "Wildfire smoke concentrations have reduced over the past 24 hours.",
           placeholder = "(example) Wildfire smoke concentrations have reduced over the past 24 hours.",
-          width = "100%",
-          height = "100%",
+          width = "50%",
+          height = "80px",
           resize = "vertical"
         ),
 
         checkboxGroupInput(
           inputId = ns("sel_healthAuth"),
-          label = h5("Health Authorities included on last warning (select all that apply; FNHA is automatically selected):"),
+          label = h4("Health Authorities included on last warning (select all that apply; FNHA is automatically selected):"),
           choices = unique(health_contact$authority)[unique(health_contact$authority) != "First Nations Health Authority"],   #exclude FNHA as a choice - exists on all bulletins
-          width = "100%"
+          width = "50%"
         ),
         
-        h5("2. Select or create summary description of affected regions (for AQ Warnings Table)."),
+        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         
         selectizeInput(
           inputId = ns("location"),
-          label = h5("Describe regions affected:"),
+          label = h4(HTML("<b>2. Describe affected regions</b> (for warnings table on website)")),
           selected = "",
           choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
-          width = "100%",
+          width = "50%",
           options = list(create = TRUE)
         ),
         
-
-       h5("3. Generate Warning:"),
-       actionButton(
+        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+        
+        h4(tags$b("3. Generate Warning")),
+        actionButton(
          inputId = ns("genWarning"),
          label = "Go!",
          style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
@@ -86,7 +87,7 @@ endWildfireSmokeUI <- function(id) {
        
        hr(),
        ## Add the download button here:
-       downloadButton(ns("download_report"), "Download Files", style = "width: 100%"),
+       downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
 
        hr(),
        actionButton(
@@ -104,89 +105,106 @@ endWildfireSmokeUI <- function(id) {
 #--------------------------------------------------
 
 endWildfireSmoke <- function(input, output, session){
-
-  # Remove
-  observeEvent(input$cleanupdir, {
-    rnw_dirs <- list.dirs(path = here::here("outputs", "rnw"), recursive = FALSE, full.names = TRUE)
-    rnw_files <- list.files(path = here::here("outputs", "rnw"), full.names = TRUE)
-    qmd_dirs <- list.dirs(path = here::here("outputs", "qmd"), recursive = FALSE, full.names = TRUE)
-    qmd_files <- dir(path = here::here("outputs", "qmd"), full.names = TRUE)
-    
-    dirsToRemove <- c(rnw_dirs, qmd_dirs)
-    files <- c(rnw_files, qmd_files)
-    filesToRemove <- setdiff(files, dirsToRemove)
-    
-    nfiles <- length(filesToRemove)
-    ndirs <- length(dirsToRemove)
-    if (nfiles == 0 & ndirs == 0) {
-      showNotification("No files or directories to remove", type = "message")
-    } else {
-      
-      fs::dir_delete(dirsToRemove)
-      file.remove(filesToRemove)
-      
-      showNotification(paste("Directories removed:", ndirs, ". ", "Files removed:", nfiles, "."), type = "message")  
-    }
-  })
   
-  # Compile LaTeX report and save as .pdf:
+  # Generate warning
   observeEvent(input$genWarning, {
-
+    
     if (input$sel_aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
     } else if (length(input$sel_healthAuth) == 0) {
       showNotification("No health authority selected; please select a health authority", type = "error")
+    } else if (input$location == "") {
+      showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
-
-      currentDate <- Sys.Date()
+      
+      # create progress object; ensure it closes when reactive exits
+      progress <- shiny::Progress$new()
+      on.exit(progress$close())
+      progress$set(message = "Preparing files...", value = 0)
+      
       endBasename <- "wildfire_smoke_end"
 
-      # PDF
-      showNotification("Generating PDF...")
-      knitr::knit2pdf(sprintf(here::here("src", "rnw", "%s.rnw"), endBasename), clean = TRUE,
-                      output = sprintf(here::here("outputs", "rnw", "%s_%s.tex"), currentDate, endBasename))
-
-      showNotification("PDF generation complete!", duration = NULL)
-      
-      # Quarto
-      showNotification("Generating Markdown...")
-
+      # generate markdown via Quarto
+      progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
+                            output_file = sprintf("%s_%s.md", Sys.Date(), endBasename),
                             output_format = "markdown",
-                            output_file = sprintf("%s_%s.md", currentDate, endBasename),
                             execute_params = list(sel_aqMet = input$sel_aqMet,
                                                   lastWarning = input$lastWarning,
                                                   customMessage = input$customMessage,
                                                   sel_healthAuth = input$sel_healthAuth,
-                                                  ice = "End",
-                                                  location = input$location),
+                                                  location = input$location,
+                                                  outputFormat = "markdown"),
                             debug = FALSE)
       
-      id <- showNotification("Markdown generation complete!", duration = NULL)
+      # move the .md to outputs/
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), endBasename), full.names = TRUE)
+      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
-      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", currentDate, endBasename), full.names = TRUE)
-      fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs", "qmd"))
-      
-      id <- showNotification("Markdown file moved to outputs/qmd directory.")
-    }
-  })
-  ## Download files
+      # generate pdf via Quarto
+      progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
+      quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
+                            output_file = sprintf("%s_%s.pdf", Sys.Date(), endBasename),
+                            output_format = "pdf",
+                            execute_params = list(sel_aqMet = input$sel_aqMet,
+                                                  lastWarning = input$lastWarning,
+                                                  customMessage = input$customMessage,
+                                                  sel_healthAuth = input$sel_healthAuth,
+                                                  location = input$location,
+                                                  outputFormat = "pdf"),
+                            debug = FALSE)
   
+      
+      # move the .pdf to outputs/
+      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), endBasename), full.names = TRUE)
+      fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
+      
+      progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
+      Sys.sleep(5)
+      
+    } #end else
+  }) #end observeEvent
+  
+  # Download files
   output$download_report <- downloadHandler(
     filename = function() {
       sprintf("%s_wildfire_smoke_end.zip", Sys.Date())
     },
     content = function(file) {
       # Build file paths correctly using sprintf()
-      files_to_zip <- c(
-        file.path("outputs", "qmd", sprintf("%s_wildfire_smoke_end.md", Sys.Date())),
-        file.path("outputs", "rnw", sprintf("%s_wildfire_smoke_end.pdf", Sys.Date()))
-      )
+      files_to_zip <- c(file.path("outputs", sprintf(
+        "%s_wildfire_smoke_end.md", Sys.Date()
+      )),
+      file.path("outputs", sprintf(
+        "%s_wildfire_smoke_end.pdf", Sys.Date()
+      )))
       
       # Zip the files into the download target
-      zip::zip(zipfile = file, files = files_to_zip, mode = "cherry-pick")
+      zip::zip(zipfile = file,
+               files = files_to_zip,
+               mode = "cherry-pick")
     },
     contentType = "application/zip"
   )
+  
+  # Clean up directories
+  observeEvent(input$cleanupdir, {
+    output_files <- dir(path = here::here("outputs"), full.names = TRUE)
+    temp_files <- dir(full.names = TRUE, pattern = ".png")
+    
+    filesToRemove <- c(output_files, temp_files)
+    
+    nfiles <- length(filesToRemove)
+    if (nfiles == 0) {
+      showNotification("No files or directories to remove", type = "message")
+    } else {
+      
+      file.remove(filesToRemove)
+      
+      showNotification(paste("Files removed:", nfiles, "."), type = "message")  
+    }
+  })
   
 }

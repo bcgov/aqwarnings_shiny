@@ -19,7 +19,8 @@ aq_mets <- read.csv(here::here("data", "raw", "aq_mets_contact.csv"))
 health_contact <- read.csv(here::here("data", "raw", "health_auth_contact.csv"))
 match_eccc_health <- read.csv(here::here("data", "raw", "eccc_health_regions.csv"))
 reg_description <- read.csv(here::here("data", "raw", "eccc_descriptions.csv"))
-logo_info <- read.csv(here::here("data", "raw", "logo_meta_data.csv"))
+buddy_stations <- read.csv(here::here("data", "raw", "buddy_stations.csv"))
+match_health_city <- read.csv(here::here("data", "raw", "match_health_city.csv"))
 bc_map <- bcmaps::bc_bound() |>  sf::st_transform(crs = crs)
 
 # Load pre-edited ECCC forecast regions and "points" within Metro Vancouver
@@ -54,4 +55,7 @@ cities <- bcmaps::bc_cities() |>
 # convert geometry to lat and lng columns; drop geometry
 cities <- cities |>  
   tidyr::extract(geometry, c('lng', 'lat'), '\\((.*), (.*)\\)', convert = TRUE)  # to do: extract() has been superseded by separate_wider_regex()
+
+# shiny app runs on a server with UTC. Specify local tz to ensure local date is applied
+Sys.setenv(TZ = "America/Vancouver")
 

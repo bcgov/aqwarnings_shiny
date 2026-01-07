@@ -12,10 +12,13 @@
 
 ## Air Quality Warning - Wildfire Smoke App
 
-# Load meta data and maps for Air Quality Warning - Wildfire Smoke
+# Load meta data, maps and functions
 source(file.path("load_metadata.r"))
 
 # Load  modules
 source(file.path("module_issue_wildfire_smoke.r"))
 source(file.path("module_end_wildfire_smoke.r"))
-
+source(file.path("module_issue_local_emissions.r"))
+source(file.path("module_end_local_emissions.r"))
+source(file.path("module_issue_pollution_prevention.r"))
+source(file.path("module_end_pollution_prevention.r"))

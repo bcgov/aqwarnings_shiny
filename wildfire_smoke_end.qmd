@@ -1,5 +1,5 @@
 ---
-title: "Air Quality Warning - Wildfire Smoke" 
+title: "Air quality warning for wildfire smoke ended" 
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`" 
 params: 
@@ -7,16 +7,26 @@ params:
   lastWarning: "2025-02-10" 
   customMessage: "`Custom message.`" 
   location: "Multiple locations in B.C."
-  ice: "End" 
+  outputFormat: "markdown"
   sel_healthAuth: 
     - First Nations Health Authority 
     - Northern Health 
-ice: "`r params$ice`" 
+ice: "End" 
 author: "`r params$sel_aqMet`" 
 customMessage: "`r params$customMessage`" 
 lastWarning: "`r params$lastWarning`" 
 sel_healthAuth: "`r paste(params$sel_healthAuth, collapse=', ')`" 
 location: "`r params$location`"
+outputFormat: "`r params$outputFormat`" 
+format:
+  markdown: default
+  pdf:
+    mainfont: "Roboto"
+    date-format: long
+    include-in-header: 
+      - src/header.tex
+    fontsize: "12pt"
+    urlcolor: bcblue
 ---
 
 ```{=html}
@@ -28,25 +38,40 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0
 -->
 ```
 
-```{r setup, echo=FALSE, include=FALSE, warning=FALSE, message=FALSE}
+```{r}
+#| label: setup
+#| echo: FALSE
+#| include: FALSE
+#| warning: FALSE
+#| message: FALSE
 
-knitr::opts_chunk$set(echo=FALSE,
-                      message=FALSE,
-                      warning=FALSE)
+# Set options globally
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
 
+# Load packages
 library(dplyr)
 
-#Import files in the quarto environment
+# Import files in the quarto environment
 source(here::here("load_metadata.r"))
 
 ```
 
-```{r lookup, results="asis", strip.white=FALSE}
+```{r}
+#| label: lookup
+#| results: asis
+#| strip.white: false
+
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+
 #AQ met information
 
 ENVcontact <- aq_mets |>
   filter(fullname == params$sel_aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = "<br />")) |> 
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
   pull(contact)
 
 HAcontact <- health_contact |>
@@ -54,12 +79,16 @@ HAcontact <- health_contact |>
   mutate(authority = factor(authority))|> 
   select(authority, contact) |>
   group_by(authority) |> 
-  summarise(html_string = paste(contact, collapse="<br />" ))
+  summarise(html_string = paste(contact, collapse = sep_type))
+
 ```
 
 ```{r}
+#| label: create-logo-list
+
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
 # This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
+
 logos_list <- list(
   "Government of British Columbia" = "BCID_V_RGB_pos",
   "First Nations Health Authority" = "FNHA",
@@ -74,6 +103,7 @@ logos_names_selected <- c(
   "Government of British Columbia", # always select BC
   "First Nations Health Authority", # always select FNHA 
   params$sel_healthAuth) # Note: if FNHA is selected in app, it will duplicate
+
 ## This line will remove the duplicated FNHA value if it appears twice
 ## Side effect: If the app user did NOT select FNHA, this will force FNHA to appear
 logos_names_selected <- unique(logos_names_selected)
@@ -83,29 +113,67 @@ logos_selected <- logos_list[logos_names_selected] # subset of logo_list
 # Count number of logos to display
 n_logos <- length(logos_selected)
 
-# Build a vector of quarto lines to insert image for each logo
-# It is more efficient to use `sapply` but this might be more readable
-logo_image_line <- c() # start with empty vector
-# Add each logo's insert line to the vector
-for(logo_name in names(logos_selected)) {
-   logo_image_line <- c(logo_image_line, paste0("![", logo_name, " logo](//assets/logo_", logos_selected[[logo_name]], ".png)\\"))
+logo_image_line <- c()
+logos_combined <- c()
+
+# Set logo path based on output format
+if (params$outputFormat == "markdown") {
+  logo_path <- " logo](//assets/logo_"
+
+  # Build a vector of quarto lines to insert image for each logo
+  # It is more efficient to use `sapply` but this might be more readable
+
+  # Add each logo's insert line to the vector
+  for (logo_name in names(logos_selected)) {
+    logo_image_line <- c(logo_image_line,
+                         paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png)\\"))
+  }}
+
+
+if (params$outputFormat == "pdf") {
+  
+  logo_path <- "https://github.com/bcgov/aqwarnings/blob/main/frontend/assets/logo_"
+  logo_urls <- c() #start with empty vector
+  
+  # create vector of urls
+  for (logo_name in names(logos_selected)) {
+    logo_urls <- c(
+      logo_urls, 
+      paste0(logo_path,
+             logos_selected[[logo_name]],
+             ".png?raw=true"
+             )
+    )
+  }
+
+# format logos
+logos <- magick::image_read(logo_urls) |> 
+  magick::image_trim() |> # remove all white space
+  magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
+  magick::image_scale("x200") # scale
+
+# Combine logos into single image and scale
+logos_combined <- magick::image_append(logos) |> 
+  magick::image_write(path = "logo.png")
 }
+
 ```
 
-<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov-->
-
+<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
 <!-- the trailing slash means the text in square brackets is alt text -->
 
-`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`
+[`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
 ```{r}
+#| label: print-logos
 #| results: asis
+
 # `cat` is used to avoid extra processing
 # `sep` argument adds the line break and then a new line as required
-cat(logo_image_line, sep="\n\n")
+if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
 ```
 
-`r paste(":::")`
+[`r paste(":::")`]{.content-visible when-format="markdown"}
 
 This Air Quality Warning for wildfire smoke that was last updated on `r format(as.Date(params$lastWarning), '%B %d, %Y')` has ended.
 
@@ -115,18 +183,10 @@ Real-time air quality information is available on the [BC Air Quality website](h
 
 # Contact information
 
-**Media and public inquiries regarding air quality and the Air Quality Warning for wildfire smoke:**
+**Media questions regarding air quality conditions related to this Air Quality Warning:**
 
-{{< card_start width="wide" >}}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
 
-`r ENVcontact`
+**Media questions regarding health implications of wildfire smoke:**
 
-{{< card_end >}}
-
-**Media questions regarding health implications of wildfires:**
-
-{{< card_start width="wide" >}}
-
-`r paste(HAcontact$html_string, collapse = "\n\n")`
-
-{{< card_end >}}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}

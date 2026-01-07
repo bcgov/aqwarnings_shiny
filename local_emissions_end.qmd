@@ -1,0 +1,508 @@
+---
+title: "`r if (params$burnRestrictionStatus == 0) { 
+            paste('Air quality warning ended for', params$location)
+                } else if (params$burnRestrictionStatus == 1) {
+        paste('Air quality warning and open burning restrictions ended for', params$location)
+        } else {
+        paste('Air quality warning ended for', params$location, '- open burning restrictions remain in effect')
+        }`"
+type: "local_emissions"
+date: "`r Sys.Date()`"
+params: 
+  pollutant: "PM25 & PM10"
+  sel_aqMet: "Sakshi Jain"
+  location: "Whistler"
+  issuedate: "2025-07-09"
+  outputFormat: "markdown"
+  customMessage: ""
+  burnRestrictionStatus: 0 # 0 = warning ended; 1 = warning and burn restrictions ended; 2 = warning ended; burn restrictions continue
+  burnRestrictionSDM: "Ben"
+  burnRestrictionArea: ""
+  burnRestrictionEndDate: "2025-09-28"
+  burnRestrictionEndTime: "12:00 PM"
+ice: "End"
+pollutant: "`r params$pollutant`"
+author: "`r params$sel_aqMet`"
+customMessage: "`r params$customMessage`"
+location: "`r params$location`"
+outputFormat: "`r params$outputFormat`" 
+burnRestrictions: "`r params$burnRestrictionStatus`"
+format:
+  markdown: default
+  pdf:
+    mainfont: "Roboto"
+    date-format: long
+    include-in-header: 
+      - src/header.tex
+    fontsize: "12pt"
+    urlcolor: bcblue
+---
+
+```{=html}
+<!--
+Copyright 2025 Province of British Columbia
+
+This work is licensed under the Creative Commons Attribution 4.0 International License.
+To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/.
+-->
+```
+
+```{r setup, echo=FALSE, include=FALSE, warning=FALSE, message=FALSE}
+
+knitr::opts_chunk$set(echo=FALSE,
+                      message=FALSE,
+                      warning=FALSE)
+
+library(tidyverse)
+library(knitr)
+library(data.table)
+library(shiny)
+library(sf)
+library(lubridate)
+library(readr)
+library(xtable)
+
+source(here::here("load_metadata.r"))
+source(here::here(file.path("functions", "local_tz.r")))
+
+# create single line break based on output file format
+if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+```
+
+```{r table-setup, include=FALSE}
+pollutants <- strsplit(params$pollutant, "&")[[1]] |> trimws()
+min_data_capture_pct <- 75
+
+results <- list()
+
+for (i in seq_along(pollutants)) {
+  pollutant <- pollutants[i]
+  
+  # ---- Check that locations are valid for this pollutant ----
+  valid_locations <- buddy_stations |> 
+    filter(location %in% params$location) |> 
+    pull(Buddy_location) |> 
+    unique()
+  
+  if (length(valid_locations) == 0) {
+    stop(sprintf("None of the specified locations are valid for %s.", pollutant))
+  }
+  
+  # ---- Lookup table for units and averaging times ----
+  lookup <- data.frame(
+    units = c("μg/m^3^", "μg/m^3^", "ppb"),
+    hours = c(24, 24, 8),
+    row.names = c("PM25", "PM10", "O3")
+  ) |> 
+    mutate(avgtimelabel = sprintf("%d-hr", hours))
+  
+  # ---- Read in CSV from FTP ----
+  columndefs <- cols_only(
+    DATE_PST = col_character(),  # time zone assigned below; col_datetime does not support time zone assignment
+    STATION_NAME = col_factor(),
+    INSTRUMENT = col_factor(),  #is instrument necessary?
+    REPORTED_VALUE = col_double(),
+    PARAMETER = col_character(),
+    EMS_ID = col_character()
+  )
+  
+  dfraw <- read_csv(
+    sprintf("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_Raw_Air_Data/Air_Quality/%s.csv", pollutant),
+    col_types = columndefs
+  ) |> 
+    rename_all(tolower)
+  
+  # ---- Filter data to retain pnly stations relevant to this warning (params$location + neighbouring sites) ----
+  df <- dfraw |> 
+    mutate(date_pst = as.POSIXct(date_pst, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) |> 
+    filter(instrument != "") |>   #is this needed?
+    filter(station_name %in% valid_locations)
+  
+  # ---- Get time window per location ----
+  dts <- df |> 
+    group_by(station_name) |> 
+    summarize(max_dt = max(date_pst), .groups = "drop") |> 
+    mutate(min_dt = max_dt - (3600 * (lookup[pollutant, "hours"] - 1)))
+  
+  df_filtered <- df |> 
+    left_join(dts, by = "station_name") |> 
+    filter(date_pst >= min_dt & date_pst <= max_dt) |> 
+    select(-min_dt, -max_dt)
+  
+  # ---- Summarize concentrations ----
+  integrated <- df_filtered |> 
+    group_by(station_name, parameter) |> 
+    summarize(
+      n_hours = n(),
+      n_na = sum(is.na(reported_value)),
+      pct_valid = 100 * (n_hours - n_na) / n_hours,
+      mean_conc = if_else(n_hours == n_na, NA_real_, mean(reported_value, na.rm = TRUE)),
+      max_conc = if_else(n_hours == n_na, NA_real_, max(reported_value, na.rm = TRUE)),
+      start_dt = min(date_pst),
+      end_dt = max(date_pst),
+      .groups = "drop"
+    ) |> 
+    mutate(
+      mean_conc = na_if(mean_conc, pct_valid < min_data_capture_pct),
+      max_conc = na_if(max_conc, pct_valid < min_data_capture_pct)
+    )
+  
+  station_metadata_raw <- read_csv("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_Raw_Air_Data/Year_to_Date/bc_air_monitoring_stations.csv", show_col_types = FALSE) 
+  station_metadata <- station_metadata_raw |> 
+    rename_all(tolower) |> 
+    select(station_name, location = city) |> 
+    distinct()
+  
+  # Join with station info using STATION_NAME
+  integrated <- integrated |> 
+    left_join(station_metadata, by = "station_name")
+  
+  # ---- Define most recent hour of data and express as 12 hour clock and local time 
+  
+  # set system to local time of params$location
+  Sys.setenv(TZ = local_tz(params$location))
+  
+  local_time <- integrated |> 
+    filter(location == params$location) |> 
+    pull(end_dt) |> 
+    as.POSIXct(., tz = local_tz(params$location))
+  
+  local_hour <- format(lubridate::floor_date(local_time, "hour"), format = "%l:00 %p")
+  
+  # ---- Format final table ----
+  formatted_table <- integrated |> 
+    mutate(
+      mean_conc = ifelse(is.finite(mean_conc), sprintf("%.1f", mean_conc), "NA"),
+      max_conc = ifelse(is.finite(max_conc), sprintf("%.1f", max_conc), "NA")
+    ) |> 
+    pivot_wider(
+      names_from = parameter,
+      id_cols = c(station_name, location),
+      values_from = c(mean_conc, max_conc)
+    )
+  
+  # clean up names, drop station_name and sort by params$location then other stations alphabetically
+  formatted_table <- formatted_table |> 
+    rename_with(~ gsub(sprintf("_%s", pollutant), "", .x), everything()) |> 
+    select(-station_name) |> 
+    arrange(location != params$location)  # arrange rows with params$location first, then rest
+  
+  # transpose
+  formatted_table <- formatted_table |> 
+    pivot_longer(cols = -location, names_to = "Community", values_to = "concentration") |> 
+    pivot_wider(names_from = "location", values_from = "concentration")
+  
+  # handle special case for O3
+  if (pollutant != "O3") {formatted_table <- formatted_table |>  filter(Community != "max_conc")}
+  
+  # clean up labels
+  final_table <- formatted_table |> 
+    mutate(Community = case_when(
+      Community == "mean_conc" ~ sprintf("%s average (%s)", lookup[pollutant, "avgtimelabel"], lookup[pollutant, "units"]),
+      Community == "max_conc" ~ sprintf("Max. within %s (%s)", gsub("-", " ", lookup[pollutant, "avgtimelabel"]), lookup[pollutant, "units"]),
+      TRUE ~ Community
+    ))
+  
+  results[[paste0("final_table", i)]] <- final_table
+}
+
+# Expose them as final_table1, final_table2, etc.
+list2env(results, envir = .GlobalEnv)
+```
+
+```{r ENVcontact, include=FALSE}
+#| results: asis
+#| strip.white: false
+
+# AQ met information
+ENVcontact <- aq_mets |>
+  filter(fullname == params$sel_aqMet) |>
+  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
+  pull(contact) 
+```
+
+```{r HAcontact, include=FALSE}
+#| results: asis
+
+HAauth <- match_health_city |> 
+  filter(location == params$location) |> 
+  pull(health_city)
+
+HAcontact <- health_contact |>
+    filter(authority == HAauth) |>
+    select(authority, contact) |>
+    group_by(authority) |>
+    summarise(html_string = paste(contact, collapse = sep_type))
+```
+
+```{r pollutant_specific_clauses, include=FALSE}
+pollutant_tbl <- tribble(
+  ~pollutant,~pollutantExpansion,
+  "PM25","fine particulate matter",
+  "PM10","coarse particulate matter",
+  "PM25 & PM10","fine particulate matter and coarse particulate matter",
+  "O3","ground level ozone"
+)
+
+# Pick the row for the current pollutant
+pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
+
+# Assign values
+pollutantExpansion  <- pollutant_info$pollutantExpansion
+
+if (params$burnRestrictionStatus == 0 | params$burnRestrictionStatus == 2) {
+first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ", HAauth,
+    " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
+    " due to elevated levels of ", pollutantExpansion, "."
+  )
+} else {
+  first_paragraph <- paste0(
+    "The Ministry of Environment and Parks in collaboration with the ", HAauth, 
+    " has ended the Air Quality Warning and open burning restrictions that were issued on ", 
+    format(as.Date(params$issuedate), "%B %d, %Y"), " for ",
+    params$location," due to elevated levels of ", pollutantExpansion, "."
+  )
+}
+```
+
+```{r additional_info, include=FALSE}
+
+additional_info_PM25 <- paste0(
+    "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  )
+
+additional_info_PM10 <- paste0(
+  "The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  )
+
+additional_info_O3 <- paste0(
+  "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
+  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+)
+```
+
+```{r burn_ban, results='asis', echo=FALSE}
+
+if (params$burnRestrictionStatus == 2) {
+  
+  # Define signature and title info depending on who it is
+  if (params$burnRestrictionSDM == 1) {
+    name_line <- "Benjamin Weinstein"
+    title_line1 <- "For Director, Environmental Management Act"
+    title_line2 <- "Environmental Monitoring and Analysis Branch"
+  } else if (params$burnRestrictionSDM == 2) {
+    name_line <- "TBD"
+    title_line1 <- "Director, Environmental Management Act"
+    title_line2 <- "Environmental Monitoring and Analysis Branch"
+  }
+  
+# to do: improve formatting - single line spacing for sdm information, \n and <br> don't seem to work; rather than using paste could this text be added to a conditional code block directly in the document?
+burn_ban <- paste0(
+  "NOTICE of DIRECTOR under s.30 Open Burning Smoke Control Regulation:\n\n",
+  "As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within ",
+  params$burnRestrictionArea, 
+  " until ", 
+  format(as.Date(params$burnRestrictionEndDate), "%B %d, %Y"), 
+  " ",
+  params$burnRestrictionEndTime, 
+  " local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n",
+  "Date issued: ", format(Sys.Date(), "%B %d, %Y"), sep_type,
+  name_line, sep_type,  
+  title_line1, sep_type,
+  title_line2
+  )
+
+} else {
+  burn_ban <- NULL
+}
+
+```
+
+```{r create-logo-list}
+
+# Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
+# This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
+logos_list <- list(
+  "Government of British Columbia" = "BCID_V_RGB_pos",
+  "First Nations Health Authority" = "FNHA",
+  "Interior Health Authority" = "IH",
+  "Fraser Health Authority" = "FH",
+  "Vancouver Coastal Health Authority" = "VCH",
+  "Vancouver Island Health Authority" = "VIH",
+  "Northern Health Authority" = "NH"
+)
+
+# Logos selected by user and ordered as per logos_list
+# Logos selected by user
+logos_names_selected <- c("Government of British Columbia",
+                          "First Nations Health Authority", 
+                          HAauth)
+logos_selected <- logos_list[logos_names_selected]
+
+# Count number of logos to display
+n_logos <- length(logos_selected)
+
+logo_image_line <- c()
+logos_combined <- c()
+
+# Set logo path based on output format
+if (params$outputFormat == "markdown") {
+  logo_path <- " logo](//assets/logo_"
+
+  # Build a vector of quarto lines to insert image for each logo
+  # It is more efficient to use `sapply` but this might be more readable
+
+  # Add each logo's insert line to the vector
+  for (logo_name in names(logos_selected)) {
+    logo_image_line <- c(logo_image_line,
+                         paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png)\\"))
+  }}
+
+if (params$outputFormat == "pdf") {
+  
+  logo_path <- "https://github.com/bcgov/aqwarnings/blob/main/frontend/assets/logo_"
+  logo_urls <- c() #start with empty vector
+  
+  # create vector of urls
+  for (logo_name in names(logos_selected)) {
+    logo_urls <- c(
+      logo_urls, 
+      paste0(logo_path,
+             logos_selected[[logo_name]],
+             ".png?raw=true"
+             )
+    )
+  }
+
+# format logos
+logos <- magick::image_read(logo_urls) |> 
+  magick::image_trim() |> # remove all white space
+  magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
+  magick::image_scale("x200") # scale
+
+# Combine logos into single image and scale
+logos_combined <- magick::image_append(logos) |> 
+  magick::image_write(path = "logo.png")
+}
+```
+
+<!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
+
+<!-- the trailing slash means the text in square brackets is alt text -->
+
+[`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
+
+```{r print-logos}
+#| results: asis
+
+# `cat` is used to avoid extra processing
+# `sep` argument adds the line break and then a new line as required
+if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
+```
+
+[`r paste(":::")`]{.content-visible when-format="markdown"}
+
+`r first_paragraph`
+
+`r params$customMessage`
+
+```{r, results='asis', echo=FALSE}
+if (params$burnRestrictionStatus == 2) {
+  cat(
+    "Open burning restrictions remain in effect within ", params$burnRestrictionArea,
+    ". No new fires may be initiated, and no additional material may be added to existing fires. For more information on burning restrictions, refer to the Mandatory Emission Reduction Actions section below.\n\n",
+    sep = ""
+  )
+  
+  cat("\n")
+}
+
+```
+
+`r if (params$burnRestrictionStatus < 2) ":::{.content-hidden}"`
+## Mandatory emission reduction actions
+`r paste(burn_ban)`
+`r if (params$burnRestrictionStatus < 2) ":::"`
+
+## More information
+::: {.content-visible when-format="markdown"}
+{{< accordion_start title="Current conditions" initiallyOpen="true" >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+### Current conditions
+:::
+
+```{r final-table, results='asis', echo=FALSE}
+
+# Single pollutant: PM25
+if (length(pollutants) == 1 && pollutants == "PM25") {
+  cat(additional_info_PM25, "\n\n")
+  print(knitr::kable(final_table, row.names = FALSE))
+}
+
+# Single pollutant: PM10
+if (length(pollutants) == 1 && pollutants == "PM10") {
+  cat(additional_info_PM10, "\n\n")
+  print(knitr::kable(final_table, row.names = FALSE))
+}
+
+# Single pollutant: O3
+if (length(pollutants) == 1 && pollutants == "O3") {
+  cat(additional_info_O3, "\n\n")
+  print(knitr::kable(final_table, row.names = FALSE))
+}
+
+# Both PM25 & PM10
+if (all(c("PM25", "PM10") %in% pollutants)) {
+  # PM25
+  cat(additional_info_PM25, "\n\n")
+  print(knitr::kable(final_table1, row.names = FALSE))
+  
+  cat("\n\n")  # spacing
+  
+  # PM10
+  cat(additional_info_PM10, "\n\n")
+  print(knitr::kable(final_table2, row.names = FALSE))
+}
+
+```
+
+Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
+
+::: {.content-visible when-format="markdown"}
+{{< accordion_end >}}
+:::
+
+## Contact
+
+::: {.content-visible when-format="pdf"}
+### Media questions regarding this Air Quality Warning
+:::
+
+::: {.content-visible when-format="markdown"}
+**Media questions regarding this Air Quality Warning:**
+{{< card_start width="wide" >}}
+:::
+
+`r ENVcontact` 
+
+::: {.content-visible when-format="markdown"}
+{{< card_end >}}
+:::
+
+::: {.content-visible when-format="pdf"}
+### Media questions regarding health implications related to degraded air quality
+:::
+
+::: {.content-visible when-format="markdown"}
+**Media questions regarding health implications when air quality is degraded:**
+{{< card_start  width="wide" >}}
+:::
+
+`r paste(HAcontact$html_string, collapse = "\n\n")`
+
+::: {.content-visible when-format="markdown"}
+{{< card_end >}}
+:::
