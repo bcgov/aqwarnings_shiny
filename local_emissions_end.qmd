@@ -26,7 +26,7 @@ author: "`r params$sel_aqMet`"
 customMessage: "`r params$customMessage`"
 location: "`r params$location`"
 outputFormat: "`r params$outputFormat`" 
-burnRestrictions: "`r params$burnRestrictionStatus`"
+burnRestrictions: "`r ifelse(params$burnRestrictionStatus < 2, 0, params$burnRestrictionStatus)`"
 format:
   markdown: default
   pdf:
