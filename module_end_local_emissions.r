@@ -26,33 +26,16 @@ endLocalEmissionsUI <- function(id) {
   tabItem(tabName = "end",
           fluidRow(
            box(
-              width = 6,
+              width = 3,
               status = "primary",
               
-              h4(tags$b("1. Complete fields below")),
+              h4(tags$b("1. Complete the fields below")),
               
               selectInput(
-                inputId = ns("sel_aqMet"),
+                inputId = ns("aqMet"),
                 label = h4("Author:"),
                 selected = "",
                 choices = c("", aq_mets$fullname),
-                width = "50%"
-              ),
-              
-              selectInput(
-                inputId = ns("pollutant"),
-                label = h4("Pollutant:"),
-                selected = "PM25",
-                choices = c("PM25", "PM10", "O3", "PM25 & PM10"),
-                width = "50%"
-              ),
-              
-              selectInput(
-                inputId = ns("location"),
-                label = h4("Location:"),
-                selected = "",
-                choices = c("", match_health_city$location),
-                width = "50%"
               ),
               
               dateInput(
@@ -62,11 +45,18 @@ endLocalEmissionsUI <- function(id) {
                 value = Sys.Date() -1,
                 startview = "month",
                 weekstart = 0,
-                width = "50%"
+              ),
+              
+              radioButtons(
+                inputId = ns("pollutant"),
+                label = h4("Pollutant:"),
+                selected = "PM25",
+                choices = c("PM25", "PM10", "O3", "PM25 & PM10"),
+                inline = TRUE
               ),
               
               box(
-                width = 8,
+                width = NULL,
                 background = "light-blue",
                 
                 radioButtons(
@@ -134,24 +124,33 @@ endLocalEmissionsUI <- function(id) {
                 inputId = ns("customMessage"),
                 label = h4("Custom message (optional): retain, edit or delete"),
                 value = "Local air quality has improved due to changing meteorological conditions.",
-                width = "75%",
                 height = "80px",
                 resize = "vertical"
               ),
               
               tags$div(style = "margin-top: 40px;"),  # Adds vertical space
-              h4(tags$b("2. Generate Warning")),
+              h4(tags$b("2. Affected location")),
               
-                actionButton(
-                  inputId = ns("genWarning"),
-                  label = "Go!",
-                  style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
-                ),
+              selectInput(
+                inputId = ns("location"),
+                label = h4("Location:"),
+                selected = "",
+                choices = c("", match_health_city$location),
+              ),
+              
+              tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+              h4(tags$b("3. Generate Warning")),
+              
+              actionButton(
+                inputId = ns("genWarning"),
+                label = "Go!",
+                style = "width: 100%; color: #fff; background-color: #3c8dbc; border-color: #2e6da4;"
+              ),
  
               hr(),
               
               ## Add the download button here:
-              downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
+              downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
               
               hr(),
               actionButton(
@@ -236,7 +235,7 @@ endLocalEmissions <- function(input, output, session){
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
     
-    if (input$sel_aqMet == "") {
+    if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
     } else if (length(input$pollutant) == "") {
       showNotification("No pollutant selected; please select a pollutant", type = "error")
@@ -274,7 +273,7 @@ endLocalEmissions <- function(input, output, session){
                             output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
                             output_format = "markdown",
                             execute_params = list(
-                              sel_aqMet = input$sel_aqMet,
+                              aqMet = input$aqMet,
                               pollutant = input$pollutant,
                               location = input$location,
                               burnRestrictionStatus = input$burnRestrictionStatus,
@@ -297,7 +296,7 @@ endLocalEmissions <- function(input, output, session){
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
                             output_format = "pdf",
                             execute_params = list(
-                              sel_aqMet = input$sel_aqMet,
+                              aqMet = input$aqMet,
                               pollutant = input$pollutant,
                               location = input$location,
                               burnRestrictionStatus = input$burnRestrictionStatus,

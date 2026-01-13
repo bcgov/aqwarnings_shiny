@@ -27,67 +27,64 @@ endWildfireSmokeUI <- function(id) {
     fluidRow(
 
       box(
-        width = 6,
+        width = 3,
         status = "primary",
 
-        h4(tags$b("1. Complete fields below")),
+        h4(tags$b("1. Complete the fields below")),
 
         selectInput(
-          inputId = ns("sel_aqMet"),
+          inputId = ns("aqMet"),
           label = h4("Author:"),
           selected = "",
-          choices = c("", aq_mets$fullname),
-          width = "50%"
+          choices = c("", aq_mets$fullname)
         ),
 
         dateInput(inputId = ns("lastWarning"),
-          label = h4("Date last warning was issued"),
+          label = h4("Date warning was last issued:"),
           max = Sys.Date(),
           value = Sys.Date()-1,
           startview = "month",
-          weekstart = 0,
-          width = "50%"
+          weekstart = 0
         ),
 
         textAreaInput(inputId = ns("customMessage"),
           label = h4("Custom message:"),
           value = "Wildfire smoke concentrations have reduced over the past 24 hours.",
           placeholder = "(example) Wildfire smoke concentrations have reduced over the past 24 hours.",
-          width = "50%",
           height = "80px",
           resize = "vertical"
         ),
 
         checkboxGroupInput(
-          inputId = ns("sel_healthAuth"),
+          inputId = ns("healthAuth"),
           label = h4("Health Authorities included on last warning (select all that apply; FNHA is automatically selected):"),
           choices = unique(health_contact$authority)[unique(health_contact$authority) != "First Nations Health Authority"],   #exclude FNHA as a choice - exists on all bulletins
-          width = "50%"
         ),
         
         tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         
-        selectizeInput(
-          inputId = ns("location"),
-          label = h4(HTML("<b>2. Describe affected regions</b> (for warnings table on website)")),
-          selected = "",
-          choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
-          width = "50%",
-          options = list(create = TRUE)
+        h4(tags$b("2. Affected location")),
+        
+        ## for warninig table on website
+        radioButtons(
+          inputId = ns("regions"),
+          label = h4("Describe affected location(s):"),
+          selected = "Multiple regions in B.C.",
+          choices = c("Multiple regions in B.C.", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.")
         ),
         
         tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         
         h4(tags$b("3. Generate Warning")),
         actionButton(
-         inputId = ns("genWarning"),
-         label = "Go!",
-         style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
-       ),
+          inputId = ns("genWarning"),
+          label = "Go!",
+          style = "width: 100%; color: #fff; background-color: #3c8dbc; border-color: #2e6da4;"
+        ),
        
        hr(),
        ## Add the download button here:
-       downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
+       downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
 
        hr(),
        actionButton(
@@ -109,9 +106,9 @@ endWildfireSmoke <- function(input, output, session){
   # Generate warning
   observeEvent(input$genWarning, {
     
-    if (input$sel_aqMet == "") {
+    if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
-    } else if (length(input$sel_healthAuth) == 0) {
+    } else if (length(input$healthAuth) == 0) {
       showNotification("No health authority selected; please select a health authority", type = "error")
     } else if (input$location == "") {
       showNotification("No location description provided; please select or type a location description.", type = "error")
@@ -129,10 +126,10 @@ endWildfireSmoke <- function(input, output, session){
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.md", Sys.Date(), endBasename),
                             output_format = "markdown",
-                            execute_params = list(sel_aqMet = input$sel_aqMet,
+                            execute_params = list(aqMet = input$aqMet,
                                                   lastWarning = input$lastWarning,
                                                   customMessage = input$customMessage,
-                                                  sel_healthAuth = input$sel_healthAuth,
+                                                  healthAuth = input$healthAuth,
                                                   location = input$location,
                                                   outputFormat = "markdown"),
                             debug = FALSE)
@@ -147,10 +144,10 @@ endWildfireSmoke <- function(input, output, session){
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), endBasename),
                             output_format = "pdf",
-                            execute_params = list(sel_aqMet = input$sel_aqMet,
+                            execute_params = list(aqMet = input$aqMet,
                                                   lastWarning = input$lastWarning,
                                                   customMessage = input$customMessage,
-                                                  sel_healthAuth = input$sel_healthAuth,
+                                                  healthAuth = input$healthAuth,
                                                   location = input$location,
                                                   outputFormat = "pdf"),
                             debug = FALSE)

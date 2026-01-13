@@ -26,17 +26,16 @@ issueLocalEmissionsUI <- function(id) {
   tabItem(tabName = "issue",
           fluidRow(
             box(
-              width = 6,
+              width = 3,
               status = "primary",
               
-              h4(tags$b("1. Complete fields below")),
+              h4(tags$b("1. Complete the fields below")),
               
               selectInput(
-                inputId = ns("sel_aqMet"),
+                inputId = ns("aqMet"),
                 label = h4("Author:"),
                 selected = "",
-                choices = c("", aq_mets$fullname),
-                width = "50%"
+                choices = c("", aq_mets$fullname)
               ),
               
               radioButtons(
@@ -44,7 +43,6 @@ issueLocalEmissionsUI <- function(id) {
                 label = h4("Issue Type:"),
                 choices = list("Issue", "Continue"),
                 selected = "Issue",
-                width = "50%",
                 inline = TRUE
               ),
               
@@ -56,28 +54,19 @@ issueLocalEmissionsUI <- function(id) {
                   value = Sys.Date() - 1,
                   startview = "month",
                   weekstart = 0,
-                  width = "50%"
                 )
               ),
               
-              selectInput(
+              radioButtons(
                 inputId = ns("pollutant"),
                 label = h4("Pollutant:"),
                 selected = "PM25",
                 choices = c("PM25", "PM10", "O3", "PM25 & PM10"),
-                width = "50%"
-              ),
-              
-              selectInput(
-                inputId = ns("location"),
-                label = h4("Location:"),
-                selected = "",
-                choices = c("", match_health_city$location),
-                width = "50%"
+                inline = TRUE
               ),
               
               box(
-                width = 8,
+                width = NULL,
                 background = "light-blue",
                 
                 radioButtons(
@@ -89,7 +78,6 @@ issueLocalEmissionsUI <- function(id) {
                     #"Yes (Arvind)" = 2
                     ),
                   selected = 0,
-                  width = "100%",
                   inline = TRUE
                 ),
                 
@@ -98,7 +86,6 @@ issueLocalEmissionsUI <- function(id) {
                     inputId = ns("burnRestrictionArea"),
                     label = HTML("<h4>Burn prohibition details:<br><br> The Director has prohibited open burning within</h4>"),
                     value = "<location>",
-                    width = "100%",
                     height = "40px",
                     resize = "vertical"
                   )
@@ -129,36 +116,46 @@ issueLocalEmissionsUI <- function(id) {
                 ) # splitLayout
               ), # box
               
+              
               textAreaInput(
                 inputId = ns("customMessage"),
                 label = h4("Custom message (optional): retain, edit or delete"),
                 value = "Current conditions are expected to persist until weather conditions change and/or local emissions are reduced.",
-                width = "75%",
                 height = "80px",
                 resize = "vertical"),
               
               dateInput(
                 inputId = ns("nextUpdate"),
-                label = h4("Warning next updated: "),
+                label = h4("Next update:"),
                 max = Sys.Date() + 7,
                 value = Sys.Date() + 1,
                 startview = "month",
                 weekstart = 0,
-                width = "75%"
               ),
               
               tags$div(style = "margin-top: 40px;"),  # Adds vertical space
-              h4(tags$b("2. Generate Warning")),
+              h4(tags$b("2. Affected location")),
+              
+              
+              selectInput(
+                inputId = ns("location"),
+                label = h4("Location:"),
+                selected = "",
+                choices = c("", match_health_city$location),
+              ),
+              
+              tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+              h4(tags$b("3. Generate Warning")),
               
               actionButton(
-                inputId = ns("genWarning"),
-                label = "Go!",
-                style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
-              ),
+          inputId = ns("genWarning"),
+          label = "Go!",
+          style = "width: 100%; color: #fff; background-color: #3c8dbc; border-color: #2e6da4;"
+        ),
               
               hr(),
               
-              downloadButton(ns("download_report"), "Download Files", style = "width: 50%; font: 16pt"),
+              downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
               
               hr(),
               actionButton(
@@ -237,7 +234,7 @@ issueLocalEmissions <- function(input, output, session){
   # Generate report: markdown and pdf
   observeEvent(input$genWarning, {
     
-    if (input$sel_aqMet == "") {
+    if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
     } else if (length(input$ice) == "") {
       showNotification("No warning status selected; please select a status", type = "error")
@@ -273,7 +270,7 @@ issueLocalEmissions <- function(input, output, session){
                             output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
                             output_format = "markdown",
                             execute_params = list(
-                              sel_aqMet = input$sel_aqMet,
+                              aqMet = input$aqMet,
                               pollutant = input$pollutant,
                               ice = input$ice,
                               location = input$location,
@@ -297,7 +294,7 @@ issueLocalEmissions <- function(input, output, session){
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
                             output_format = "pdf",
                             execute_params = list(
-                              sel_aqMet = input$sel_aqMet,
+                              aqMet = input$aqMet,
                               pollutant = input$pollutant,
                               ice = input$ice,
                               location = input$location,

@@ -26,68 +26,71 @@ endPollutionPreventionUI <- function(id) {
   tabItem(tabName = "end",
           fluidRow(
            box(
-              width = 6,
+              width = 3,
               status = "primary",
               
-              h4(tags$b("1. Complete fields below")),
+              h4(tags$b("1. Complete the fields below")),
               
               selectInput(
-                inputId = ns("sel_aqMet"),
+                inputId = ns("aqMet"),
                 label = h4("Author:"),
                 selected = "",
-                choices = c("", aq_mets$fullname),
-                width = "50%"
+                choices = c("", aq_mets$fullname)
               ),
               
-              selectInput(
-                inputId = ns("nearestMonitor"),
-                label = h4("Nearest Monitor:"),
-                selected = "",
-                choices = c("", match_health_city$location),
-                width = "50%"
-              ),
-              
-              textAreaInput(
-                inputId = ns("burnRestrictionArea"),
-                label = HTML("<h4>Burn prohibition details:<br><br> Open burning was prohibited within</h4>"),
-                value = "<location>",
-                width = "100%",
-                height = "40px",
-                resize = "vertical"
-              ),
-
               dateInput(
                 inputId = ns("issuedate"),
-                label = h4("Date Pollution Prevention Notice was first issued:"),
+                label = h4("Date notice was first issued:"),
                 max = Sys.Date(),
                 value = Sys.Date() -1,
                 startview = "month",
-                weekstart = 0,
-                width = "50%"
+                weekstart = 0
+              ),
+              
+              
+              box(
+                width = NULL,
+                background = "light-blue",
+                
+                textAreaInput(
+                inputId = ns("burnRestrictionArea"),
+                label = HTML("<h4>Burn prohibition details:<br><br> The Director had prohibited open burning within</h4>"),
+                value = "<location>",
+                height = "40px",
+                resize = "vertical")
               ),
               
               textAreaInput(
                 inputId = ns("customMessage"),
                 label = h4("Custom message (optional): retain, edit or delete"),
                 value = "Local air quality has improved due to changing meteorological conditions.",
-                width = "75%",
                 height = "80px",
                 resize = "vertical"
               ),
               
               tags$div(style = "margin-top: 40px;"),  # Adds vertical space
-              h4(tags$b("2. Generate Pollution Prevention Notice")),
+              h4(tags$b("2. Affected location")),
+              
+              selectInput(
+                inputId = ns("nearestMonitor"),
+                label = h4("Nearest monitor:"),
+                selected = "",
+                choices = c("", match_health_city$location)
+              ),
+              
+              tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+              h4(tags$b("3. Generate Pollution Prevention Notice")),
               
                 actionButton(
                   inputId = ns("genNotice"),
                   label = "Go!",
-                  style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+                  style = "width: 100%; color: #fff; background-color: #3c8dbc; border-color: #2e6da4;"
                 ),
  
               hr(),
               
               ## Add the download button here:
-              downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
+              downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
               
               hr(),
               actionButton(
@@ -111,7 +114,7 @@ endPollutionPrevention <- function(input, output, session){
    # Generate report: markdown and pdf
   observeEvent(input$genNotice, {
     
-    if (input$sel_aqMet == "") {
+    if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
     } else if (input$nearestMonitor == "") {
       showNotification("Nearest monitor not selected; please select the nearest monitor", type = "error")
@@ -130,7 +133,7 @@ endPollutionPrevention <- function(input, output, session){
                             output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
                             output_format = "markdown",
                             execute_params = list(
-                              sel_aqMet = input$sel_aqMet,
+                              aqMet = input$aqMet,
                               nearestMonitor = input$nearestMonitor,
                               burnRestrictionArea = input$burnRestrictionArea,
                               issuedate = input$issuedate,
@@ -148,7 +151,7 @@ endPollutionPrevention <- function(input, output, session){
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
                             output_format = "pdf",
                             execute_params = list(
-                              sel_aqMet = input$sel_aqMet,
+                              aqMet = input$aqMet,
                               nearestMonitor = input$nearestMonitor,
                               burnRestrictionArea = input$burnRestrictionArea,
                               issuedate = input$issuedate,

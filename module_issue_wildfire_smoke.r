@@ -54,57 +54,54 @@ issueWildfireSmokeUI <- function(id) {
         h4(tags$b("1. Complete the fields below")),
 
         selectInput(
-          inputId = ns("sel_aqMet"),
+          inputId = ns("aqMet"),
           label = h4("Author:"),
           selected = "",
-          choices = c("", aq_mets$fullname),
-          width = "100%"),
+          choices = c("", aq_mets$fullname)),
 
         textInput(inputId = ns("smokeDuration"),
                   label = h4("Wildfire smoke expected to last:"),
-                  value = "24-48 hours",
-                  width = "100%"),
+                  value = "24-48 hours"),
 
+        textAreaInput(inputId = ns("smokeMessage"),
+                      label = h4("Custom smoke outlook message:"),
+                      value = "",
+                      height = "80px",
+                      resize = "vertical"),
+        
         dateInput(inputId = ns("nextUpdate"),
                   label = h4("Next update:"),
                   min = Sys.Date() +1,
                   value = Sys.Date() +1,
                   startview = "month",
-                  weekstart = 0,
-                  width = "100%"),
-
-        textAreaInput(inputId = ns("smokeMessage"),
-                      label = h4("Custom smoke outlook message:"),
-                      value = "",
-                      width = "100%",
-                      height = "80px",
-                      resize = "vertical"),
+                  weekstart = 0),
         
-        tags$div(style = "margin-top: 20px;"),  # Adds vertical space
-        h4(tags$b("2. Select regions on map")),
+        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         
-        tags$div(style = "margin-top: 20px;"),  # Adds vertical space
-        selectizeInput(
-          inputId = ns("location"),
-          selected = "",
-          label = h4(HTML("<b>3. Describe affected regions</b> (for warnings table on website)")),
-          choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
-          width = "100%",
-          options = list(create = TRUE)
+        h4(tags$b("2. Affected location")),
+        
+        h4("a) Select affected location(s) on the map:"),
+        
+        ## for warninig table on website
+        radioButtons(
+          inputId = ns("regions"),
+          label = h4("b) Describe affected location(s):"),
+          selected = "Multiple regions in B.C.",
+          choices = c("Multiple regions in B.C.", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.")
         ),
         
-        tags$div(style = "margin-top: 20px;"),  # Adds vertical space
-        h4(tags$b("4. Generate Warning")),
+        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+        h4(tags$b("3. Generate Warning")),
 
         actionButton(
           inputId = ns("genWarning"),
           label = "Go!",
-          style = "width: 50%; color: #fff; background-color: #337ab7; border-color: #2e6da4;"
+          style = "width: 100%; color: #fff; background-color: #3c8dbc; border-color: #2e6da4;"
         ),
        
         hr(),
         
-        downloadButton(ns("download_report"), "Download Files", style = "width: 50%"),
+        downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
         
         hr(),
         
@@ -124,7 +121,7 @@ issueWildfireSmokeUI <- function(id) {
         actionButton(inputId = ns("clearHighlight"),label = "Reset Map"),
         
         hr(),
-        leafletOutput(outputId = ns("map"), width = "100%", height = 750)
+        leafletOutput(outputId = ns("map"), height = 750)
       
       ),
       
@@ -388,7 +385,7 @@ issueWildfireSmoke <- function(input, output, session){
 # Generate warning
   observeEvent(input$genWarning, {
     
-    if (input$sel_aqMet == "") {
+    if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
     } else if (length(selRegions$ids) == 0) {
       showNotification("No region selected; please select a region.", type = "error")
@@ -431,7 +428,7 @@ issueWildfireSmoke <- function(input, output, session){
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.md", Sys.Date(), issueBasename),
                             output_format = "markdown",
-                            execute_params = list(sel_aqMet = input$sel_aqMet,
+                            execute_params = list(aqMet = input$aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
                                                   smokeDuration = input$smokeDuration,
                                                   selRegionsIDs = selRegions$ids,
@@ -454,7 +451,7 @@ issueWildfireSmoke <- function(input, output, session){
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), issueBasename),
                             output_format = "pdf",
-                            execute_params = list(sel_aqMet = input$sel_aqMet,
+                            execute_params = list(aqMet = input$aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
                                                   smokeDuration = input$smokeDuration,
                                                   selRegionsIDs = selRegions$ids,
