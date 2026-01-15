@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## Module: end Air Quality Warning - Wildfire Smoke
+# Module: Air Quality Warning - Wildfire Smoke
 
 library(shiny)
 library(shinydashboard)
@@ -21,6 +21,8 @@ library(dplyr)
 # UI
 #--------------------------------------------------
 
+#UI function for the "Wildfire Smoke Warning - End" tab 
+
 endWildfireSmokeUI <- function(id) {
   ns <- NS(id)
   tabItem(tabName = "end",
@@ -30,8 +32,13 @@ endWildfireSmokeUI <- function(id) {
         width = 3,
         status = "primary",
 
+        # -------------------------------
+        # Section 1: Metadata required to generate warning
+        # -------------------------------
+        
         h4(tags$b("1. Complete the fields below")),
 
+        # Author selection (Air Quality Meteorologist)
         selectInput(
           inputId = ns("aqMet"),
           label = h4("Author:"),
@@ -39,6 +46,7 @@ endWildfireSmokeUI <- function(id) {
           choices = c("", aq_mets$fullname)
         ),
 
+        # Date the last warning was issued; default is yesterday
         dateInput(inputId = ns("lastWarning"),
           label = h4("Date warning was last issued:"),
           max = Sys.Date(),
@@ -47,6 +55,7 @@ endWildfireSmokeUI <- function(id) {
           weekstart = 0
         ),
 
+        # Optional custom message included in warning text
         textAreaInput(inputId = ns("customMessage"),
           label = h4("Custom message:"),
           value = "Wildfire smoke concentrations have reduced over the past 24 hours.",
@@ -55,27 +64,36 @@ endWildfireSmokeUI <- function(id) {
           resize = "vertical"
         ),
 
+        # Select the health authorities included in the last warning
         checkboxGroupInput(
           inputId = ns("healthAuth"),
           label = h4("Health Authorities included on last warning (select all that apply; FNHA is automatically selected):"),
           choices = unique(health_contact$authority)[unique(health_contact$authority) != "First Nations Health Authority"],   #exclude FNHA as a choice - exists on all bulletins
         ),
         
-        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+        # -------------------------------
+        # Section 2: Affected location
+        # -------------------------------
         
+        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         h4(tags$b("2. Affected location")),
         
-        ## for warninig table on website
+        # Describe affected location(s) for the warning table on the website
         radioButtons(
-          inputId = ns("regions"),
+          inputId = ns("location"),
           label = h4("Describe affected location(s):"),
           selected = "Multiple regions in B.C.",
           choices = c("Multiple regions in B.C.", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.")
         ),
         
-        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+        # -------------------------------
+        # Section 3: Generate outputs
+        # -------------------------------
         
+        tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         h4(tags$b("3. Generate Warning")),
+        
+        # Trigger report generation
         actionButton(
           inputId = ns("genWarning"),
           label = "Go!",
@@ -83,29 +101,32 @@ endWildfireSmokeUI <- function(id) {
         ),
        
        hr(),
-       ## Add the download button here:
+       
+       # Download button
        downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
 
        hr(),
+       
+       # Utility button to clean working directories
        actionButton(
          inputId = ns("cleanupdir"),
          label = "clean dir"
        )
-
-      )
-    )
-  )
+      ) # end main box
+    ) # end fluidRow
+  ) # end tabItem
 } 
 
 #--------------------------------------------------
 # Server
 #--------------------------------------------------
 
+# Server logic for the "Wildfire Smoke Warning - End" tab
+
 endWildfireSmoke <- function(input, output, session){
-  
-  # Generate warning
   observeEvent(input$genWarning, {
     
+    # Input validation
     if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
     } else if (length(input$healthAuth) == 0) {
@@ -114,14 +135,17 @@ endWildfireSmoke <- function(input, output, session){
       showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
       
-      # create progress object; ensure it closes when reactive exits
+      # Progress indicator
       progress <- shiny::Progress$new()
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
       
+      # Set output file name
       endBasename <- "wildfire_smoke_end"
 
-      # generate markdown via Quarto
+      # -------------------------------
+      # Markdown output
+      # -------------------------------
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.md", Sys.Date(), endBasename),
@@ -134,12 +158,14 @@ endWildfireSmoke <- function(input, output, session){
                                                   outputFormat = "markdown"),
                             debug = FALSE)
       
-      # move the .md to outputs/
+      # Relocate the .md file to outputs/ directory
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
-      # generate pdf via Quarto
+      # -------------------------------
+      # PDF output
+      # -------------------------------
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), endBasename),
@@ -153,8 +179,8 @@ endWildfireSmoke <- function(input, output, session){
                             debug = FALSE)
   
       
-      # move the .pdf to outputs/
-      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      # Relocate the .pdf to outputs/ directory
+      # to keep it consistent with the Markdown files
       pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
@@ -164,7 +190,10 @@ endWildfireSmoke <- function(input, output, session){
     } #end else
   }) #end observeEvent
   
-  # Download files
+  # --------------------------------------------------
+  # Download handler: zip all outputs
+  # --------------------------------------------------
+  
   output$download_report <- downloadHandler(
     filename = function() {
       sprintf("%s_wildfire_smoke_end.zip", Sys.Date())
@@ -186,7 +215,9 @@ endWildfireSmoke <- function(input, output, session){
     contentType = "application/zip"
   )
   
-  # Clean up directories
+  # --------------------------------------------------
+  # Cleanup directory
+  # --------------------------------------------------
   observeEvent(input$cleanupdir, {
     output_files <- dir(path = here::here("outputs"), full.names = TRUE)
     temp_files <- dir(full.names = TRUE, pattern = ".png")

@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-## Module: Air Quality Warning - Non Wildfire Smoke
+## Module: Air Quality Warning - Pollution Prevention Notice
 
 library(shiny)
 library(shinydashboard)
@@ -21,6 +21,8 @@ library(dplyr)
 # UI
 #--------------------------------------------------
 
+#UI function for the "Pollution Prevention Notice - End" tab 
+
 endPollutionPreventionUI <- function(id) {
   ns <- NS(id)
   tabItem(tabName = "end",
@@ -29,8 +31,13 @@ endPollutionPreventionUI <- function(id) {
               width = 3,
               status = "primary",
               
+              # -------------------------------
+              # Section 1: Metadata required to generate warning
+              # -------------------------------
+              
               h4(tags$b("1. Complete the fields below")),
               
+              # Author selection (Air Quality Meteorologist)
               selectInput(
                 inputId = ns("aqMet"),
                 label = h4("Author:"),
@@ -38,6 +45,7 @@ endPollutionPreventionUI <- function(id) {
                 choices = c("", aq_mets$fullname)
               ),
               
+              # Author selection (Air Quality Meteorologist)
               dateInput(
                 inputId = ns("issuedate"),
                 label = h4("Date notice was first issued:"),
@@ -47,19 +55,28 @@ endPollutionPreventionUI <- function(id) {
                 weekstart = 0
               ),
               
+              # -------------------------------
+              # Burn restriction information
+              # Shown/hidden field dynamically based on burn restriction status
+              # -------------------------------
               
               box(
+                # Width intentionally left unset so the box spans the available app width
                 width = NULL,
+                
+                # Background colour set to match the overall app theme
                 background = "light-blue",
                 
+                # Textbox to describe the burn prohibition area
                 textAreaInput(
                 inputId = ns("burnRestrictionArea"),
                 label = HTML("<h4>Burn prohibition details:<br><br> The Director had prohibited open burning within</h4>"),
                 value = "<location>",
                 height = "40px",
                 resize = "vertical")
-              ),
+              ), #end box
               
+              # Optional custom message included in warning text
               textAreaInput(
                 inputId = ns("customMessage"),
                 label = h4("Custom message (optional): retain, edit or delete"),
@@ -68,9 +85,13 @@ endPollutionPreventionUI <- function(id) {
                 resize = "vertical"
               ),
               
+              # -------------------------------
+              # Section 2: Affected location
+              # -------------------------------
               tags$div(style = "margin-top: 40px;"),  # Adds vertical space
               h4(tags$b("2. Affected location")),
               
+              # Nearest monitor selection
               selectInput(
                 inputId = ns("nearestMonitor"),
                 label = h4("Nearest monitor:"),
@@ -78,56 +99,68 @@ endPollutionPreventionUI <- function(id) {
                 choices = c("", match_health_city$location)
               ),
               
+              # -------------------------------
+              # Section 3: Generate outputs
+              # -------------------------------
               tags$div(style = "margin-top: 40px;"),  # Adds vertical space
               h4(tags$b("3. Generate Pollution Prevention Notice")),
               
-                actionButton(
-                  inputId = ns("genNotice"),
-                  label = "Go!",
-                  style = "width: 100%; color: #fff; background-color: #3c8dbc; border-color: #2e6da4;"
-                ),
+              # Trigger report generation
+              actionButton(
+                inputId = ns("genNotice"),
+                label = "Go!",
+                style = "width: 100%; color: #fff; background-color: #3c8dbc; border-color: #2e6da4;"
+              ),
  
               hr(),
               
-              ## Add the download button here:
+              # Download button
               downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
               
               hr(),
+              
+              # Utility button to clean working directories
               actionButton(
                 inputId = ns("cleanupdir"),
                 label = "clean dir"
               )
-              
-            ) # box
-          ) # fluidRow
-          ) # tabItem
+           ) # end main box
+          ) #end fluidRow
+  ) # end tabItem
 } 
 
 #--------------------------------------------------
 # Server
 #--------------------------------------------------
 
+# Server logic for the "Community Warning - End" tab
+
 endPollutionPrevention <- function(input, output, session){
   
-  
-  # show/hide conditional inputs
-   # Generate report: markdown and pdf
+  # --------------------------------------------------
+  # Generate Markdown + PDF warning
+  # --------------------------------------------------
+   
   observeEvent(input$genNotice, {
     
+    # Input validation
     if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
     } else if (input$nearestMonitor == "") {
       showNotification("Nearest monitor not selected; please select the nearest monitor", type = "error")
     } else {
       
-      # create progress object; ensure it closes when reactive exits
+      # Progress indicator
       progress <- shiny::Progress$new()
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
       
+      # Set output file name
       output_file_name <- sprintf("%s_%s", input$nearestMonitor, "end_pollution_prevention") 
 
-      # generate warning: markdown and pdf formats
+      # -------------------------------
+      # Markdown output
+      # -------------------------------
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("pollution_prevention_end.qmd"),
                             output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
@@ -141,11 +174,14 @@ endPollutionPrevention <- function(input, output, session){
                               outputFormat = "markdown"),
                             debug = FALSE)
       
-      # move the .md to outputs/
+      # Relocate the .md file to outputs/ directory
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), output_file_name), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
+      # -------------------------------
+      # PDF output
+      # -------------------------------
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("pollution_prevention_end.qmd"),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
@@ -159,8 +195,8 @@ endPollutionPrevention <- function(input, output, session){
                               outputFormat = "pdf"),
                             debug = FALSE)
     
-    # move the .pdf to outputs/
-    # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+    # Relocate the .pdf to outputs/ directory
+    # to keep it consistent with the Markdown files
     pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), output_file_name), full.names = TRUE)
     fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
     
@@ -170,7 +206,9 @@ endPollutionPrevention <- function(input, output, session){
     } # end else
   }) # end observeEvent
   
-  # Download files
+  # --------------------------------------------------
+  # Download handler: zip all outputs
+  # --------------------------------------------------
   output$download_report <- downloadHandler(
     
      filename = function() {
@@ -194,7 +232,9 @@ endPollutionPrevention <- function(input, output, session){
     contentType = "application/zip"
     )
   
-  # Clean up directories
+  # --------------------------------------------------
+  # Cleanup directory
+  # --------------------------------------------------
   observeEvent(input$cleanupdir, {
     output_files <- dir(path = here::here("outputs"), full.names = TRUE)
     temp_files <- dir(full.names = TRUE, pattern = ".png")

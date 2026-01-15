@@ -21,6 +21,8 @@ library(dplyr)
 # UI
 #--------------------------------------------------
 
+#UI function for the "Community Warning - Issue" tab
+
 issueLocalEmissionsUI <- function(id) {
   ns <- NS(id)
   tabItem(tabName = "issue",
@@ -29,8 +31,13 @@ issueLocalEmissionsUI <- function(id) {
               width = 3,
               status = "primary",
               
+              # -------------------------------
+              # Section 1: Metadata required to generate warning
+              # -------------------------------
+              
               h4(tags$b("1. Complete the fields below")),
               
+              # Author selection (Air Quality Meteorologist)
               selectInput(
                 inputId = ns("aqMet"),
                 label = h4("Author:"),
@@ -38,6 +45,7 @@ issueLocalEmissionsUI <- function(id) {
                 choices = c("", aq_mets$fullname)
               ),
               
+              # Select whether this warning is being issued or continued
               radioButtons(
                 inputId = ns("ice"),
                 label = h4("Issue Type:"),
@@ -46,6 +54,8 @@ issueLocalEmissionsUI <- function(id) {
                 inline = TRUE
               ),
               
+              # Date the warning was first issued
+              # Displayed conditionally when Issue Type is set to "Continue"
               shinyjs::hidden(
                 dateInput(
                   inputId = ns("issuedate"),
@@ -57,6 +67,7 @@ issueLocalEmissionsUI <- function(id) {
                 )
               ),
               
+              # Pollutant selection
               radioButtons(
                 inputId = ns("pollutant"),
                 label = h4("Pollutant:"),
@@ -65,22 +76,32 @@ issueLocalEmissionsUI <- function(id) {
                 inline = TRUE
               ),
               
+              # -------------------------------
+              # Burn restriction information
+              # Shown/hidden field dynamically based on burn restriction status
+              # -------------------------------
+              
               box(
+                # Width intentionally left unset so the box spans the available app width
                 width = NULL,
+                
+                # Background colour set to match the overall app theme
                 background = "light-blue",
                 
+                # Burn prohibition status
                 radioButtons(
                   inputId = ns("burnRestrictions"),
                   label = h4("Burn prohibition issued:"),
                   choices = list(
                     "No" = 0, 
                     "Yes (Ben)" = 1
-                    #"Yes (Arvind)" = 2
+                    #"Yes (TBD)" = 2
                     ),
                   selected = 0,
                   inline = TRUE
                 ),
                 
+                # Textbox to describe the burn prohibition area
                 shinyjs::hidden(
                   textAreaInput(
                     inputId = ns("burnRestrictionArea"),
@@ -91,6 +112,7 @@ issueLocalEmissionsUI <- function(id) {
                   )
                 ),
                 
+                # End date and time of burn restriction
                 splitLayout(
                   cellWidths = c("50%", "50%"),
                   shinyjs::hidden(
@@ -113,10 +135,10 @@ issueLocalEmissionsUI <- function(id) {
                       width = "75%"
                     )
                   )
-                ) # splitLayout
-              ), # box
+                ) # # end splitLayout
+              ), # end burn restriction box
               
-              
+              # Optional custom message included in warning text
               textAreaInput(
                 inputId = ns("customMessage"),
                 label = h4("Custom message (optional): retain, edit or delete"),
@@ -124,6 +146,7 @@ issueLocalEmissionsUI <- function(id) {
                 height = "80px",
                 resize = "vertical"),
               
+              # Select the date of the next scheduled update; defaults to tomorrow
               dateInput(
                 inputId = ns("nextUpdate"),
                 label = h4("Next update:"),
@@ -133,10 +156,14 @@ issueLocalEmissionsUI <- function(id) {
                 weekstart = 0,
               ),
               
-              tags$div(style = "margin-top: 40px;"),  # Adds vertical space
+              # -------------------------------
+              # Section 2: Affected location
+              # -------------------------------
+              
+              tags$div(style = "margin-top: 40px;"), # Adds vertical space
               h4(tags$b("2. Affected location")),
               
-              
+              # Location selection
               selectInput(
                 inputId = ns("location"),
                 label = h4("Location:"),
@@ -144,9 +171,14 @@ issueLocalEmissionsUI <- function(id) {
                 choices = c("", match_health_city$location),
               ),
               
+              # -------------------------------
+              # Section 3: Generate outputs
+              # -------------------------------
+              
               tags$div(style = "margin-top: 40px;"),  # Adds vertical space
               h4(tags$b("3. Generate Warning")),
               
+              # Trigger report generation
               actionButton(
           inputId = ns("genWarning"),
           label = "Go!",
@@ -155,25 +187,34 @@ issueLocalEmissionsUI <- function(id) {
               
               hr(),
               
+              # Download button
               downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
               
               hr(),
+              
+              # Utility button to clean working directories
               actionButton(
                 inputId = ns("cleanupdir"),
                 label = "clean dir"
               )
-            )
-          ) #fluidRow
-  ) # tabItem
+            ) # end main box
+          ) #end fluidRow
+  ) # end tabItem
 } 
 
 #--------------------------------------------------
 # Server
 #--------------------------------------------------
 
+# Server logic for the "Community Warning - Issue" tab
+
 issueLocalEmissions <- function(input, output, session){
   
-  # show/hide conditional inputs
+  # -------------------------------
+  # Conditional UI logic
+  # -------------------------------
+  
+  # Hide burn restriction section when pollutant is O3
   observeEvent(input$pollutant, {
     if (input$pollutant == "O3") {
       shinyjs::hide("burnRestrictions") 
@@ -182,6 +223,8 @@ issueLocalEmissions <- function(input, output, session){
     }
   })
   
+  # Show additional burn restriction fields only when
+  # restriction remains in effect beyond this warning
   observeEvent(input$burnRestrictions, {
     if (input$burnRestrictions > 0) {
       shinyjs::show("burnRestrictionArea")
@@ -194,6 +237,7 @@ issueLocalEmissions <- function(input, output, session){
       }
   })
   
+  # Show the "Date issued" input only if Issue Type is "Continue"
   observeEvent(input$ice, {
     if (input$ice == "Continue") {
       shinyjs::show("issuedate") 
@@ -202,7 +246,7 @@ issueLocalEmissions <- function(input, output, session){
     }
   })
   
-  # reset burn restriction info when pollutant changed; action button but didn't seem to work? Consider uiOuput to streamline?
+  # Reset burn restriction fields when pollutant changes
   observeEvent(input$pollutant, {
     
     updateRadioButtons(
@@ -231,9 +275,13 @@ issueLocalEmissions <- function(input, output, session){
     
   })
   
-  # Generate report: markdown and pdf
+  # --------------------------------------------------
+  # Generate Markdown + PDF warning
+  # --------------------------------------------------
+  
   observeEvent(input$genWarning, {
     
+    # Input validation
     if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
     } else if (length(input$ice) == "") {
@@ -244,12 +292,12 @@ issueLocalEmissions <- function(input, output, session){
       showNotification("No location selected; please select a location", type = "error")
     } else {
       
-      # create progress object; ensure it closes when reactive exits
+      # Progress indicator
       progress <- shiny::Progress$new()
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
       
-      # Clean location name for file name
+      # Clean strings for safe filenames
       location_clean <- gsub("\\s+", "_", input$location)
       pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", input$pollutant)))
       
@@ -264,7 +312,9 @@ issueLocalEmissions <- function(input, output, session){
         
       }
       
-      # generate warning: markdown and pdf formats
+      # -------------------------------
+      # Markdown output
+      # -------------------------------
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
                             output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
@@ -284,11 +334,14 @@ issueLocalEmissions <- function(input, output, session){
                               outputFormat = "markdown"),
                             debug = FALSE)
       
-      # move the .md to outputs/
+      # Relocate the .md file to outputs/ directory
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
-      markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), output_file_name), full.names = TRUE)
+            markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), output_file_name), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
       
+      # -------------------------------
+      # PDF output
+      # -------------------------------
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
@@ -308,18 +361,20 @@ issueLocalEmissions <- function(input, output, session){
                               outputFormat = "pdf"),
                             debug = FALSE)
       
-      # move the .pdf to outputs/
-      # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
+      # Relocate the .pdf to outputs/ directory
+      # to keep it consistent with the Markdown files
       pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), output_file_name), full.names = TRUE)
       fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
       
       progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
       Sys.sleep(5)
       
-    } #else
-  }) #observeEvent
+    } # end else
+  }) # end observeEvent
   
-  # Download files
+  # --------------------------------------------------
+  # Download handler: zip all outputs
+  # --------------------------------------------------
   output$download_report <- downloadHandler(
     
     filename = function() {
@@ -342,7 +397,9 @@ issueLocalEmissions <- function(input, output, session){
     contentType = "application/zip"
   )
   
-  # Clean up directories
+  # --------------------------------------------------
+  # Cleanup directory
+  # --------------------------------------------------
   observeEvent(input$cleanupdir, {
     output_files <- dir(path = here::here("outputs"), full.names = TRUE)
     temp_files <- dir(full.names = TRUE, pattern = ".png")
