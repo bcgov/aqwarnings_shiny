@@ -35,7 +35,7 @@ issueLocalEmissionsUI <- function(id) {
               # Section 1: Metadata required to generate warning
               # -------------------------------
               
-              h4(tags$b("1. Complete the fields below")),
+              h4(tags$b("1. Warning Information")),
               
               # Author selection (Air Quality Meteorologist)
               selectInput(
