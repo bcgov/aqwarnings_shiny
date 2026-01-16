@@ -74,141 +74,32 @@ if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  
 ```
 
 ```{r table-setup, include=FALSE}
+### reads in pre-populated concentration table(s) in data/raw directory
 
 pollutants <- strsplit(params$pollutant, "&")[[1]] |> trimws()
-min_data_capture_pct <- 75
 
 results <- list()
 
 for (i in seq_along(pollutants)) {
+  
   pollutant <- pollutants[i]
+
+  #create filename of manual data file
+  fname <- paste0("data/raw/manual_conc_", tolower(params$pollutant), ".csv")
+  manual_table <- read_csv(fname,
+                           locale = locale(tz = "Etc/GMT+8"))
   
-  # ---- Check that locations are valid for this pollutant ----
-  valid_locations <- buddy_stations |> 
-    filter(location %in% params$location) |> 
-    pull(Buddy_location) |> 
-    unique()
+  # set system to local time of params$location  
+  hour_ending <- manual_table$date_time_pst[1]
   
-  if (length(valid_locations) == 0) {
-    stop(sprintf("None of the specified locations are valid for %s.", pollutant))
-  }
-  
-  # ---- Lookup table for units and averaging times ----
-  lookup <- data.frame(
-    units = c("μg/m^3^", "μg/m^3^", "ppb"),
-    hours = c(24, 24, 8),
-    row.names = c("PM25", "PM10", "O3")
-  ) |> 
-    mutate(avgtimelabel = sprintf("%d-hr", hours))
-  
-  # ---- Read in CSV from FTP ----
-  columndefs <- cols_only(
-    DATE_PST = col_character(),  # time zone assigned later; col_datetime does not support time zone assignment
-    STATION_NAME = col_factor(),
-    INSTRUMENT = col_factor(),  #is instrument necessary?
-    REPORTED_VALUE = col_double(),
-    PARAMETER = col_character(),
-    EMS_ID = col_character()
-  )
-  
-  dfraw <- read_csv(
-    sprintf("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_Raw_Air_Data/Air_Quality/%s.csv", pollutant),
-    col_types = columndefs
-  ) |> 
-    rename_all(tolower)
-  
-  # ---- Filter data to retain pnly stations relevant to this warning (params$location + neighbouring sites) ----
-  df <- dfraw |> 
-    mutate(date_pst = as.POSIXct(date_pst, format = "%Y-%m-%d %H:%M", tz = "Etc/GMT+8")) |> 
-    filter(instrument != "") |>   #is this needed?
-    filter(station_name %in% valid_locations)
-  
-  # ---- Get time window per location ----
-  dts <- df |> 
-    group_by(station_name) |> 
-    summarize(max_dt = max(date_pst), .groups = "drop") |> 
-    mutate(min_dt = max_dt - (3600 * (lookup[pollutant, "hours"] - 1)))
-  
-  df_filtered <- df |> 
-    left_join(dts, by = "station_name") |> 
-    filter(date_pst >= min_dt & date_pst <= max_dt) |> 
-    select(-min_dt, -max_dt)
-  
-  # ---- Summarize concentrations ----
-  integrated <- df_filtered |> 
-    group_by(station_name, parameter) |> 
-    summarize(
-      n_hours = n(),
-      n_na = sum(is.na(reported_value)),
-      pct_valid = 100 * (n_hours - n_na) / n_hours,
-      mean_conc = if_else(n_hours == n_na, NA_real_, mean(reported_value, na.rm = TRUE)),
-      max_conc = if_else(n_hours == n_na, NA_real_, max(reported_value, na.rm = TRUE)),
-      start_dt = min(date_pst),
-      end_dt = max(date_pst),
-      .groups = "drop"
-    ) |> 
-    mutate(
-      mean_conc = na_if(mean_conc, pct_valid < min_data_capture_pct),
-      max_conc = na_if(max_conc, pct_valid < min_data_capture_pct)
-    )
-  
-  station_metadata_raw <- read_csv("ftp://ftp.env.gov.bc.ca/pub/outgoing/AIR/Hourly_Raw_Air_Data/Year_to_Date/bc_air_monitoring_stations.csv", show_col_types = FALSE) 
-  station_metadata <- station_metadata_raw |> 
-    rename_all(tolower) |> 
-    select(station_name, location = city) |> 
-    distinct()
-  
-  # Join with station info using STATION_NAME
-  integrated <- integrated |> 
-    left_join(station_metadata, by = "station_name")
-  
-  # ---- Define most recent hour of data and express as 12 hour clock and local time 
-  
-  # set system to local time of params$location
   Sys.setenv(TZ = local_tz(params$location))
-  
-  local_time <- integrated |> 
-    filter(location == params$location) |> 
-    pull(end_dt) |> 
-    as.POSIXct(., tz = local_tz(params$location))
-  
+  local_time <- as.POSIXct(hour_ending, tz = local_tz(params$location))  
   local_hour <- format(lubridate::floor_date(local_time, "hour"), format = "%l:00 %p")
   
-  # ---- Format final table ----
-  formatted_table <- integrated |> 
-    mutate(
-      mean_conc = ifelse(is.finite(mean_conc), sprintf("%.1f", mean_conc), "NA"),
-      max_conc = ifelse(is.finite(max_conc), sprintf("%.1f", max_conc), "NA")
-    ) |> 
-    pivot_wider(
-      names_from = parameter,
-      id_cols = c(station_name, location),
-      values_from = c(mean_conc, max_conc)
-    )
-  
-  # clean up names, drop station_name and sort by params$location then other stations alphabetically
-  formatted_table <- formatted_table |> 
-    rename_with(~ gsub(sprintf("_%s", pollutant), "", .x), everything()) |> 
-    select(-station_name) |> 
-    arrange(location != params$location)  # arrange rows with params$location first, then rest
-  
-  # transpose
-  formatted_table <- formatted_table |> 
-    pivot_longer(cols = -location, names_to = "Community", values_to = "concentration") |> 
-    pivot_wider(names_from = "location", values_from = "concentration")
-  
-  # handle special case for O3
-  if (pollutant != "O3") {formatted_table <- formatted_table |>  filter(Community != "max_conc")}
-  
-  # clean up labels
-  final_table <- formatted_table |> 
-    mutate(Community = case_when(
-      Community == "mean_conc" ~ sprintf("%s average (%s)", lookup[pollutant, "avgtimelabel"], lookup[pollutant, "units"]),
-      Community == "max_conc" ~ sprintf("Max. within %s (%s)", gsub("-", " ", lookup[pollutant, "avgtimelabel"]), lookup[pollutant, "units"]),
-      TRUE ~ Community
-    ))
+  final_table <- select(manual_table, - date_time_pst)
   
   results[[paste0("final_table", i)]] <- final_table
+
 }
 
 # Expose them as final_table1, final_table2, etc.
