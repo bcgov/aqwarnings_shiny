@@ -4,7 +4,7 @@ type: "pollution_prevention"
 date: "`r Sys.Date()`"
 params: 
   ice: "Issue" # Issue; Continue
-  sel_aqMet: "Sakshi Jain"
+  aqMet: "Sakshi Jain"
   nearestMonitor: "Prince George"
   issuedate: "2025-07-20"
   nextUpdate: "2025-09-28"
@@ -15,7 +15,7 @@ params:
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
 ice: "`r params$ice`"
-author: "`r params$sel_aqMet`"
+author: "`r params$aqMet`"
 customMessage: "`r params$customMessage`"
 location: "`r params$nearestMonitor`"
 outputFormat: "`r params$outputFormat`"
@@ -211,7 +211,7 @@ list2env(results, envir = .GlobalEnv)
 
 # AQ met information
 ENVcontact <- aq_mets |>
-  filter(fullname == params$sel_aqMet) |>
+  filter(fullname == params$aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
   pull(contact) 
 ```

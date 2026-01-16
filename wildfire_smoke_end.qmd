@@ -3,19 +3,19 @@ title: "Air quality warning for wildfire smoke ended"
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`" 
 params: 
-  sel_aqMet: "Sakshi Jain" 
+  aqMet: "Sakshi Jain" 
   lastWarning: "2025-02-10" 
   customMessage: "`Custom message.`" 
   location: "Multiple locations in B.C."
   outputFormat: "markdown"
-  sel_healthAuth: 
+  healthAuth: 
     - First Nations Health Authority 
     - Northern Health 
 ice: "End" 
-author: "`r params$sel_aqMet`" 
+author: "`r params$aqMet`" 
 customMessage: "`r params$customMessage`" 
 lastWarning: "`r params$lastWarning`" 
-sel_healthAuth: "`r paste(params$sel_healthAuth, collapse=', ')`" 
+healthAuth: "`r paste(params$healthAuth, collapse=', ')`" 
 location: "`r params$location`"
 outputFormat: "`r params$outputFormat`" 
 format:
@@ -70,12 +70,12 @@ if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  
 #AQ met information
 
 ENVcontact <- aq_mets |>
-  filter(fullname == params$sel_aqMet) |>
+  filter(fullname == params$aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
   pull(contact)
 
 HAcontact <- health_contact |>
-  filter(authority %in% params$sel_healthAuth) |>
+  filter(authority %in% params$healthAuth) |>
   mutate(authority = factor(authority))|> 
   select(authority, contact) |>
   group_by(authority) |> 
@@ -102,7 +102,7 @@ logos_list <- list(
 logos_names_selected <- c(
   "Government of British Columbia", # always select BC
   "First Nations Health Authority", # always select FNHA 
-  params$sel_healthAuth) # Note: if FNHA is selected in app, it will duplicate
+  params$healthAuth) # Note: if FNHA is selected in app, it will duplicate
 
 ## This line will remove the duplicated FNHA value if it appears twice
 ## Side effect: If the app user did NOT select FNHA, this will force FNHA to appear
