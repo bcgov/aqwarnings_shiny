@@ -3,7 +3,7 @@ title: "Air quality warning in effect for wildfire smoke"
 type: "wildfire_smoke" 
 date: "`r Sys.Date()`"
 params:
-  sel_aqMet: "Sakshi Jain"
+  aqMet: "Sakshi Jain"
   smokeDuration: "`24-48 hours`"
   customMessage: "`Custom message.`"
   ice: "Issue"
@@ -16,7 +16,7 @@ params:
     - Whistler
     - South Okanagan
 ice: "`r params$ice`"
-author: "`r params$sel_aqMet`"
+author: "`r params$aqMet`"
 smokeDuration: "`r params$smokeDuration`"
 customMessage: "`r params$customMessage`"
 location: "`r params$location`"
@@ -72,7 +72,7 @@ if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  
 
   # AQ met information
   ENVcontact <- aq_mets |>
-    filter(fullname == params$sel_aqMet) |>
+    filter(fullname == params$aqMet) |>
     mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
     pull(contact) 
 

@@ -3,14 +3,14 @@ title: "`r paste('Pollution Prevention Notice and open burning restrictions ende
 type: "pollution_prevention"
 date: "`r Sys.Date()`"
 params: 
-  sel_aqMet: "Sakshi Jain"
+  aqMet: "Sakshi Jain"
   nearestMonitor: "Whistler"
   issuedate: "2025-07-09"
   outputFormat: "markdown"
   customMessage: ""
   burnRestrictionArea: ""
 ice: "End"
-author: "`r params$sel_aqMet`"
+author: "`r params$aqMet`"
 customMessage: "`r params$customMessage`"
 location: "`r params$nearestMonitor`"
 outputFormat: "`r params$outputFormat`" 
@@ -204,7 +204,7 @@ list2env(results, envir = .GlobalEnv)
 
 # AQ met information
 ENVcontact <- aq_mets |>
-  filter(fullname == params$sel_aqMet) |>
+  filter(fullname == params$aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
   pull(contact) 
 ```
