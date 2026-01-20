@@ -13,3 +13,7 @@ outputs/*
 logo.png
 *map.html
 *map.png
+
+# ignore the data table (manual entry) in the data directory
+data/raw/manual_conc_pm25.csv
+data/raw/manual_conc_pm10.csv
