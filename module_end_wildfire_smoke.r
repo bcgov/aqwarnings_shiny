@@ -79,11 +79,12 @@ endWildfireSmokeUI <- function(id) {
         h4(tags$b("2. Affected location")),
         
         # Describe affected location(s) for the warning table on the website
-        radioButtons(
+        selectizeInput(
           inputId = ns("location"),
-          label = h4("Describe affected location(s):"),
-          selected = "Multiple regions in B.C.",
-          choices = c("Multiple regions in B.C.", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.")
+          label = h4(HTML("<b>2. Describe affected regions</b> (for warnings table on website)")),
+          selected = "",
+          choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
+          options = list(create = TRUE)
         ),
         
         # -------------------------------
