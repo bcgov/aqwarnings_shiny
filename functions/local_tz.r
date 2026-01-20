@@ -13,7 +13,7 @@
 ## functions
 
 local_tz <- function(x) {
-  if (x %in% c("Cranbrook", "Golden", "Invermere")) {
+  if (x %in% c("Cranbrook", "Golden", "Invermere", "Elkford", "Sparwood")) {
     "America/Edmonton"  
   } else if (x %in% c("Fort St John", "Dawson Creek", "Fort Nelson", "Creston")) {
     "America/Fort_Nelson"
