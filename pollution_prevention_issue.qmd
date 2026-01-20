@@ -190,6 +190,9 @@ for (i in seq_along(pollutants)) {
     pivot_longer(cols = -location, names_to = "Community", values_to = "concentration") |> 
     pivot_wider(names_from = "location", values_from = "concentration")
   
+  # handle special case for O3
+  if (pollutant != "O3") {formatted_table <- formatted_table |>  filter(Community != "max_conc")}
+  
   # clean up labels
   final_table <- formatted_table |> 
     mutate(Community = case_when(
