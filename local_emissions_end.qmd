@@ -19,14 +19,16 @@ params:
   burnRestrictionSDM: "Ben"
   burnRestrictionArea: ""
   burnRestrictionEndDate: "2025-09-28"
+  bylaw: true
   burnRestrictionEndTime: "12:00 PM"
 ice: "End"
 pollutant: "`r params$pollutant`"
 author: "`r params$aqMet`"
 customMessage: "`r params$customMessage`"
 location: "`r params$location`"
-outputFormat: "`r params$outputFormat`" 
+outputFormat: "`r params$outputFormat`"
 burnRestrictions: "`r ifelse(params$burnRestrictionStatus < 2, 0, params$burnRestrictionStatus)`"
+bylaw: "`r params$bylaw`"
 format:
   markdown: default
   pdf:
