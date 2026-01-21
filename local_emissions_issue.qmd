@@ -17,6 +17,7 @@ params:
   customMessage: ""
   burnRestrictions: 0   # 0 = No; 1 = Yes (Ben); 2 = Yes (Arvind)
   burnRestrictionArea: ""
+  bylaw: true
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
 ice: "`r params$ice`"
@@ -26,6 +27,7 @@ customMessage: "`r params$customMessage`"
 location: "`r params$location`"
 outputFormat: "`r params$outputFormat`"
 burnRestrictions: "`r params$burnRestrictions`"
+bylaw: "`r params$bylaw`"
 format:
   markdown: default
   pdf:
