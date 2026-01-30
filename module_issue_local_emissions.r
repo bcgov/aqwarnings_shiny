@@ -297,6 +297,13 @@ issueLocalEmissions <- function(input, output, session){
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
       
+      # Create YAML parameters for .qmd
+      bylawBoolean <- isTRUE(any(c("Burns Lake", "Duncan", "Houston", "Prince George", "Smithers", "Valemount") == input$location, na.rm = TRUE))
+      warningTitle <- paste0("Air quality warning ", 
+                             ifelse(input$burnRestrictions > 0, "and open burning restrictions ", " "), 
+                             "in effect for ",
+                             input$location)
+      
       # Clean strings for safe filenames
       location_clean <- gsub("\\s+", "_", input$location)
       pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", input$pollutant)))
@@ -321,17 +328,28 @@ issueLocalEmissions <- function(input, output, session){
                             output_format = "markdown",
                             execute_params = list(
                               aqMet = input$aqMet,
-                              pollutant = input$pollutant,
-                              ice = input$ice,
-                              location = input$location,
+                              customMessage = input$customMessage,
                               burnRestrictions = input$burnRestrictions,
                               burnRestrictionArea = input$burnRestrictionArea,
                               burnRestrictionEndDate = input$burnRestrictionEndDate,
                               burnRestrictionEndTime = input$burnRestrictionEndTime,
+                              ice = input$ice,
                               issuedate = input$issuedate,
+                              location = input$location,
                               nextUpdate = input$nextUpdate,
-                              customMessage = input$customMessage,
-                              outputFormat = "markdown"),
+                              outputFormat = "markdown",
+                              pollutant = input$pollutant
+                              ),
+                            metadata = list(
+                              author = input$aqMet,
+                              burnRestrictions = input$burnRestrictions,
+                              bylaw = bylawBoolean,
+                              ice = input$ice,
+                              location = input$location,
+                              pollutant = input$pollutant,
+                              title = warningTitle,
+                              type = "local_emissions"
+                              ),
                             debug = FALSE)
       
       # Relocate the .md file to outputs/ directory
@@ -359,6 +377,9 @@ issueLocalEmissions <- function(input, output, session){
                               nextUpdate = input$nextUpdate,
                               customMessage = input$customMessage,
                               outputFormat = "pdf"),
+                            metadata = list(
+                              title = warningTitle
+                              ),
                             debug = FALSE)
       
       # Relocate the .pdf to outputs/ directory

@@ -1,6 +1,4 @@
 ---
-title: "`r paste('Pollution Prevention Notice and open burning restrictions are in effect within', params$burnRestrictionArea)`"
-type: "pollution_prevention"
 date: "`r Sys.Date()`"
 params: 
   ice: "Issue" # Issue; Continue
@@ -14,12 +12,6 @@ params:
   burnRestrictionArea: ""
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
-ice: "`r params$ice`"
-author: "`r params$aqMet`"
-customMessage: "`r params$customMessage`"
-location: "`r params$nearestMonitor`"
-outputFormat: "`r params$outputFormat`"
-burnRestrictions: "`r params$burnRestrictions`"
 format:
   markdown: default
   pdf:

@@ -1,10 +1,4 @@
 ---
-title: "`r paste0(
-  'Air quality warning ', 
-  ifelse(params$burnRestrictions > 0, 'and open burning restrictions ', ''),
-  'in effect for ',
-  params$location)`"
-type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
   ice: "Issue" # Issue; Continue
@@ -19,13 +13,6 @@ params:
   burnRestrictionArea: ""
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
-ice: "`r params$ice`"
-pollutant: "`r params$pollutant`"
-author: "`r params$aqMet`"
-customMessage: "`r params$customMessage`"
-location: "`r params$location`"
-outputFormat: "`r params$outputFormat`"
-burnRestrictions: "`r params$burnRestrictions`"
 format:
   markdown: default
   pdf:
