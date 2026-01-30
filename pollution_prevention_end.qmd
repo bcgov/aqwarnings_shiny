@@ -1,6 +1,4 @@
 ---
-title: "`r paste('Pollution Prevention Notice and open burning restrictions ended within', params$burnRestrictionArea)`"
-type: "pollution_prevention"
 date: "`r Sys.Date()`"
 params: 
   aqMet: "Sakshi Jain"
@@ -9,12 +7,6 @@ params:
   outputFormat: "markdown"
   customMessage: ""
   burnRestrictionArea: ""
-ice: "End"
-author: "`r params$aqMet`"
-customMessage: "`r params$customMessage`"
-location: "`r params$nearestMonitor`"
-outputFormat: "`r params$outputFormat`" 
-burnRestrictions: 0
 format:
   markdown: default
   pdf:

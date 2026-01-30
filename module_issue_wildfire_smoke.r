@@ -520,9 +520,15 @@ issueWildfireSmoke <- function(input, output, session){
                                                   smokeDuration = input$smokeDuration,
                                                   selRegionsIDs = selRegions$ids,
                                                   customMessage = input$smokeMessage,
-                                                  ice = "Issue",
                                                   location = input$location,
                                                   outputFormat = "markdown"),
+                            metadata = list(
+                              author = input$aqMet,
+                              ice = "Issue",
+                              location = input$location,
+                              title = "Air quality warning in effect for wildfire smoke",
+                              type = "wildfire_smoke" 
+                            ),
                             debug = FALSE)
       
       # Relocate the .md file to outputs/ directory
@@ -545,9 +551,11 @@ issueWildfireSmoke <- function(input, output, session){
                                                   smokeDuration = input$smokeDuration,
                                                   selRegionsIDs = selRegions$ids,
                                                   customMessage = input$smokeMessage,
-                                                  ice = "Issue",
                                                   location = input$location,
                                                   outputFormat = "pdf"),
+                            metadata = list(
+                              title = "Air quality warning in effect for wildfire smoke"
+                            ),
                             debug = FALSE)
      
      # Relocate the .pdf to outputs/ directory

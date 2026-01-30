@@ -1,12 +1,4 @@
 ---
-title: "`r if (params$burnRestrictionStatus == 0) { 
-            paste('Air quality warning ended for', params$location)
-                } else if (params$burnRestrictionStatus == 1) {
-        paste('Air quality warning and open burning restrictions ended for', params$location)
-        } else {
-        paste('Air quality warning ended for', params$location, '- open burning restrictions remain in effect')
-        }`"
-type: "local_emissions"
 date: "`r Sys.Date()`"
 params: 
   pollutant: "PM25 & PM10"
@@ -20,13 +12,6 @@ params:
   burnRestrictionArea: ""
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
-ice: "End"
-pollutant: "`r params$pollutant`"
-author: "`r params$aqMet`"
-customMessage: "`r params$customMessage`"
-location: "`r params$location`"
-outputFormat: "`r params$outputFormat`" 
-burnRestrictions: "`r ifelse(params$burnRestrictionStatus < 2, 0, params$burnRestrictionStatus)`"
 format:
   markdown: default
   pdf:
