@@ -1,12 +1,9 @@
 ---
-title: "Air quality warning in effect for wildfire smoke"
-type: "wildfire_smoke" 
 date: "`r Sys.Date()`"
 params:
   aqMet: "Sakshi Jain"
   smokeDuration: "`24-48 hours`"
   customMessage: "`Custom message.`"
-  ice: "Issue"
   nextUpdate: "2025-02-10"
   location: "Multiple locations in B.C."
   outputFormat: "markdown"
@@ -15,12 +12,6 @@ params:
     - Prince George
     - Whistler
     - South Okanagan
-ice: "`r params$ice`"
-author: "`r params$aqMet`"
-smokeDuration: "`r params$smokeDuration`"
-customMessage: "`r params$customMessage`"
-location: "`r params$location`"
-outputFormat: "`r params$outputFormat`" 
 format:
   markdown: default
   pdf:

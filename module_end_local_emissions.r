@@ -294,6 +294,16 @@ endLocalEmissions <- function(input, output, session){
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
       
+      # Create YAML parameters for rendering via quarto_render()
+      burnRestrictions <- ifelse(input$burnRestrictionStatus < 2, 0, input$burnRestrictionStatus)
+      warningTitle <-if (input$burnRestrictionStatus == 0) { 
+            paste('Air quality warning ended for', input$location)
+                } else if (input$burnRestrictionStatus == 1) {
+                  paste('Air quality warning and open burning restrictions ended for', input$location)
+                  } else {
+                    paste('Air quality warning ended for', input$location, '- open burning restrictions remain in effect')
+                  }
+      
       # Clean strings for safe filenames
       location_clean <- gsub("\\s+", "_", input$location)
       pollutant_clean <- tolower(gsub(" ", "", gsub("&", "_", input$pollutant)))
@@ -325,7 +335,19 @@ endLocalEmissions <- function(input, output, session){
                               burnRestrictionEndTime = input$burnRestrictionEndTime,
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
-                              outputFormat = "markdown"),
+                              outputFormat = "markdown"
+                              ),
+                            # YAML parameters to add to .md header
+                            metadata = list(
+                              author = input$aqMet,
+                              burnRestrictions = burnRestrictions,
+                              customMessage = input$customMessage,
+                              ice = "End",
+                              location = input$location,
+                              pollutant = input$pollutant,
+                              title = warningTitle,
+                              type = "local_emissions"
+                              ),
                             debug = FALSE)
       
       # Relocate the .md file to outputs/ directory
@@ -352,6 +374,10 @@ endLocalEmissions <- function(input, output, session){
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               outputFormat = "pdf"),
+                            # YAML parameters for .pdf generation
+                            metadata = list(
+                              title = warningTitle
+                            ),
                             debug = FALSE)
     
     # Relocate the .pdf to outputs/ directory

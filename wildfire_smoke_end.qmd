@@ -1,6 +1,4 @@
 ---
-title: "Air quality warning for wildfire smoke ended" 
-type: "wildfire_smoke" 
 date: "`r Sys.Date()`" 
 params: 
   aqMet: "Sakshi Jain" 
@@ -11,13 +9,6 @@ params:
   healthAuth: 
     - First Nations Health Authority 
     - Northern Health 
-ice: "End" 
-author: "`r params$aqMet`" 
-customMessage: "`r params$customMessage`" 
-lastWarning: "`r params$lastWarning`" 
-healthAuth: "`r paste(params$healthAuth, collapse=', ')`" 
-location: "`r params$location`"
-outputFormat: "`r params$outputFormat`" 
 format:
   markdown: default
   pdf:
@@ -175,7 +166,7 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-This Air Quality Warning for wildfire smoke that was last updated on `r format(as.Date(params$lastWarning), '%B %d, %Y')` has ended.
+The Air Quality Warning for wildfire smoke that was last updated on `r format(as.Date(params$lastWarning), '%B %d, %Y')` has ended.
 
 `r params$customMessage`
 

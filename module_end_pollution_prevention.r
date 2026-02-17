@@ -155,6 +155,13 @@ endPollutionPrevention <- function(input, output, session){
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
       
+      # Create YAML parameters for .qmd
+      warningTitle <- paste(
+        "Pollution Prevention Notice and open burning restrictions ended within", 
+        input$burnRestrictionArea
+        )
+
+      
       # Set output file name
       output_file_name <- sprintf("%s_%s", input$nearestMonitor, "end_pollution_prevention") 
 
@@ -172,6 +179,14 @@ endPollutionPrevention <- function(input, output, session){
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               outputFormat = "markdown"),
+                            metadata = list(
+                              author = input$aqMet,
+                              burnRestrictions = 0,
+                              ice = "End",
+                              location = input$nearestMonitor,
+                              title = warningTitle,
+                              type = "pollution_prevention"
+                              ),
                             debug = FALSE)
       
       # Relocate the .md file to outputs/ directory
@@ -193,6 +208,9 @@ endPollutionPrevention <- function(input, output, session){
                               issuedate = input$issuedate,
                               customMessage = input$customMessage,
                               outputFormat = "pdf"),
+                            metadata = list(
+                              title = warningTitle
+                            ),
                             debug = FALSE)
     
     # Relocate the .pdf to outputs/ directory

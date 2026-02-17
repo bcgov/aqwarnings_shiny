@@ -157,6 +157,13 @@ endWildfireSmoke <- function(input, output, session){
                                                   healthAuth = input$healthAuth,
                                                   location = input$location,
                                                   outputFormat = "markdown"),
+                            metadata = list(
+                              author = input$aqMet, 
+                              ice = "End",
+                              location = input$location,
+                              title = "Air quality warning for wildfire smoke ended",
+                              type = "wildfire_smoke"
+                            ),
                             debug = FALSE)
       
       # Relocate the .md file to outputs/ directory
@@ -177,6 +184,9 @@ endWildfireSmoke <- function(input, output, session){
                                                   healthAuth = input$healthAuth,
                                                   location = input$location,
                                                   outputFormat = "pdf"),
+                            metadata = list(
+                              title = "Air quality warning for wildfire smoke ended"
+                            ),
                             debug = FALSE)
   
       
