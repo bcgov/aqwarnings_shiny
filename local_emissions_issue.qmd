@@ -292,32 +292,60 @@ if (params$ice == "Issue") {
 
 ```
 
-```{r additional_info, include=FALSE, results='asis'}
+```{r more_info, include=FALSE, results='asis'}
 
-additional_info_PM25 <- paste0(
-  "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
-    
-The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-)
+more_info_table <- tibble(
+  pollutant = c("PM25", "PM10", "O3"),
+  info = c(
+    paste0(
+      "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can includef wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
 
-additional_info_PM10 <- paste0(
+The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ",
+params$location,
+" and nearest monitored communities at ",
+local_hour,
+" local time today:"
+    ),
+paste0(
   "Coarse particulate matter refers to airborne solid or liquid droplets with diameters between 2.5 and 10 micrometers (μm). Together with fine particulate matter (airborne solid or liquid droplets with diameters of 2.5 μm or less), these particles are referred to as PM~10~. Sources of PM~10~ contributing to this air quality episode include road dust from the emission of winter traction material along busy and dry road surfaces. PM~10~ can easily penetrate indoors because of their small size.
-  
+
   The current dusty conditions are caused by road traffic stirring up winter traction materials that have accumulated on roadways over the past winter.
-  
-  The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-)
 
-additional_info_O3 <- paste0(
+  The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ",
+  params$location,
+  " and nearest monitored communities at ",
+  local_hour,
+  " local time today:"
+),
+paste0(
   "Ground-level ozone is formed when chemicals (such as nitrogen oxides and volatile organic compounds) react in the air when there is sunlight. Nitrogen oxides are emitted from vehicles, boilers, building heating, and other combustion processes. VOCs are emitted from burning fossil fuels, evaporation of solvents (including paint, varnishes and thinners), refining and storing fuel and agricultural activities. VOCs also come from natural sources such as vegetation.
-  
-The highest concentrations of ground-level ozone usually happen between mid-afternoon and early evening on summer days.
-  
-The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality warnings. Air quality warnings for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. 
 
-The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+The highest concentrations of ground-level ozone usually happen between mid-afternoon and early evening on summer days.
+
+The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality warnings. Air quality warnings for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives.
+
+The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ",
+params$location,
+" and nearest monitored communities at ",
+local_hour,
+" local time today:"
+)
+  )
 )
 
+results_info <- list()
+
+for (i in seq_along(pollutants)) {
+ 
+  more_info <- more_info_table |> 
+    filter(pollutant == pollutants[i]) |> 
+    pull(info)
+  
+    results_info[[paste0("more_info", i)]] <- more_info
+}
+
+# Expose them as more_info1, more_info2, etc.
+list2env(results_info, envir = .GlobalEnv)
 ```
 
 ```{r bylaws, include=FALSE}
@@ -467,7 +495,7 @@ if (params$outputFormat == "pdf") {
 if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
 ```
 
-[`r paste(":::")`]{.content-visible when-format="markdown"}
+[:::]{.content-visible when-format="markdown"}
 
 `r first_paragraph`
 
@@ -496,9 +524,7 @@ As air contaminant levels increase, health risks increase. Consider reducing or 
 People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
 
 ::: {.content-visible when-format="markdown"}
-{{< accordion_controls >}}
-
-{{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
+{{< accordion_controls >}} {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -586,11 +612,7 @@ if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in%
 `r if (params$burnRestrictions > 0) paste(burn_ban)`
 
 ::: {.content-visible when-format="markdown"}
-{{< accordion_end >}}
-:::
-
-::: {.content-visible when-format="markdown"}
-{{< accordion_start title="Voluntary actions" initiallyOpen="true" >}}
+{{< accordion_end >}} {{< accordion_start title="Voluntary actions" initiallyOpen="true" >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -609,41 +631,26 @@ if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in%
 {{< accordion_start title="Current conditions" initiallyOpen="true" >}}
 :::
 
-::: {.content-visible when-format="pdf"}
-### Current conditions
-:::
-
-```{r final-table, results='asis', echo=FALSE}
-
-# Single pollutant: PM25
-if (length(pollutants) == 1 && pollutants == "PM25") {
-  cat(additional_info_PM25, "\n\n")
+```{r final-table1, results='asis', echo=FALSE}
+if (length(pollutants) == 1) {
+  cat(more_info, "\n\n")
+} else { # pollutants == c(PM2.5, PM10)
+  cat(more_info1, "\n\n") 
+}
+cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
+if (length(pollutants) == 1) {
   print(knitr::kable(final_table, row.names = FALSE, escape = FALSE))
-}
+  } else {  # pollutants == c(PM2.5, PM10)
+    print(knitr::kable(final_table1, row.names = FALSE))
+  }
+cat('[\n:::\n]{.content-visible when-format="markdown"}')
+```
 
-# Single pollutant: PM10
-if (length(pollutants) == 1 && pollutants == "PM10") {
-  cat(additional_info_PM10, "\n\n")
-  print(knitr::kable(final_table, row.names = FALSE))
-}
-
-# Single pollutant: O3
-if (length(pollutants) == 1 && pollutants == "O3") {
-  cat(additional_info_O3, "\n\n")
-  print(knitr::kable(final_table, row.names = FALSE))
-}
-
-# Both PM25 & PM10
-if (all(c("PM25", "PM10") %in% pollutants)) {
-  # PM25
-  cat(additional_info_PM25, "\n\n")
-  print(knitr::kable(final_table1, row.names = FALSE))
-  
-  # PM10
-  cat("\n\n", additional_info_PM10, "\n\n")
-  print(knitr::kable(final_table2, row.names = FALSE))
-}
-
+```{r final-table2, results='asis', echo=FALSE, eval= (all(c("PM25", "PM10") %in% pollutants))}
+cat("\n\n", more_info2, "\n\n")
+cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
+print(knitr::kable(final_table2, row.names = FALSE, escape = FALSE))
+cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ```
 
 ::: {.content-visible when-format="markdown"}
@@ -654,7 +661,7 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 ### For additional information about air quality in British Columbia
 :::
 
-:::: {.content-visible when-format="markdown"}
+::: {.content-visible when-format="markdown"}
 **For additional information about air quality in British Columbia:**
 
 ::: bcds-card-wrapper
@@ -666,7 +673,7 @@ if (all(c("PM25", "PM10") %in% pollutants)) {
 
 [Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
 :::
-::::
+:::
 
 ::: {.content-visible when-format="pdf"}
 - View the latest [Air Quality Health Index (AQHI) and forecast](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html)

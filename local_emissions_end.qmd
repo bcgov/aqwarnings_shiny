@@ -251,20 +251,36 @@ first_paragraph <- paste0(
 }
 ```
 
-```{r additional_info, include=FALSE}
+```{r more_info, include=FALSE}
 
-additional_info_PM25 <- paste0(
-    "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
-
-additional_info_PM10 <- paste0(
+more_info_table <- tibble(
+  pollutant = c("PM25", "PM10", "O3"),
+  info = c(
+    paste0(
+      "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+    ),
+    paste0(
   "The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
-  )
-
-additional_info_O3 <- paste0(
+  ),
+  paste0(
   "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
   "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
 )
+)
+)
+
+results_info <- list()
+
+for (i in seq_along(pollutants)) {
+  more_info <- more_info_table |> 
+    filter(pollutant == pollutants[i]) |> 
+    pull(info)
+  
+  results_info[[paste0("more_info", i)]] <- more_info
+}
+
+# Expose them as more_info1, more_info2, etc.
+list2env(results_info, envir = .GlobalEnv)
 ```
 
 ```{r burn_ban, results='asis', echo=FALSE}
@@ -419,41 +435,26 @@ if (params$burnRestrictionStatus == 2) {
 ### Current conditions
 :::
 
-```{r final-table, results='asis', echo=FALSE}
-
-# Single pollutant: PM25
-if (length(pollutants) == 1 && pollutants == "PM25") {
-  cat(additional_info_PM25, "\n\n")
-  print(knitr::kable(final_table, row.names = FALSE))
+```{r final-table1, results='asis', echo=FALSE}
+if (length(pollutants) == 1) {
+  cat(more_info, "\n\n")
+} else { # pollutants == c(PM2.5, PM10)
+  cat(more_info1, "\n\n") 
 }
-
-# Single pollutant: PM10
-if (length(pollutants) == 1 && pollutants == "PM10") {
-  cat(additional_info_PM10, "\n\n")
-  print(knitr::kable(final_table, row.names = FALSE))
-}
-
-# Single pollutant: O3
-if (length(pollutants) == 1 && pollutants == "O3") {
-  cat(additional_info_O3, "\n\n")
-  print(knitr::kable(final_table, row.names = FALSE))
-}
-
-# Both PM25 & PM10
-if (all(c("PM25", "PM10") %in% pollutants)) {
-  # PM25
-  cat(additional_info_PM25, "\n\n")
-  print(knitr::kable(final_table1, row.names = FALSE))
-  
-  cat("\n\n")  # spacing
-  
-  # PM10
-  cat(additional_info_PM10, "\n\n")
-  print(knitr::kable(final_table2, row.names = FALSE))
-}
-
+cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
+if (length(pollutants) == 1) {
+  print(knitr::kable(final_table, row.names = FALSE, escape = FALSE))
+  } else {  # pollutants == c(PM2.5, PM10)
+    print(knitr::kable(final_table1, row.names = FALSE))
+  }
+cat('[\n:::\n]{.content-visible when-format="markdown"}')
 ```
-
+```{r final-table2, results='asis', echo=FALSE, eval= (all(c("PM25", "PM10") %in% pollutants))}
+cat("\n\n", more_info2, "\n\n")
+cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
+print(knitr::kable(final_table2, row.names = FALSE, escape = FALSE))
+cat('[\n:::]{.content-visible when-format="markdown"}\n')
+```
 Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
 
 ::: {.content-visible when-format="markdown"}
