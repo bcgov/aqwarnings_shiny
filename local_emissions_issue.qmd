@@ -357,9 +357,13 @@ bylaws <- if (params$location == "Burns Lake") {
 } else if (params$location == "Duncan") {
   "Comply with the requirements of local woodstove bylaws that apply to periods when air quality advisories are in effect (e.g., City of Duncan and Municipality of North Cowichan)."
 } else if (params$location == "Houston") {
-  "Houston bylaw 947 restricts the use of wood burning appliances during air quality advisories:\n\n
+  "Houston bylaw 947 restricts the use of wood burning appliances and open burning during air quality advisories:\n\n
   - **2.1.1**: No person shall use a wood burning appliance at any time when an air quality advisory is in effect, except to heat premises that are equipped with no heating appliance or facilities other than the wood burning appliance.\n\n
-  - Contact the Houston municipal office at [250-845-2238](tel:2508452238) for more information on woodstove restrictions."
+  - **3.2**: No person shall conduct open burning or ignite or maintain any recreational fire if an air quality advisory has been issued.\n\n
+  - **3.3**: If an air quality advisory is issued while a person is conducting open burning or 
+maintaining a recreational fire, that person shall take all reasonable steps to cease the 
+open burning or extinguish the recreational fire as soon as possible.\n\n
+  - Contact the Houston municipal office at [250-845-2238](tel:2508452238) for more information on woodstove and open burning restrictions."
 } else if (params$location == "Prince George") {
   "The City of Prince George's Clean Air Bylaw prohibits all open burning, including backyard burning, and land clearing burning. During air quality advisories, this bylaw also prohibits recreational fires, use of wood-burning appliances (except for sole wood-burning heat users), and street sweeping activities (unless approved by an Authorized Person)."
 } else if (params$location == "Smithers") {
