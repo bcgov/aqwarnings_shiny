@@ -525,8 +525,9 @@ if (current_month %in% 6:8) {
 
 # Single pollutant: PM25
   cat(additional_info_PM25, "\n\n")
+  cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
   print(knitr::kable(final_table, row.names = FALSE, escape = FALSE))
-
+  cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ```
 
 ::: {.content-visible when-format="markdown"}
