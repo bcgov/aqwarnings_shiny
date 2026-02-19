@@ -108,6 +108,7 @@ region_output <- bulletin_regions |>
   pull(output_line) |> 
   paste(collapse = "\n")
 
+run_pg <- "Prince George" %in% bulletin_regions$region
 ```
 
 ```{r}
@@ -386,20 +387,23 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 **For additional general information about wildfire smoke and air quality:**
 
-<div class="bcds-card-wrapper"> 
-{{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
-
-[What's the air like today?] {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
-
-[Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
-
-[Smoke forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
-
-[Smoke forecast map] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and map of air quality and weather data.
-
-[Air quality data and warnings] {{< card_end >}}
-</div>
-
+::: bcds-card-wrapper
+  {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
+  
+  [What's the air like today?] {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+  
+  [Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
+  
+  [Smoke forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
+  
+  [Smoke forecast map] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and map of air quality and weather data.
+  
+  [Air quality data and warnings] {{< card_end >}}
+```{r, results='asis', echo=FALSE, eval= run_pg}
+  
+  cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}\n\n')
+```
+:::
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -422,6 +426,10 @@ Wildfire smoke forecasts
 
 - BlueSky Canada smoke forecasts - [FireSmoke Canada][Smoke forecast map]
 
+```{r, results='asis', echo=FALSE, eval= run_pg}
+cat("Local resources\n\n")
+cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.pgairquality.com/)\n\n")
+```
 :::
 
 [Air quality data and warnings]: https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories
@@ -429,9 +437,6 @@ Wildfire smoke forecasts
 [Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
 [Smoke forecast maps]: https://weather.gc.ca/firework/index_e.html
 [Smoke forecast map]: https://firesmoke.ca/forecasts/current/
-
-
-
 
 ::: {.content-visible when-format="markdown"}
 

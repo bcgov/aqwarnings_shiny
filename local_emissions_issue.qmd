@@ -58,6 +58,7 @@ current_month <- as.numeric(format(Sys.Date(), "%m"))
 # create single line break based on output file format
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
+run_pg <- (params$location == "Prince George")  #to control conditional text related to Prince George only
 ```
 
 ```{r table-setup, include=FALSE}
@@ -499,7 +500,7 @@ if (params$outputFormat == "pdf") {
 if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
 ```
 
-[:::]{.content-visible when-format="markdown"}
+[`r paste(":::")`]{.content-visible when-format="markdown"}
 
 `r first_paragraph`
 
@@ -668,15 +669,19 @@ cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ::: {.content-visible when-format="markdown"}
 **For additional information about air quality in British Columbia:**
 
-::: bcds-card-wrapper
-{{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
-
-[What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
-
-[Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
-
-[Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
-:::
+  ::: bcds-card-wrapper
+  {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
+  
+  [What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+  
+  [Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
+  
+  [Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
+  ```{r, results='asis', echo=FALSE, eval= run_pg}
+  
+  cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}\n\n')
+  ```
+  :::
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -684,7 +689,11 @@ cat('[\n:::]{.content-visible when-format="markdown"}\n')
 - Visit the provincial [air quality map](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) to view real-time air quality measurements
 - Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for more information about air quality in B.C.
 - Visit Metro Vancouver's [air quality data and warnings page](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories)
+```{r, results='asis', echo=FALSE, eval= run_pg}
+  cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.pgairquality.com/)")
+```
 :::
+
 
 ## Contact
 
