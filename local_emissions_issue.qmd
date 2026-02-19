@@ -58,6 +58,7 @@ current_month <- as.numeric(format(Sys.Date(), "%m"))
 # create single line break based on output file format
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
+run_pg <- (params$location == "Prince George")  #to control conditional text related to Prince George only
 ```
 
 ```{r table-setup, include=FALSE}
@@ -357,9 +358,13 @@ bylaws <- if (params$location == "Burns Lake") {
 } else if (params$location == "Duncan") {
   "Comply with the requirements of local woodstove bylaws that apply to periods when air quality advisories are in effect (e.g., City of Duncan and Municipality of North Cowichan)."
 } else if (params$location == "Houston") {
-  "Houston bylaw 947 restricts the use of wood burning appliances during air quality advisories:\n\n
+  "Houston bylaw 947 restricts the use of wood burning appliances and open burning during air quality advisories:\n\n
   - **2.1.1**: No person shall use a wood burning appliance at any time when an air quality advisory is in effect, except to heat premises that are equipped with no heating appliance or facilities other than the wood burning appliance.\n\n
-  - Contact the Houston municipal office at [250-845-2238](tel:2508452238) for more information on woodstove restrictions."
+  - **3.2**: No person shall conduct open burning or ignite or maintain any recreational fire if an air quality advisory has been issued.\n\n
+  - **3.3**: If an air quality advisory is issued while a person is conducting open burning or 
+maintaining a recreational fire, that person shall take all reasonable steps to cease the 
+open burning or extinguish the recreational fire as soon as possible.\n\n
+  - Contact the Houston municipal office at [250-845-2238](tel:2508452238) for more information on woodstove and open burning restrictions."
 } else if (params$location == "Prince George") {
   "The City of Prince George's Clean Air Bylaw prohibits all open burning, including backyard burning, and land clearing burning. During air quality advisories, this bylaw also prohibits recreational fires, use of wood-burning appliances (except for sole wood-burning heat users), and street sweeping activities (unless approved by an Authorized Person)."
 } else if (params$location == "Smithers") {
@@ -495,7 +500,7 @@ if (params$outputFormat == "pdf") {
 if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
 ```
 
-[:::]{.content-visible when-format="markdown"}
+[`r paste(":::")`]{.content-visible when-format="markdown"}
 
 `r first_paragraph`
 
@@ -664,15 +669,19 @@ cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ::: {.content-visible when-format="markdown"}
 **For additional information about air quality in British Columbia:**
 
-::: bcds-card-wrapper
-{{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
-
-[What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
-
-[Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
-
-[Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
-:::
+  ::: bcds-card-wrapper
+  {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
+  
+  [What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+  
+  [Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
+  
+  [Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
+  ```{r, results='asis', echo=FALSE, eval= run_pg}
+  
+  cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}\n\n')
+  ```
+  :::
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -680,7 +689,11 @@ cat('[\n:::]{.content-visible when-format="markdown"}\n')
 - Visit the provincial [air quality map](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) to view real-time air quality measurements
 - Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for more information about air quality in B.C.
 - Visit Metro Vancouver's [air quality data and warnings page](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories)
+```{r, results='asis', echo=FALSE, eval= run_pg}
+  cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.pgairquality.com/)")
+```
 :::
+
 
 ## Contact
 
