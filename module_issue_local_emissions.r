@@ -197,7 +197,18 @@ issueLocalEmissionsUI <- function(id) {
                 inputId = ns("cleanupdir"),
                 label = "clean dir"
               )
-            ) # end main box
+            ), # end main box
+        
+        # -------------------------------
+        # Instructions panel
+        # -------------------------------
+        
+        box(width=9,
+            status="info",
+            
+            # Include user instructions from an external Markdown file
+            includeMarkdown("docs/instructions-aqwarnings.md"))
+        
           ) #end fluidRow
   ) # end tabItem
 } 
