@@ -1,10 +1,8 @@
 ---
-title: "`r paste('Pollution Prevention Notice and open burning restrictions are in effect within', params$burnRestrictionArea)`"
-type: "pollution_prevention"
 date: "`r Sys.Date()`"
 params: 
   ice: "Issue" # Issue; Continue
-  sel_aqMet: "Sakshi Jain"
+  aqMet: "Sakshi Jain"
   nearestMonitor: "Prince George"
   issuedate: "2025-07-20"
   nextUpdate: "2025-09-28"
@@ -14,12 +12,6 @@ params:
   burnRestrictionArea: ""
   burnRestrictionEndDate: "2025-09-28"
   burnRestrictionEndTime: "12:00 PM"
-ice: "`r params$ice`"
-author: "`r params$sel_aqMet`"
-customMessage: "`r params$customMessage`"
-location: "`r params$nearestMonitor`"
-outputFormat: "`r params$outputFormat`"
-burnRestrictions: "`r params$burnRestrictions`"
 format:
   markdown: default
   pdf:
@@ -63,7 +55,7 @@ source(here::here(file.path("functions", "local_tz.r")))
 current_month <- as.numeric(format(Sys.Date(), "%m"))
 # create single line break based on output file format
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
+run_pg <- (params$nearestMonitor == "Prince George")  #to control conditional text related to Prince George only
 ```
 
 ```{r table-setup, include=FALSE}
@@ -190,6 +182,9 @@ for (i in seq_along(pollutants)) {
     pivot_longer(cols = -location, names_to = "Community", values_to = "concentration") |> 
     pivot_wider(names_from = "location", values_from = "concentration")
   
+  # handle special case for O3
+  if (pollutant != "O3") {formatted_table <- formatted_table |>  filter(Community != "max_conc")}
+  
   # clean up labels
   final_table <- formatted_table |> 
     mutate(Community = case_when(
@@ -211,7 +206,7 @@ list2env(results, envir = .GlobalEnv)
 
 # AQ met information
 ENVcontact <- aq_mets |>
-  filter(fullname == params$sel_aqMet) |>
+  filter(fullname == params$aqMet) |>
   mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
   pull(contact) 
 ```
@@ -530,8 +525,9 @@ if (current_month %in% 6:8) {
 
 # Single pollutant: PM25
   cat(additional_info_PM25, "\n\n")
+  cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
   print(knitr::kable(final_table, row.names = FALSE, escape = FALSE))
-
+  cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ```
 
 ::: {.content-visible when-format="markdown"}
@@ -545,16 +541,19 @@ if (current_month %in% 6:8) {
 ::: {.content-visible when-format="markdown"}
 **For additional information about air quality in British Columbia:**
 
-<div class="bcds-card-wrapper"> 
-{{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
-
-[What's the air like today?] {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
-
-[Latest air quality data] {{< card_end >}}{{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
-
-[Air quality data and warnings] {{< card_end >}}
-</div>
-
+  ::: bcds-card-wrapper
+  {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
+  
+  [What's the air like today?](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html) {{< card_end >}} {{< card_start title="Provincal Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+  
+  [Latest air quality data](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and a map of air quality and weather data.
+  
+  [Air quality data and warnings](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories) {{< card_end >}}
+  ```{r, results='asis', echo=FALSE, eval= run_pg}
+  
+  cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}')
+  ```
+  :::
 :::
 
 ::: {.content-visible when-format="pdf"}
