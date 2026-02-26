@@ -159,7 +159,7 @@ issueWildfireSmokeUI <- function(id) {
             status="info",
             
             # Include user instructions from an external Markdown file
-            includeMarkdown("docs/instructions.md"))
+            includeMarkdown("docs/instructions-aqwarnings.md"))
   
       ) #end fluidRow
     ) #end tabItem
