@@ -21,7 +21,7 @@ list_of_packages <- c(
   "htmlwidgets",
   "knitr",
   "leaflet",
-  "leaflet.esri",
+  "remotes",
   "mapview",
   "sf",
   "shiny",
@@ -45,5 +45,7 @@ lapply(list_of_packages,function(x){library(x, character.only = TRUE)})
 # install_phantomjs() - an external program to take screenshots. It is required by the webshot package
 webshot::install_phantomjs()
 
+remotes::install_github("trafficonese/leaflet.extras")
+remotes::install_github("trafficonese/leaflet.esri")
 
 
