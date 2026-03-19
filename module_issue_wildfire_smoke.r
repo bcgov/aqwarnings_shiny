@@ -578,8 +578,8 @@ issueWildfireSmoke <- function(input, output, session) {
     # Input validation
     if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
-      #     } else if (length(selRegions$ids) == 0) {
-      #       showNotification("No region selected; please select a region.", type = "error")
+    } else if (selRegions$DF %>% filter(colour > 0) %>% nrow() == 0) {
+      showNotification("No region selected; please select a region.", type = "error")
     } else if (input$location == "") {
       showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
