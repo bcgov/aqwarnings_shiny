@@ -7,17 +7,24 @@ params:
   nextUpdate: "2025-02-10"
   location: "Multiple locations in B.C."
   outputFormat: "markdown"
-  selRegionsIDs:
+  allRegions:
     - Watson Lake
     - Prince George
     - Whistler
     - South Okanagan
+  yellowRegions:
+      - Watson Lake
+      - Prince George
+  orangeRegions:
+      - Whistler
+  redRegions:
+      - South Okanagan
 format:
   markdown: default
   pdf:
     mainfont: "Roboto"
     date-format: long
-    include-in-header: 
+    include-in-header:
       - src/header.tex
     fontsize: "12pt"
     urlcolor: bcblue
@@ -64,19 +71,19 @@ if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  
   # AQ met information
   ENVcontact <- aq_mets |>
     filter(fullname == params$aqMet) |>
-    mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
-    pull(contact) 
+    mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |>
+    pull(contact)
 
 # Check for first health authority
-a <- match_eccc_health |> 
-  filter(eccc %in% params$selRegionsIDs) |> 
-  distinct(healthAuth1) |> 
+a <- match_eccc_health |>
+  filter(eccc %in% params$allRegions) |>
+  distinct(healthAuth1) |>
   pull(healthAuth1)
 
 # Check for second health authority
-b <- match_eccc_health |> 
-  filter(eccc %in% params$selRegionsIDs) |> 
-  distinct(healthAuth2) |> 
+b <- match_eccc_health |>
+  filter(eccc %in% params$allRegions) |>
+  distinct(healthAuth2) |>
   pull(healthAuth2)
 
 # Find unique health authorities between a and b; drop empty cases (" ")
@@ -84,28 +91,28 @@ unique_HA <- unique(c(a,b))
 unique_HA <- unique_HA [! unique_HA %in% ""]
 
 # Filter health authorities, always include FNHA
-HAcontact <- health_contact |> 
-  filter(authority %in% c("First Nations Health Authority", unique_HA)) |> 
-  mutate(authority = factor(authority))|> 
+HAcontact <- health_contact |>
+  filter(authority %in% c("First Nations Health Authority", unique_HA)) |>
+  mutate(authority = factor(authority))|>
   select(authority, contact) |>
-  group_by(authority) |> 
+  group_by(authority) |>
   summarise(html_string = paste(contact, collapse = sep_type))
 
 # Retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
-bulletin_regions <- reg_description |> 
-  filter(eccc %in% params$selRegionsIDs) |> 
-  filter(!is.na(region_name) & region_name != "")|> 
+bulletin_regions <- reg_description |>
+  filter(eccc %in% params$allRegions) |>
+  filter(!is.na(region_name) & region_name != "")|>
   mutate(eccc = factor(eccc))
 
 region <- paste(bulletin_regions$region_name, collapse = ", ")
 
 description <- paste(bulletin_regions$description, collapse = "; ")
 
-region_output <- bulletin_regions |> 
-  distinct(region_name, description) |> 
-  mutate(output_line = paste0("* **", region_name, ":** ", description)) |> 
-  pull(output_line) |> 
+region_output <- bulletin_regions |>
+  distinct(region_name, description) |>
+  mutate(output_line = paste0("* **", region_name, ":** ", description)) |>
+  pull(output_line) |>
   paste(collapse = "\n")
 
 run_pg <- "Prince George" %in% bulletin_regions$region
@@ -121,7 +128,7 @@ initial_long = -124.253144
 currentDate <- Sys.Date()
 issueBasename <- "wildfire_smoke_issue"
 
-# Add dynamic map to quarto environment using area boundaries from ECCC. 
+# Add dynamic map to quarto environment using area boundaries from ECCC.
 m <- leaflet::leaflet() |>
   leaflet::addTiles() |>
   leaflet::addPolygons(
@@ -137,17 +144,46 @@ m <- leaflet::leaflet() |>
     group = "regions",
     label = ~ NAME,
     labelOptions = leaflet::labelOptions(textsize = "15px"),
-  ) |>
-  leaflet::addPolygons(
-    data = eccc_map_env[which(eccc_map_env$NAME %in% params$selRegionsIDs), ],
-    fillOpacity = 0.65,
-    opacity = 0.65,
-    color = "black",
-    weight = 1.75,
-    fillColor = "grey",
-    label = ~ NAME,
-    labelOptions = leaflet::labelOptions(textsize = "15px")
   )
+
+  if (length(params$yellowRegions) > 0) {
+    m <- leaflet::addPolygons(m,
+      data = eccc_map_env[which(eccc_map_env$NAME %in% params$yellowRegions), ],
+      fillOpacity = 0.65,
+      opacity = 0.65,
+      color = "black",
+      weight = 1.75,
+      fillColor = "yellow",
+      label = ~ NAME,
+      labelOptions = leaflet::labelOptions(textsize = "15px")
+    )
+  }
+
+  if (length(params$orangeRegions) > 0) {
+      m <- leaflet::addPolygons(m,
+        data = eccc_map_env[which(eccc_map_env$NAME %in% params$orangeRegions), ],
+        fillOpacity = 0.65,
+        opacity = 0.65,
+        color = "black",
+        weight = 1.75,
+        fillColor = "orange",
+        label = ~ NAME,
+        labelOptions = leaflet::labelOptions(textsize = "15px")
+      )
+  }
+
+  if (length(params$redRegions) > 0) {
+    m <- leaflet::addPolygons(m,
+      data = eccc_map_env[which(eccc_map_env$NAME %in% params$redRegions), ],
+      fillOpacity = 0.65,
+      opacity = 0.65,
+      color = "black",
+      weight = 1.75,
+      fillColor = "red",
+      label = ~ NAME,
+      labelOptions = leaflet::labelOptions(textsize = "15px")
+    )
+  }
 
 map_html <- sprintf("%s_%s_map.html", currentDate, issueBasename)
 map_png <- sprintf("%s_%s_map.png", currentDate, issueBasename)
@@ -175,7 +211,26 @@ if (params$outputFormat == "pdf") {
 }}
 
 ```
+```{r}
+#| label: add-banners
 
+banners <- ""
+
+if (length(params$yellowRegions) > 0) {
+  banners <- paste(banners, "{{< banner_alert_start title='Yellow Warning - Air Quality' variant='yellow'>}}")
+  banners <- paste(banners, "{{< banner_alert_end >}}")
+}
+
+if (length(params$orangeRegions) > 0) {
+  banners <- paste(banners, "{{< banner_alert_start title='Orange Warning - Air Quality' variant='orange'>}}")
+  banners <- paste(banners, "{{< banner_alert_end >}}")
+}
+
+if (length(params$redRegions) > 0) {
+  banners <- paste(banners, "{{< banner_alert_start title='Red Warning - Air Quality' variant='red'>}}")
+  banners <- paste(banners, "{{< banner_alert_end >}}")
+}
+```
 ```{r}
 #| label: create-logo-list
 
@@ -218,14 +273,14 @@ if (params$outputFormat == "markdown") {
 
 
 if (params$outputFormat == "pdf") {
-  
+
   logo_path <- "https://github.com/bcgov/aqwarnings/blob/main/frontend/assets/logo_"
   logo_urls <- c() #start with empty vector
-  
+
   # create vector of urls
   for (logo_name in names(logos_selected)) {
     logo_urls <- c(
-      logo_urls, 
+      logo_urls,
       paste0(logo_path,
              logos_selected[[logo_name]],
              ".png?raw=true"
@@ -234,13 +289,13 @@ if (params$outputFormat == "pdf") {
   }
 
 # format logos
-logos <- magick::image_read(logo_urls) |> 
+logos <- magick::image_read(logo_urls) |>
   magick::image_trim() |> # remove all white space
   magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
   magick::image_scale("x200") # scale
 
 # Combine logos into single image and scale
-logos_combined <- magick::image_append(logos) |> 
+logos_combined <- magick::image_append(logos) |>
   magick::image_write(path = "logo.png")
 }
 
@@ -258,7 +313,7 @@ logos_combined <- magick::image_append(logos) |>
 
 # `cat` is used to avoid extra processing
 # `sep` argument adds the line break and then a new line as required
-if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
+if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
@@ -275,6 +330,13 @@ The Regions of BC highlighted on the map are being impacted or are likely to be 
 \caption{Descriptions of the affected region(s) are provided at the end of this document. This Air Quality Warning excludes the area managed by Metro Vancouver. For air quality notifications issued by Metro Vancouver refer to Metro Vancouver's \href{https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories}{air quality data and warnings page}.}
 \vspace*{-2 cm}
 \end{wrapfigure}
+
+:::
+
+
+::: {.content-visible when-format="markdown"}
+
+`r banners`
 
 :::
 
@@ -367,13 +429,13 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.
 
--   Protect your indoor air from wildfire smoke. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. 
+-   Protect your indoor air from wildfire smoke. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles.
 
 -   If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to the fine particles in the smoke. Even though exposure may be reduced, there can still be risks to health.
 
 -   Check on others who are in your care or live nearby who may be more likely to be impacted by wildfire smoke.
 
--   Always follow guidance from local authorities. 
+-   Always follow guidance from local authorities.
 
 ::: {.content-visible when-format="markdown"}
 
@@ -389,18 +451,18 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 ::: bcds-card-wrapper
   {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
-  
+
   [What's the air like today?] {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
-  
+
   [Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
-  
+
   [Smoke forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
-  
+
   [Smoke forecast map] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and map of air quality and weather data.
-  
+
   [Air quality data and warnings] {{< card_end >}}
 ```{r, results='asis', echo=FALSE, eval= run_pg}
-  
+
   cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}\n\n')
 ```
 :::
@@ -442,7 +504,7 @@ cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.p
 
 **For additional general information about wildfire smoke and your health:**
 
-<div class="bcds-card-wrapper"> 
+<div class="bcds-card-wrapper">
 {{< card_start title="BC Centre for Disease Control" logo="/assets/logo_BCCDC.png" >}} Fact sheets on wildfire smoke and its health impacts.
 
 [Wildfire smoke] {{< card_end >}}`r HA_text`{{< card_start title="First Nations Health Authority" logo="/assets/logo_FNHA_horizontal.png" >}} Information and resources to help you prepare.
@@ -463,7 +525,7 @@ cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.p
 BC Centre for Disease Control
 
 - Wildfire smoke and its health impacts - [Fact sheet][Wildfire smoke]
- 
+
 Provincial Health Authorities
 
 - First Nations Health Authority - [Wildfire smoke health information][Wildfire smoke health information]
@@ -474,7 +536,7 @@ HealthLink BC
 
 - Learn about and prepare for wildfires - [Wildfires and your health resource][Wildfires and your health]
 
-- Phone 8-1-1 for 24/7 health advice 
+- Phone 8-1-1 for 24/7 health advice
 
 Worksafe BC
 
