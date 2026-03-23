@@ -39,6 +39,18 @@ fireIcons <- awesomeIconList(
 fireIconFactorPalette <- colorFactor(as.vector(sapply(fireIcons, get, x = "markerColor")), levels = names(fireIcons), ordered = TRUE)
 
 #--------------------------------------------------
+# Warning Level Definitions
+#--------------------------------------------------
+
+# You can add more layers if required. This is the only place in code where they are defined.
+
+warningLevelDefinitions <- data.frame(Name = c("unselected", "yellow", "orange", "red"), # names as they will appear in template parameters
+                                      Colour = c("#656565", "#FFFF00", "#FF9500", "#D10000"), # used both in UI and PDF generation
+                                      PolygonOpacity = c(0.0, 0.75, 0.75, 0.75),
+                                      IsTemplateParameter = c(FALSE, TRUE, TRUE, TRUE), # If it is passed through as a template param
+                                      Selectable = c(TRUE, TRUE, TRUE, FALSE)) # set to FALSE to disable click-to-select for a given layer
+
+#--------------------------------------------------
 # UI
 #--------------------------------------------------
 
@@ -229,92 +241,44 @@ issueWildfireSmoke <- function(input, output, session) {
         group = "regions",
         label = ~NAME,
         labelOptions = labelOptions(textsize = "15px"),
-      ) |>
+      ) -> m
 
-      # Add ECCC for selections (user clicks)
+    # Add ECCC for selections (user clicks) - from warningLevelDefinitions DF
+    for (i in 1:nrow(warningLevelDefinitions)) {
+      warningLevel <- warningLevelDefinitions[i,]
 
-      # unselected polygons (selection level zero)
       addPolygons(
+        m,
         data = eccc_map_env,
         stroke = TRUE,
-        fillOpacity = 0,
-        opacity = 0.75,
+        fillOpacity = warningLevel$PolygonOpacity,
+        opacity = 1,
         color = "black",
-        weight = 2.5,
-        fillColor = "#BBBBBB",
+        weight = 1.75,
+        fillColor = warningLevel$Colour,
         options = pathOptions(pane = "ames_polygons"),
         label = ~NAME,
         labelOptions = labelOptions(textsize = "15px"),
         layerId = ~OBJECTID,
-        group = ~paste0(NAME, "-0")
+        group = paste0(eccc_map_env$NAME, "-", i)
       ) |>
 
-      # yellow polygons (selection level one)
-      addPolygons(
-        data = eccc_map_env,
-        stroke = TRUE,
-        fillOpacity = 0.8,
-        opacity = 0.75,
-        color = "black",
-        weight = 2.5,
-        fillColor = "#FFFF00",
-        options = pathOptions(pane = "ames_polygons"),
-        label = ~NAME,
-        labelOptions = labelOptions(textsize = "15px"),
-        layerId = ~OBJECTID,
-        group = ~paste0(NAME, "-1")
-      ) |>
+        hideGroup(group = paste0(eccc_map_env$NAME, "-", i)) -> m # hide until clicked
+    }
 
-      # orange polygons (selection level two)
-      addPolygons(
-        data = eccc_map_env,
-        stroke = TRUE,
-        fillOpacity = 0.8,
-        opacity = 0.75,
-        color = "black",
-        weight = 2.5,
-        fillColor = "#FFA500",
-        options = pathOptions(pane = "ames_polygons"),
-        label = ~NAME,
-        labelOptions = labelOptions(textsize = "15px"),
-        layerId = ~OBJECTID,
-        group = ~paste0(NAME, "-2")
-      ) |>
-
-      # red polygons (selection level three)
-      addPolygons(
-        data = eccc_map_env,
-        stroke = TRUE,
-        fillOpacity = 0.8,
-        opacity = 0.75,
-        color = "black",
-        weight = 2.5,
-        fillColor = "#FF0000",
-        options = pathOptions(pane = "ames_polygons"),
-        label = ~NAME,
-        labelOptions = labelOptions(textsize = "15px"),
-        layerId = ~OBJECTID,
-        group = ~paste0(NAME, "-3")
-      ) |>
-
-      # hide all selection polygons until clicked
-      hideGroup(group = paste0(eccc_map_env$NAME, "-0")) |>
-      hideGroup(group = paste0(eccc_map_env$NAME, "-1")) |>
-      hideGroup(group = paste0(eccc_map_env$NAME, "-2")) |>
-      hideGroup(group = paste0(eccc_map_env$NAME, "-3")) |>
-
-      # BCWFS fire layer
-      leaflet.esri::addEsriFeatureLayer(
-        url = bcwfs_fire_layer,
-        useServiceSymbology = FALSE,
-        labelProperty = "FIRE_ID",     #"FIRE_STATUS" redundant with legend
-        labelOptions = labelOptions(textsize = "12px"),
-        markerType = "marker",    # "circleMarker" won't work with icon symbols
-        markerIconProperty = "FIRE_STATUS",
-        markerIcons = fireIcons,
-        options = leaflet.esri::featureLayerOptions(where = "FIRE_STATUS <> 'Out'"),
-        group = "BCWFS Fires"
-      ) |>
+    # BCWFS fire layer
+    leaflet.esri::addEsriFeatureLayer(
+      m,
+      url = bcwfs_fire_layer,
+      useServiceSymbology = FALSE,
+      labelProperty = "FIRE_ID",     #"FIRE_STATUS" redundant with legend
+      labelOptions = labelOptions(textsize = "12px"),
+      markerType = "marker",    # "circleMarker" won't work with icon symbols
+      markerIconProperty = "FIRE_STATUS",
+      markerIcons = fireIcons,
+      options = leaflet.esri::featureLayerOptions(where = "FIRE_STATUS <> 'Out'"),
+      group = "BCWFS Fires"
+    ) |>
       addLegend(
         pal = fireIconFactorPalette,
         values = names(fireIcons),
@@ -400,38 +364,43 @@ issueWildfireSmoke <- function(input, output, session) {
   observeEvent(input$map_shape_click, {
     # The selection states of polygons are represented by a 2-column dataframe
     # $id is the name of the polygon region on the map
-    # $colour is a number that cycles from 0 to COLOUR_CYCLE_LENGTH-1 each time the polygon is clicked
-    #
-    # 0 = not displayed/selected
-    # 1 = yellow
-    # 2 = orange
-    # 3 = red
-
-    COLOUR_CYCLE_LENGTH <- 3 # CHANGE THIS TO 4 TO ENABLE THE SELECTION OF RED POLYGONS OR 3 IF ORANGE IS MAX LEVEL
+    # $colour is an index into the warningLevelDefinitions dataframe used to represent the currently-selected index
 
     # input$map_shape_click$group --> group of map objects, e.g., "regions"
     # input$map_shape_click$id    --> name/ID of the individual region clicked
 
-    id_to_modify <- input$map_shape_click$group
-    if (id_to_modify == "regions") {
-      id_to_modify <- input$map_shape_click$id
+    IDToModify <- input$map_shape_click$group
+    if (IDToModify == "regions") {
+      IDToModify <- input$map_shape_click$id
     }
-    id_to_modify <- gsub("\\-\\d$", "", id_to_modify) # strip trailing -digit if exists
+    IDToModify <- gsub("\\-\\d$", "", IDToModify) # strip trailing -digit if exists
 
-    lastColour <- 0
+    currentlySelectedColour <- 1 # unselected to start
     if (selRegions$DF %>%
-      filter(id == id_to_modify) %>%
+      filter(id == IDToModify) %>%
       nrow() > 0) {
-      lastColour <- (selRegions$DF %>% filter(id == id_to_modify))$colour
+      currentlySelectedColour <- (selRegions$DF %>% filter(id == IDToModify))$colour
     }
 
-    updated <- tibble(id = id_to_modify, colour = ((lastColour + 1) %% COLOUR_CYCLE_LENGTH))
+    updatedColour <- currentlySelectedColour
+
+    for (i in 1:nrow(warningLevelDefinitions)) {
+      nextIndex <- 1 + (i + currentlySelectedColour - 1) %% nrow(warningLevelDefinitions) # use modulus operator to circularly visit the dataframe
+
+      # skip colours that are not selectable
+      if (warningLevelDefinitions[nextIndex,]$Selectable == TRUE) {
+        updatedColour <- nextIndex
+        break
+      }
+    }
+
+    updated <- tibble(id = IDToModify, colour = updatedColour)
     selRegions$DF <- rows_upsert(selRegions$DF, updated, by = "id")
 
     by(selRegions$DF, seq_len(nrow(selRegions$DF)), function(row) {
 
-      # iterate over the dataframe, calling the map proxy to hide inactive and show active selections
-      for (i in 0:3) {
+      # iterate over the selRegion dataframe, calling the map proxy to hide inactive and show active selections
+      for (i in 1:nrow(warningLevelDefinitions)) {
         active <- row$colour == i
         group_name <- paste0(row$id, "-", i)
 
@@ -511,35 +480,19 @@ issueWildfireSmoke <- function(input, output, session) {
                        fillOpacity = 0.3,
                        radius = 0.75)
 
-    if (selRegions$DF %>% filter(colour == 1) %>% nrow() > 0) {
-      m <- addPolygons(
-        m,
-        data = eccc_map_env[which(eccc_map_env$NAME %in% (selRegions$DF %>% filter(colour == 1))$id),],
-        stroke = FALSE,
-        fillOpacity = 0.8,
-        opacity = 0.75,
-        fillColor = "#FFFF00",
-      )
-    }
-    if (selRegions$DF %>% filter(colour == 2) %>% nrow() > 0) {
-      m <- addPolygons(
-        m,
-        data = eccc_map_env[which(eccc_map_env$NAME %in% (selRegions$DF %>% filter(colour == 2))$id),],
-        stroke = FALSE,
-        fillOpacity = 0.8,
-        opacity = 0.75,
-        fillColor = "orange",
-      )
-    }
-    if (selRegions$DF %>% filter(colour == 3) %>% nrow() > 0) {
-      m <- addPolygons(
-        m,
-        data = eccc_map_env[which(eccc_map_env$NAME %in% (selRegions$DF %>% filter(colour == 3))$id),],
-        stroke = FALSE,
-        fillOpacity = 0.8,
-        opacity = 0.75,
-        fillColor = "red",
-      )
+    for (i in 1:nrow(warningLevelDefinitions)) {
+      warningLevel <- warningLevelDefinitions[i,]
+
+      if (selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
+        m <- addPolygons(
+          m,
+          data = eccc_map_env[which(eccc_map_env$NAME %in% (selRegions$DF %>% filter(colour == i))$id),],
+          stroke = FALSE,
+          fillOpacity = warningLevel$PolygonOpacity,
+          opacity = 0.75,
+          fillColor = warningLevel$Colour,
+        )
+      }
     }
 
     # Return the fully constructed map object
@@ -575,10 +528,19 @@ issueWildfireSmoke <- function(input, output, session) {
 
   observeEvent(input$genWarning, {
 
+    atLeastOneRegionSelected <- FALSE
+    for (i in 1:nrow(warningLevelDefinitions)) {
+      warningLevel <- warningLevelDefinitions[i,]
+      if (warningLevel$IsTemplateParameter == TRUE && selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
+        atLeastOneRegionSelected <- TRUE
+        break
+      }
+    }
+
     # Input validation
     if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
-    } else if (selRegions$DF %>% filter(colour > 0) %>% nrow() == 0) {
+    } else if (atLeastOneRegionSelected == FALSE) {
       showNotification("No region selected; please select a region.", type = "error")
     } else if (input$location == "") {
       showNotification("No location description provided; please select or type a location description.", type = "error")
@@ -617,42 +579,55 @@ issueWildfireSmoke <- function(input, output, session) {
               cliprect = cliprect
       )
 
+
       # Compute `level` metadata for document (used in recent warnings table)
       levels <- c()
-      if (selRegions$DF %>% filter(colour == 1) %>% nrow() > 0) {
-        levels <- append(levels, "Yellow")
-      }
-      if (selRegions$DF %>% filter(colour == 2) %>% nrow() > 0) {
-        levels <- append(levels, "Orange")
-      }
-      if (selRegions$DF %>% filter(colour == 3) %>% nrow() > 0) {
-        levels <- append(levels, "Red")
+      for (i in 1:nrow(warningLevelDefinitions)) {
+        warningLevel <- warningLevelDefinitions[i,]
+        if (warningLevel$IsTemplateParameter == TRUE && selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
+          levels <- append(levels, warningLevel$Name)
+        }
       }
 
+      # Compute a list of selected regions for each warning level ( + 1 for allRegions) for inclusion in parameters
+      regionSelectionsForTemplate <- list()
+      for (i in 1:nrow(warningLevelDefinitions)) {
+        warningLevel <- warningLevelDefinitions[i,]
+        if (warningLevel$IsTemplateParameter == TRUE) {
+          regionSelectionsForTemplate[[warningLevel$Name]] <- list()
+          if (selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
+            regionSelectionsForTemplate[[warningLevel$Name]] <- as.list(selRegions$DF %>% filter(colour == i))$id
+          }
+          regionSelectionsForTemplate[["all"]] <- append(regionSelectionsForTemplate[["all"]], as.list(selRegions$DF %>% filter(colour == i))$id)
+        }
+      }
 
       # -------------------------------
       # Markdown output
       # -------------------------------
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
+
+      renderParameters <- list(aqMet = input$aqMet,
+                               nextUpdate = as.character(input$nextUpdate),
+                               smokeDuration = input$smokeDuration,
+                               customMessage = input$smokeMessage,
+                               location = input$location,
+                               warningLevel = regionSelectionsForTemplate,
+                               outputFormat = "markdown")
+
+
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.md", Sys.Date(), issueBasename),
                             output_format = "markdown",
-                            execute_params = list(aqMet = input$aqMet,
-                                                  nextUpdate = as.character(input$nextUpdate),
-                                                  smokeDuration = input$smokeDuration,
-                                                  yellowRegions = (selRegions$DF %>% filter(colour == 1))$id,
-                                                  orangeRegions = (selRegions$DF %>% filter(colour == 2))$id,
-                                                  redRegions = (selRegions$DF %>% filter(colour == 3))$id,
-                                                  allRegions = (selRegions$DF %>% filter(colour != 0))$id, customMessage = input$smokeMessage,
-                                                  location = input$location,
-                                                  outputFormat = "markdown"),
+                            execute_params = renderParameters,
                             metadata = list(
                               author = input$aqMet,
                               ice = "Issue",
                               level = paste(levels, collapse = " / "),
                               location = input$location,
                               title = "Air quality warning in effect for wildfire smoke",
-                              type = "wildfire_smoke"
+                              type = "wildfire_smoke",
+                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
                             ),
                             debug = FALSE)
 
@@ -674,10 +649,7 @@ issueWildfireSmoke <- function(input, output, session) {
                             execute_params = list(aqMet = input$aqMet,
                                                   nextUpdate = as.character(input$nextUpdate),
                                                   smokeDuration = input$smokeDuration,
-                                                  yellowRegions = (selRegions$DF %>% filter(colour == 1))$id,
-                                                  orangeRegions = (selRegions$DF %>% filter(colour == 2))$id,
-                                                  redRegions = (selRegions$DF %>% filter(colour == 3))$id,
-                                                  allRegions = (selRegions$DF %>% filter(colour != 0))$id,
+                                                  warningLevel = regionSelectionsForTemplate,
                                                   customMessage = input$smokeMessage,
                                                   location = input$location,
                                                   outputFormat = "pdf"),

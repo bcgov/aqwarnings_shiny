@@ -1,15 +1,15 @@
 % Copyright 2025 Province of British Columbia
-% 
+%
 % Licensed under the Apache License, Version 2.0 (the "License");
 % you may not use this file except in compliance with the License.
 % You may obtain a copy of the License at
-% 
+%
 % http://www.apache.org/licenses/LICENSE-2.0
-% 
+%
 % Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 % WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 % See the License for the specific language governing permissions and limitations under the License.
- 
+
  % Custom settings for PDF output
 
 % set custom color: bcblue
@@ -49,3 +49,41 @@
 \usepackage{float}
 \usepackage{wrapfig} % to wrap text around map
 \usepackage{caption} % for map caption
+\usepackage{bootstrapicons} % for icons in warning banners
+
+% used in warning banners
+\definecolor{WarningYellow}{HTML}{ffff00}
+\definecolor{WarningOrange}{HTML}{ff9500}
+\definecolor{WarningRed}{HTML}{d10000}
+
+
+\providecommand{\YellowBanner}{\noindent
+\colorbox{WarningYellow}{
+\parbox{\linewidth}{
+  \smallskip
+  \textbicon{exclamation-circle-fill}\textbf{Yellow Warning - Air Quality}
+  \smallskip
+  }
+}
+}
+
+\providecommand{\OrangeBanner}{\noindent
+\colorbox{WarningOrange}{
+\parbox{\linewidth}{
+  \smallskip
+  \textbicon{exclamation-diamond-fill}\textbf{Orange Warning - Air Quality}
+  \smallskip
+  }
+}
+}
+
+\providecommand{\RedBanner}{\noindent
+\colorbox{WarningRed}{
+\parbox{\linewidth}{
+    \smallskip
+    {\color{white}\textbicon{exclamation-triangle-fill}}
+    \textcolor{white}{\textbf{Red Warning - Air Quality}}
+    \smallskip
+  }
+}
+}

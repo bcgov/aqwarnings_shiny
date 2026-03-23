@@ -7,18 +7,20 @@ params:
   nextUpdate: "2025-02-10"
   location: "Multiple locations in B.C."
   outputFormat: "markdown"
-  allRegions:
-    - Watson Lake
-    - Prince George
-    - Whistler
-    - South Okanagan
-  yellowRegions:
-      - Watson Lake
-      - Prince George
-  orangeRegions:
-      - Whistler
-  redRegions:
-      - South Okanagan
+  warningLevel:
+    value:
+      all:
+        - Watson Lake
+        - Prince George
+        - Whistler
+        - South Okanagan
+      yellow:
+        - Watson Lake
+        - Prince George
+      orange:
+        - Whistler
+      red:
+        - South Okanagan
 format:
   markdown: default
   pdf:
@@ -76,13 +78,13 @@ if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  
 
 # Check for first health authority
 a <- match_eccc_health |>
-  filter(eccc %in% params$allRegions) |>
+  filter(eccc %in% params$warningLevel$all) |>
   distinct(healthAuth1) |>
   pull(healthAuth1)
 
 # Check for second health authority
 b <- match_eccc_health |>
-  filter(eccc %in% params$allRegions) |>
+  filter(eccc %in% params$warningLevel$all) |>
   distinct(healthAuth2) |>
   pull(healthAuth2)
 
@@ -101,7 +103,7 @@ HAcontact <- health_contact |>
 # Retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
 bulletin_regions <- reg_description |>
-  filter(eccc %in% params$allRegions) |>
+  filter(eccc %in% params$warningLevel$all) |>
   filter(!is.na(region_name) & region_name != "")|>
   mutate(eccc = factor(eccc))
 
@@ -146,40 +148,40 @@ m <- leaflet::leaflet() |>
     labelOptions = leaflet::labelOptions(textsize = "15px"),
   )
 
-  if (length(params$yellowRegions) > 0) {
+  if (length(params$warningLevel$yellow) > 0) {
     m <- leaflet::addPolygons(m,
-      data = eccc_map_env[which(eccc_map_env$NAME %in% params$yellowRegions), ],
+      data = eccc_map_env[which(eccc_map_env$NAME %in% params$warningLevel$yellow), ],
       fillOpacity = 0.65,
       opacity = 0.65,
       color = "black",
       weight = 1.75,
-      fillColor = "yellow",
+      fillColor = "#FFFF00",
       label = ~ NAME,
       labelOptions = leaflet::labelOptions(textsize = "15px")
     )
   }
 
-  if (length(params$orangeRegions) > 0) {
+  if (length(params$warningLevel$orange) > 0) {
       m <- leaflet::addPolygons(m,
-        data = eccc_map_env[which(eccc_map_env$NAME %in% params$orangeRegions), ],
+        data = eccc_map_env[which(eccc_map_env$NAME %in% params$warningLevel$orange), ],
         fillOpacity = 0.65,
         opacity = 0.65,
         color = "black",
         weight = 1.75,
-        fillColor = "orange",
+        fillColor = "#FF9500",
         label = ~ NAME,
         labelOptions = leaflet::labelOptions(textsize = "15px")
       )
   }
 
-  if (length(params$redRegions) > 0) {
+  if (length(params$warningLevel$red) > 0) {
     m <- leaflet::addPolygons(m,
-      data = eccc_map_env[which(eccc_map_env$NAME %in% params$redRegions), ],
+      data = eccc_map_env[which(eccc_map_env$NAME %in% params$warningLevel$red), ],
       fillOpacity = 0.65,
       opacity = 0.65,
       color = "black",
       weight = 1.75,
-      fillColor = "red",
+      fillColor = "#D10000",
       label = ~ NAME,
       labelOptions = leaflet::labelOptions(textsize = "15px")
     )
@@ -216,19 +218,31 @@ if (params$outputFormat == "pdf") {
 
 banners <- ""
 
-if (length(params$yellowRegions) > 0) {
-  banners <- paste(banners, "{{< banner_alert_start title='Yellow Warning - Air Quality' variant='yellow'>}}")
-  banners <- paste(banners, "{{< banner_alert_end >}}")
+if (length(params$warningLevel$yellow) > 0) {
+  if (params$outputFormat == "markdown") {
+    banners <- paste(banners, "{{< banner_alert_start title='Yellow Warning - Air Quality' variant='yellow'>}}")
+    banners <- paste(banners, "{{< banner_alert_end >}}")
+  } else if (params$outputFormat == "pdf") {
+    banners <- paste(banners, "\\YellowBanner")
+  }
 }
 
-if (length(params$orangeRegions) > 0) {
-  banners <- paste(banners, "{{< banner_alert_start title='Orange Warning - Air Quality' variant='orange'>}}")
-  banners <- paste(banners, "{{< banner_alert_end >}}")
+if (length(params$warningLevel$orange) > 0) {
+  if (params$outputFormat == "markdown") {
+    banners <- paste(banners, "{{< banner_alert_start title='Orange Warning - Air Quality' variant='orange'>}}")
+    banners <- paste(banners, "{{< banner_alert_end >}}")
+  } else if (params$outputFormat == "pdf") {
+    banners <- paste(banners, "\\OrangeBanner")
+  }
 }
 
-if (length(params$redRegions) > 0) {
-  banners <- paste(banners, "{{< banner_alert_start title='Red Warning - Air Quality' variant='red'>}}")
-  banners <- paste(banners, "{{< banner_alert_end >}}")
+ if (length(params$warningLevel$red) > 0) {
+  if (params$outputFormat == "markdown") {
+    banners <- paste(banners, "{{< banner_alert_start title='Red Warning - Air Quality' variant='red'>}}")
+    banners <- paste(banners, "{{< banner_alert_end >}}")
+  } else if (params$outputFormat == "pdf") {
+    banners <- paste(banners, "\\RedBanner")
+  }
 }
 ```
 ```{r}
@@ -318,6 +332,8 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
+`r banners`
+
 The Regions of BC highlighted on the map are being impacted or are likely to be impacted by wildfire smoke over the next `r params$smokeDuration`.
 
 ::: {.content-visible when-format="pdf"}
@@ -330,13 +346,6 @@ The Regions of BC highlighted on the map are being impacted or are likely to be 
 \caption{Descriptions of the affected region(s) are provided at the end of this document. This Air Quality Warning excludes the area managed by Metro Vancouver. For air quality notifications issued by Metro Vancouver refer to Metro Vancouver's \href{https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories}{air quality data and warnings page}.}
 \vspace*{-2 cm}
 \end{wrapfigure}
-
-:::
-
-
-::: {.content-visible when-format="markdown"}
-
-`r banners`
 
 :::
 
