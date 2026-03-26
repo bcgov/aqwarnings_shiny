@@ -22,6 +22,7 @@
 \addtokomafont{subsection}{\color{bcblue}}
 
 \usepackage{graphicx} % for images
+\usepackage[export]{adjustbox} % for valign support for icons in banners
 
 % page numbers
 \usepackage{lastpage} % for referencing the total number of pages
@@ -49,19 +50,20 @@
 \usepackage{float}
 \usepackage{wrapfig} % to wrap text around map
 \usepackage{caption} % for map caption
-\usepackage{bootstrapicons} % for icons in warning banners
 
 % used in warning banners
 \definecolor{WarningYellow}{HTML}{ffff00}
 \definecolor{WarningOrange}{HTML}{ff9500}
 \definecolor{WarningRed}{HTML}{d10000}
 
+\graphicspath{{./assets/}}
 
 \providecommand{\YellowBanner}{\noindent
 \colorbox{WarningYellow}{
 \parbox{\linewidth}{
   \smallskip
-  \textbicon{exclamation-circle-fill}\textbf{Yellow Warning - Air Quality}
+  \includegraphics[height=0.75\baselineskip, valign=M, margin=0 0 0.5ex 0]{icon_warning_yellow}
+  \adjustbox{valign=M}{\textbf{\small{Yellow Warning - Air Quality}}}
   \smallskip
   }
 }
@@ -71,7 +73,8 @@
 \colorbox{WarningOrange}{
 \parbox{\linewidth}{
   \smallskip
-  \textbicon{exclamation-diamond-fill}\textbf{Orange Warning - Air Quality}
+  \includegraphics[height=0.75\baselineskip, valign=M, margin=0 0 0.5ex 0]{icon_warning_orange}
+  \adjustbox{valign=M}{\small{\textbf{Orange Warning - Air Quality}}}
   \smallskip
   }
 }
@@ -81,8 +84,8 @@
 \colorbox{WarningRed}{
 \parbox{\linewidth}{
     \smallskip
-    {\color{white}\textbicon{exclamation-triangle-fill}}
-    \textcolor{white}{\textbf{Red Warning - Air Quality}}
+    \includegraphics[height=0.75\baselineskip, valign=M, margin=0 0 0.5ex 0]{icon_warning_red}
+    \adjustbox{valign=M}{\textcolor{white}{\small{\textbf{Red Warning - Air Quality}}}}
     \smallskip
   }
 }
