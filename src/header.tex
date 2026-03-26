@@ -1,15 +1,15 @@
 % Copyright 2025 Province of British Columbia
-% 
+%
 % Licensed under the Apache License, Version 2.0 (the "License");
 % you may not use this file except in compliance with the License.
 % You may obtain a copy of the License at
-% 
+%
 % http://www.apache.org/licenses/LICENSE-2.0
-% 
+%
 % Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 % WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 % See the License for the specific language governing permissions and limitations under the License.
- 
+
  % Custom settings for PDF output
 
 % set custom color: bcblue
@@ -22,6 +22,7 @@
 \addtokomafont{subsection}{\color{bcblue}}
 
 \usepackage{graphicx} % for images
+\usepackage[export]{adjustbox} % for valign support for icons in banners
 
 % page numbers
 \usepackage{lastpage} % for referencing the total number of pages
@@ -49,3 +50,43 @@
 \usepackage{float}
 \usepackage{wrapfig} % to wrap text around map
 \usepackage{caption} % for map caption
+
+% used in warning banners
+\definecolor{WarningYellow}{HTML}{ffff00}
+\definecolor{WarningOrange}{HTML}{ff9500}
+\definecolor{WarningRed}{HTML}{d10000}
+
+\graphicspath{{./assets/}}
+
+\providecommand{\YellowBanner}{\noindent
+\colorbox{WarningYellow}{
+\parbox{\linewidth}{
+  \smallskip
+  \includegraphics[height=0.75\baselineskip, valign=M, margin=0 0 0.5ex 0]{icon_warning_yellow}
+  \adjustbox{valign=M}{\textbf{\small{Yellow Warning - Air Quality}}}
+  \smallskip
+  }
+}
+}
+
+\providecommand{\OrangeBanner}{\noindent
+\colorbox{WarningOrange}{
+\parbox{\linewidth}{
+  \smallskip
+  \includegraphics[height=0.75\baselineskip, valign=M, margin=0 0 0.5ex 0]{icon_warning_orange}
+  \adjustbox{valign=M}{\small{\textbf{Orange Warning - Air Quality}}}
+  \smallskip
+  }
+}
+}
+
+\providecommand{\RedBanner}{\noindent
+\colorbox{WarningRed}{
+\parbox{\linewidth}{
+    \smallskip
+    \includegraphics[height=0.75\baselineskip, valign=M, margin=0 0 0.5ex 0]{icon_warning_red}
+    \adjustbox{valign=M}{\textcolor{white}{\small{\textbf{Red Warning - Air Quality}}}}
+    \smallskip
+  }
+}
+}
