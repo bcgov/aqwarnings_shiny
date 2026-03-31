@@ -18,6 +18,7 @@ library(leaflet)
 library(dplyr)
 library(webshot)
 library(zip)
+library(sf)
 
 # Ensure PhantomJS is installed for webshot (used for map snapshots)
 if (is.null(suppressMessages(webshot:::find_phantom()))) { webshot::install_phantomjs() }
@@ -37,6 +38,14 @@ fireIcons <- awesomeIconList(
 # Create a color palette for fire markers using the markerColor of each icon
 # Ordered factor ensures consistent legend ordering on maps
 fireIconFactorPalette <- colorFactor(as.vector(sapply(fireIcons, get, x = "markerColor")), levels = names(fireIcons), ordered = TRUE)
+
+# Load BCWFS Fires Data
+
+bcwfs_fire_data_url <- "https://services6.arcgis.com/ubm4tcTYICKBpist/arcgis/rest/services/BCWS_ActiveFires_PublicView/FeatureServer/0/query?where=FIRE_STATUS+%3C%3E+%27Out%27&objectIds=&time=&timeRelation=esriTimeRelationOverlaps&geometry=&geometryType=esriGeometryPoint&inSR=&spatialRel=esriSpatialRelIntersects&resultType=standard&distance=0.0&units=esriSRUnit_Meter&outDistance=&relationParam=&returnGeodetic=false&outFields=FIRE_STATUS%2C+GEOGRAPHIC_DESCRIPTION%2C+FIRE_TYPE%2C+FIRE_ID&returnGeometry=true&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&defaultSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&collation=&orderByFields=&groupByFieldsForStatistics=&returnAggIds=false&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnTrueCurves=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pgeojson&token="
+bcwfs_fire_point_data <- st_read(bcwfs_fire_data_url) %>% mutate(
+  longitude = st_coordinates(.)[, "X"],
+  latitude = st_coordinates(.)[, "Y"]
+)
 
 #--------------------------------------------------
 # Warning Level Definitions
@@ -266,28 +275,25 @@ issueWildfireSmoke <- function(input, output, session) {
         hideGroup(group = paste0(eccc_map_env$NAME, "-", i)) -> m # hide until clicked
     }
 
-    # BCWFS fire layer
-    leaflet.esri::addEsriFeatureLayer(
-      m,
-      url = bcwfs_fire_layer,
-      useServiceSymbology = FALSE,
-      labelProperty = "FIRE_ID",     #"FIRE_STATUS" redundant with legend
-      labelOptions = labelOptions(textsize = "12px"),
-      markerType = "marker",    # "circleMarker" won't work with icon symbols
-      markerIconProperty = "FIRE_STATUS",
-      markerIcons = fireIcons,
-      options = leaflet.esri::featureLayerOptions(where = "FIRE_STATUS <> 'Out'"),
-      group = "BCWFS Fires"
-    ) |>
       addLegend(
+        m,
         pal = fireIconFactorPalette,
         values = names(fireIcons),
         position = "topright",
         group = "BCWFS Fires"
       ) |>
+      addAwesomeMarkers(
+       data = bcwfs_fire_point_data,
+       label = ~paste0(FIRE_ID, " - ", GEOGRAPHIC_DESCRIPTION),
+       labelOptions = labelOptions(textsize = "12px"),
+       options = markerOptions(),
+       icon = ~fireIcons[FIRE_STATUS],
+       group = "BCWFS Fires"
+      ) -> m
 
       # Current weather
       addWMSTiles(
+        m,
         current_weather,
         layers = "CURRENT_CONDITIONS",
         options = WMSTileOptions(format = "image/png", transparent = TRUE, freezeAtZoom = "max"),

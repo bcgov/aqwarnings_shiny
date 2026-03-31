@@ -1,4 +1,5 @@
 # This file defines construct_logos, functionality that is common across all templates
+library(magick)
 
 logos_list <- list(
   "Government of British Columbia" = "BCID_V_RGB_pos",
