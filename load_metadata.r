@@ -15,19 +15,19 @@
 
 crs = "epsg:4326"
 
-aq_mets <- read.csv(here::here("data", "raw", "aq_mets_contact.csv"))
-health_contact <- read.csv(here::here("data", "raw", "health_auth_contact.csv"))
-match_eccc_health <- read.csv(here::here("data", "raw", "eccc_health_regions.csv"))
-reg_description <- read.csv(here::here("data", "raw", "eccc_descriptions.csv"))
-buddy_stations <- read.csv(here::here("data", "raw", "buddy_stations.csv"))
-match_health_city <- read.csv(here::here("data", "raw", "match_health_city.csv"))
-bc_map <- bcmaps::bc_bound() |>  sf::st_transform(crs = crs)
+aq_mets <- read.csv(here::here("data", "raw", "aq_mets_contact.csv")) # used in all templates
+health_contact <- read.csv(here::here("data", "raw", "health_auth_contact.csv")) # used in most templates
+match_eccc_health <- read.csv(here::here("data", "raw", "eccc_health_regions.csv")) # used in wildfire_smoke_issue
+reg_description <- read.csv(here::here("data", "raw", "eccc_descriptions.csv"))  # used in wildfire_smoke_issue
+buddy_stations <- read.csv(here::here("data", "raw", "buddy_stations.csv")) # used in pollutant table generation
+match_health_city <- read.csv(here::here("data", "raw", "match_health_city.csv")) # used in most modules and templates
+bc_map <- bcmaps::bc_bound() |>  sf::st_transform(crs = crs) # used in wildfire_smoke_issue
 
 # Load pre-edited ECCC forecast regions and "points" within Metro Vancouver
 # and the Fraser Valley Regional District (MV/FVRD). These points will be
 # used to manually create a texture over the MV/FVRD area, to denote
 # that is it not a Region available on our bulletins.
-eccc_map_bc <- sf::st_read(here::here("data", "raw", "shapefiles","eccc_zones_bc.shp"))
+eccc_map_bc <- sf::st_read(here::here("data", "raw", "shapefiles","eccc_zones_bc.shp"))  # used in wildfire_smoke_issue
 # Create separate Lower Mainland shapefiles and ENV shapefiles
 eccc_zones_lm <- eccc_map_bc[grepl("Metro Vancouver -|Fraser Valley", eccc_map_bc$NAME), ]
 eccc_zones_lm_merged <- sf::st_union(eccc_zones_lm)
@@ -36,10 +36,10 @@ lm_pts <- sf::st_read(here::here("data", "raw", "shapefiles","lm_pts.shp"))
 eccc_map_env <- eccc_map_bc[!grepl("Metro Vancouver -|Fraser Valley", eccc_map_bc$NAME), ]
 
 
-labels <- sprintf("<strong>%s</strong>", eccc_map_env$NAME) |> 
+labels <- sprintf("<strong>%s</strong>", eccc_map_env$NAME) |>
   lapply(htmltools::HTML)
 
-cities <- bcmaps::bc_cities() |> 
+cities <- bcmaps::bc_cities() |>
   sf::st_transform(crs = crs) |>
   dplyr::filter(NAME %in% c("Kamloops",
                             "Cranbrook",
@@ -53,7 +53,7 @@ cities <- bcmaps::bc_cities() |>
                             "Atlin"))
 
 # convert geometry to lat and lng columns; drop geometry
-cities <- cities |>  
+cities <- cities |>
   tidyr::extract(geometry, c('lng', 'lat'), '\\((.*), (.*)\\)', convert = TRUE)  # to do: extract() has been superseded by separate_wider_regex()
 
 # shiny app runs on a server with UTC. Specify local tz to ensure local date is applied
