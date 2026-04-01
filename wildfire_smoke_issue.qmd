@@ -62,6 +62,7 @@ library(dplyr)
 source(here::here("load_metadata.r"))
 source(here::here(file.path("src", "construct_banners.r")))
 source(here::here(file.path("src", "construct_logos.r")))
+source(here::here(file.path("src", "construct_shared_dependencies.r")))
 
 ```
 
@@ -71,12 +72,6 @@ source(here::here(file.path("src", "construct_logos.r")))
 #| strip.white: false
 
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
-# AQ met information
-ENVcontact <- aq_mets |>
-  filter(fullname == params$aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |>
-  pull(contact)
 
 # Check for first health authority
 a <- match_eccc_health |>
@@ -477,7 +472,7 @@ Worksafe BC
 ### Media questions regarding air quality conditions related to this Air Quality Warning
 :::
 
-`r ENVcontact`
+`r get_meteorologist_contact(params$aqMet, sep_type)`
 
 ::: {.content-visible when-format="markdown"}
 

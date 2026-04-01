@@ -49,6 +49,7 @@ library(dplyr)
 # Import files in the quarto environment
 source(here::here("load_metadata.r"))
 source(here::here(file.path("src", "construct_logos.r")))
+source(here::here(file.path("src", "construct_shared_dependencies.r")))
 
 ```
 
@@ -60,12 +61,6 @@ source(here::here(file.path("src", "construct_logos.r")))
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
 
 #AQ met information
-
-ENVcontact <- aq_mets |>
-  filter(fullname == params$aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |>
-  pull(contact)
-
 HAcontact <- health_contact |>
   filter(authority %in% params$healthAuth) |>
   mutate(authority = factor(authority))|>
@@ -106,7 +101,9 @@ Real-time air quality information is available on the [BC Air Quality website](h
 
 **Media questions regarding air quality conditions related to this Air Quality Warning:**
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}
+`r get_meteorologist_contact(params$aqMet, sep_type)`
+[{{< card_end >}}]{.content-visible when-format="markdown"}
 
 **Media questions regarding health implications of wildfire smoke:**
 

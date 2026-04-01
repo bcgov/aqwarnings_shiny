@@ -39,13 +39,6 @@ fireIcons <- awesomeIconList(
 # Ordered factor ensures consistent legend ordering on maps
 fireIconFactorPalette <- colorFactor(as.vector(sapply(fireIcons, get, x = "markerColor")), levels = names(fireIcons), ordered = TRUE)
 
-# Load BCWFS Fires Data
-
-bcwfs_fire_data_url <- "https://services6.arcgis.com/ubm4tcTYICKBpist/arcgis/rest/services/BCWS_ActiveFires_PublicView/FeatureServer/0/query?where=FIRE_STATUS+%3C%3E+%27Out%27&objectIds=&time=&timeRelation=esriTimeRelationOverlaps&geometry=&geometryType=esriGeometryPoint&inSR=&spatialRel=esriSpatialRelIntersects&resultType=standard&distance=0.0&units=esriSRUnit_Meter&outDistance=&relationParam=&returnGeodetic=false&outFields=FIRE_STATUS%2C+GEOGRAPHIC_DESCRIPTION%2C+FIRE_TYPE%2C+FIRE_ID&returnGeometry=true&featureEncoding=esriDefault&multipatchOption=xyFootprint&maxAllowableOffset=&geometryPrecision=&outSR=&defaultSR=&datumTransformation=&applyVCSProjection=false&returnIdsOnly=false&returnUniqueIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&returnQueryGeometry=false&returnDistinctValues=false&cacheHint=false&collation=&orderByFields=&groupByFieldsForStatistics=&returnAggIds=false&outStatistics=&having=&resultOffset=&resultRecordCount=&returnZ=false&returnM=false&returnTrueCurves=false&returnExceededLimitFeatures=true&quantizationParameters=&sqlFormat=none&f=pgeojson&token="
-bcwfs_fire_point_data <- st_read(bcwfs_fire_data_url) %>% mutate(
-  longitude = st_coordinates(.)[, "X"],
-  latitude = st_coordinates(.)[, "Y"]
-)
 
 #--------------------------------------------------
 # Warning Level Definitions
@@ -194,6 +187,11 @@ issueWildfireSmokeUI <- function(id) {
 
 # Import URL assignments
 source(here::here("src", "assign_urls.r"))
+
+# Load BCWFS Fires Data
+
+bcwfs_fire_point_data <- st_read(bcwfs_fire_data_url)
+
 
 issueWildfireSmoke <- function(input, output, session) {
 

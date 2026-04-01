@@ -19,6 +19,7 @@ list_of_packages <- c(
   "fs",
   "here",
   "htmlwidgets",
+  "httr",
   "knitr",
   "leaflet",
   "remotes",

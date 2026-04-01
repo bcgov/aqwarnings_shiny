@@ -51,6 +51,7 @@ source(here::here("load_metadata.r"))
 source(here::here(file.path("functions", "local_tz.r")))
 source(here::here(file.path("src", "construct_logos.r")))
 source(here::here(file.path("src", "construct_pollutants_table.r")))
+source(here::here(file.path("src", "construct_shared_dependencies.r")))
 
 # create single line break based on output file format
 if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
@@ -68,29 +69,12 @@ final_table <- results$final_table
 list2env(results$results, envir = .GlobalEnv)
 ```
 
-```{r ENVcontact, include=FALSE}
+
+```{r health-authority, include=FALSE}
 #| results: asis
-#| strip.white: false
-
-# AQ met information
-ENVcontact <- aq_mets |>
-  filter(fullname == params$aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |>
-  pull(contact)
-```
-
-```{r HAcontact, include=FALSE}
-#| results: asis
-
-HAauth <- match_health_city |>
-  filter(location == params$location) |>
-  pull(health_city)
-
-HAcontact <- health_contact |>
-    filter(authority == HAauth) |>
-    select(authority, contact) |>
-    group_by(authority) |>
-    summarise(html_string = paste(contact, collapse = sep_type))
+health_authority_details <- get_health_authority_details(params$location)
+HAauth <- health_authority_details$health_authority
+HAcontact <- health_authority_details$health_authority_contact
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -281,7 +265,7 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 {{< card_start width="wide" >}}
 :::
 
-`r ENVcontact`
+`r get_meteorologist_contact(params$aqMet, sep_type)`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}

@@ -57,6 +57,7 @@ source(here::here(file.path("src", "construct_banners.r")))
 source(here::here(file.path("src", "construct_logos.r")))
 source(here::here(file.path("src", "construct_pollutants_table.r")))
 source(here::here(file.path("src", "local_emissions_bylaws.r")))
+source(here::here(file.path("src", "construct_shared_dependencies.r")))
 
 # date/time information
 current_month <- as.numeric(format(Sys.Date(), "%m"))
@@ -79,31 +80,12 @@ final_table <- results$final_table
 list2env(results$results, envir = .GlobalEnv)
 ```
 
-```{r ENVcontact, include=FALSE}
+```{r health-authority, include=FALSE}
 #| results: asis
-#| strip.white: false
-
-# AQ met information
-ENVcontact <- aq_mets |>
-  filter(fullname == params$aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |>
-  pull(contact)
+health_authority_details <- get_health_authority_details(params$location)
+HAauth <- health_authority_details$health_authority
+HAcontact <- health_authority_details$health_authority_contact
 ```
-
-```{r HAcontact, include=FALSE}
-#| results: asis
-
-HAauth <- match_health_city |>
-  filter(location == params$location) |>
-  pull(health_city)
-
-HAcontact <- health_contact |>
-  filter(authority == HAauth) |>
-  select(authority, contact) |>
-  group_by(authority) |>
-  summarise(html_string = paste(contact, collapse = sep_type))
-```
-
 ```{r voluntary_reduction, include=FALSE}
 
 voluntary_reduction_PM25 <- paste0(
@@ -523,7 +505,7 @@ card_end >}}
 **Media questions regarding this Air Quality Warning:** {{< card_start width="wide" >}}
 :::
 
-`r ENVcontact`
+`r get_meteorologist_contact(params$aqMet, sep_type)`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}
