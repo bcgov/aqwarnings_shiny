@@ -1,7 +1,7 @@
 # This file defines construct_logos, functionality that is common across all templates
 library(magick)
 
-logos_list <- list(
+reference_logos_list <- list(
   "Government of British Columbia" = "BCID_V_RGB_pos",
   "First Nations Health Authority" = "FNHA",
   "Interior Health Authority" = "IH",
@@ -17,7 +17,7 @@ construct_logos <- function(format = "markdown", selected_health_authorities) {
                             "First Nations Health Authority",
                             selected_health_authorities)
 
-  logos_selected <- logos_list[logos_names_selected]
+  logos_selected <- reference_logos_list[logos_names_selected]
 
   # Count number of logos to display
   n_logos <- length(logos_selected)

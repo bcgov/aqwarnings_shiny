@@ -54,27 +54,27 @@ source(here::here(file.path("src", "construct_pollutants_table.r")))
 source(here::here(file.path("src", "construct_shared_dependencies.r")))
 
 # create single line break based on output file format
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+if (params$outputFormat == "markdown") markup_separator <- "<br />" else markup_separator <- "  \n"
 ```
 
 ```{r table-setup, include=FALSE}
-pollutants <- strsplit(params$pollutant, "&")[[1]] |> trimws()
-min_data_capture_pct <- 75
+data_pollutants <- strsplit(params$pollutant, "&")[[1]] |> trimws()
+constant_min_data_capture_pct <- 75
 
-results <- construct_pollutants_table(pollutants, params$location, min_data_capture_pct)
-local_hour <- results$local_hour
-final_table <- results$final_table
+local_results <- construct_pollutants_table(data_pollutants, params$location, constant_min_data_capture_pct)
+string_local_hour <- local_results$local_hour
+data_pollutants_table <- local_results$data_pollutants_table
 
-# Expose additional results as final_table1, final_table2, etc.
-list2env(results$results, envir = .GlobalEnv)
+# Expose additional results as data_pollutants_table1, data_pollutants_table2, etc.
+list2env(local_results$results, envir = .GlobalEnv)
 ```
 
 
 ```{r health-authority, include=FALSE}
 #| results: asis
-health_authority_details <- get_health_authority_details(params$location)
-HAauth <- health_authority_details$health_authority
-HAcontact <- health_authority_details$health_authority_contact
+health_authority_details <- get_health_authority_details(params$location, markup_separator)
+string_health_authority <- health_authority_details$health_authority
+data_health_authority_contact <- health_authority_details$health_authority_contact
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -94,13 +94,13 @@ pollutantExpansion  <- pollutant_info$pollutantExpansion
 
 if (params$burnRestrictionStatus == 0 | params$burnRestrictionStatus == 2) {
 first_paragraph <- paste0(
-    "The Ministry of Environment and Parks in collaboration with the ", HAauth,
+    "The Ministry of Environment and Parks in collaboration with the ", string_health_authority,
     " has ended the Air Quality Warning that was issued on ", format(as.Date(params$issuedate), "%B %d, %Y"), " for ", params$location,
     " due to elevated levels of ", pollutantExpansion, "."
   )
 } else {
   first_paragraph <- paste0(
-    "The Ministry of Environment and Parks in collaboration with the ", HAauth,
+    "The Ministry of Environment and Parks in collaboration with the ", string_health_authority,
     " has ended the Air Quality Warning and open burning restrictions that were issued on ",
     format(as.Date(params$issuedate), "%B %d, %Y"), " for ",
     params$location," due to elevated levels of ", pollutantExpansion, "."
@@ -108,36 +108,36 @@ first_paragraph <- paste0(
 }
 ```
 
-```{r more_info, include=FALSE}
+```{r more_pollutant_info, include=FALSE}
 
-more_info_table <- tibble(
+reference_more_info_table <- tibble(
   pollutant = c("PM25", "PM10", "O3"),
   info = c(
     paste0(
-      "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+      "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", string_local_hour, " local time today:"
     ),
     paste0(
-  "The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  "The provincial air quality objective for PM~10~ is 50 micrograms per cubic metre (μg/m^3^), averaged over 24 hours. 24-hour average PM~10~ concentrations are summarized below for ", params$location, " and nearest monitored communities at ", string_local_hour, " local time today:"
   ),
   paste0(
   "- The provincial air quality objectives for ozone is an eight-hour objective of 62 parts per billion (ppb) and a one-hour average of 82 ppb for air quality advisories. Air quality advisories for ground-level ozone may be issued when current concentrations exceed or are expected to exceed either of these objectives. \n",
-  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", local_hour, " local time today:"
+  "- The 8-hour average ozone concentration and 1-hour maximum concentration (within the past 8 hours) are summarized below for ", params$location, " and nearest monitored communities at ", string_local_hour, " local time today:"
 )
 )
 )
 
-results_info <- list()
+local_results_info <- list()
 
-for (i in seq_along(pollutants)) {
-  more_info <- more_info_table |>
-    filter(pollutant == pollutants[i]) |>
+for (i in seq_along(data_pollutants)) {
+  string_more_pollutant_info <- reference_more_info_table |>
+    filter(pollutant == data_pollutants[i]) |>
     pull(info)
 
-  results_info[[paste0("more_info", i)]] <- more_info
+  local_results_info[[paste0("string_more_pollutant_info", i)]] <- string_more_pollutant_info
 }
 
-# Expose them as more_info1, more_info2, etc.
-list2env(results_info, envir = .GlobalEnv)
+# Expose them as string_more_pollutant_info1, string_more_pollutant_info2, etc.
+list2env(local_results_info, envir = .GlobalEnv)
 ```
 
 ```{r burn_ban, results='asis', echo=FALSE}
@@ -165,9 +165,9 @@ burn_ban <- paste0(
   " ",
   params$burnRestrictionEndTime,
   " local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n",
-  "Date issued: ", format(Sys.Date(), "%B %d, %Y"), sep_type,
-  name_line, sep_type,
-  title_line1, sep_type,
+  "Date issued: ", format(Sys.Date(), "%B %d, %Y"), markup_separator,
+  name_line, markup_separator,
+  title_line1, markup_separator,
   title_line2
   )
 
@@ -178,7 +178,7 @@ burn_ban <- paste0(
 ```
 
 ```{r create-logo-list}
-logos <- construct_logos(params$outputFormat, HAauth)
+logos <- construct_logos(params$outputFormat, string_health_authority)
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
@@ -228,24 +228,24 @@ if (params$burnRestrictionStatus == 2) {
 ### Current conditions
 :::
 
-```{r final-table1, results='asis', echo=FALSE}
-if (length(pollutants) == 1) {
-  cat(more_info, "\n\n")
+```{r pollutants-table1, results='asis', echo=FALSE}
+if (length(data_pollutants) == 1) {
+  cat(string_more_pollutant_info, "\n\n")
 } else { # pollutants == c(PM2.5, PM10)
-  cat(more_info1, "\n\n")
+  cat(string_more_pollutant_info1, "\n\n")
 }
 cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
-if (length(pollutants) == 1) {
-  print(knitr::kable(final_table, row.names = FALSE, escape = FALSE))
+if (length(data_pollutants) == 1) {
+  print(knitr::kable(data_pollutants_table, row.names = FALSE, escape = FALSE))
   } else {  # pollutants == c(PM2.5, PM10)
-    print(knitr::kable(final_table1, row.names = FALSE))
+    print(knitr::kable(data_pollutants_table1, row.names = FALSE))
   }
 cat('[\n:::\n]{.content-visible when-format="markdown"}')
 ```
-```{r final-table2, results='asis', echo=FALSE, eval= (all(c("PM25", "PM10") %in% pollutants))}
-cat("\n\n", more_info2, "\n\n")
+```{r pollutants-table2, results='asis', echo=FALSE, eval= (all(c("PM25", "PM10") %in% data_pollutants))}
+cat("\n\n", string_more_pollutant_info2, "\n\n")
 cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
-print(knitr::kable(final_table2, row.names = FALSE, escape = FALSE))
+print(knitr::kable(data_pollutants_table2, row.names = FALSE, escape = FALSE))
 cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ```
 Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for real-time observations.
@@ -265,7 +265,7 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 {{< card_start width="wide" >}}
 :::
 
-`r get_meteorologist_contact(params$aqMet, sep_type)`
+`r get_meteorologist_contact(params$aqMet, markup_separator)`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}
@@ -280,7 +280,7 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 {{< card_start  width="wide" >}}
 :::
 
-`r paste(HAcontact$html_string, collapse = "\n\n")`
+`r paste(data_health_authority_contact$html_string, collapse = "\n\n")`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}

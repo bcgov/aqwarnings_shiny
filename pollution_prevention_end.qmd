@@ -49,25 +49,25 @@ source(here::here(file.path("src", "construct_pollutants_table.r")))
 source(here::here(file.path("src", "construct_shared_dependencies.r")))
 
 # create single line break based on output file format
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+if (params$outputFormat == "markdown") markup_separator <- "<br />" else markup_separator <- "  \n"
 ```
 
 ```{r table-setup, include=FALSE}
-pollutants <- "PM25"
+data_pollutants <- "PM25"
 min_data_capture_pct <- 75
 
-results <- construct_pollutants_table(pollutants, params$nearestMonitor, min_data_capture_pct)
-local_hour <- results$local_hour
-final_table <- results$final_table
+local_results <- construct_pollutants_table(data_pollutants, params$nearestMonitor, min_data_capture_pct)
+string_local_hour <- local_results$local_hour
+data_pollutants_table <- local_results$data_pollutants_table
 ```
 
 
 ```{r health-authority, include=FALSE}
 #| results: asis
 
-health_authority_details <- get_health_authority_details(params$location)
-HAauth <- health_authority_details$health_authority
-HAcontact <- health_authority_details$health_authority_contact
+health_authority_details <- get_health_authority_details(params$nearestMonitor, markup_separator)
+string_health_authority <- health_authority_details$health_authority
+data_health_authority_contact <- health_authority_details$health_authority_contact
 ```
 
 ```{r pollutant_specific_clauses, include=FALSE}
@@ -82,7 +82,7 @@ pollutant_info <- pollutant_tbl |> filter(pollutant == "PM25")
 pollutantExpansion  <- pollutant_info$pollutantExpansion
 
   first_paragraph <- paste0(
-    "The Ministry of Environment and Parks in collaboration with the ", HAauth,
+    "The Ministry of Environment and Parks in collaboration with the ", string_health_authority,
     " has ended the Pollution Prevention Notice and open burning restrictions within ",
     params$burnRestrictionArea,
     " that were issued on ",
@@ -95,13 +95,13 @@ pollutantExpansion  <- pollutant_info$pollutantExpansion
 ```{r additional_info, include=FALSE}
 
 additional_info_PM25 <- paste0(
-    "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$nearestMonitor, " and nearest monitored communities at ", local_hour, " local time today:"
+    "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$nearestMonitor, " and nearest monitored communities at ", string_local_hour, " local time today:"
   )
 
 ```
 
 ```{r create-logo-list}
-logos <- construct_logos(params$outputFormat, HAauth)
+logos <- construct_logos(params$outputFormat, string_health_authority)
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
@@ -133,12 +133,12 @@ if (params$outputFormat == "markdown") cat(logos$logo_image_line, sep="\n\n")
 ### Current conditions
 :::
 
-```{r final-table, results='asis', echo=FALSE}
+```{r pollutants-table, results='asis', echo=FALSE}
 
 # Single pollutant: PM25
   cat(additional_info_PM25, "\n\n")
   cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
-  print(knitr::kable(final_table, row.names = FALSE, escape = FALSE))
+  print(knitr::kable(data_pollutants_table, row.names = FALSE, escape = FALSE))
   cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ```
 
@@ -159,7 +159,7 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 {{< card_start width="wide" >}}
 :::
 
-`r get_meteorologist_contact(params$aqMet, sep_type)`
+`r get_meteorologist_contact(params$aqMet, markup_separator)`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}
@@ -174,7 +174,7 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 {{< card_start  width="wide" >}}
 :::
 
-`r paste(HAcontact$html_string, collapse = "\n\n")`
+`r paste(data_health_authority_contact$html_string, collapse = "\n\n")`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}

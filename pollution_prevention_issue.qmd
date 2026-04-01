@@ -57,26 +57,26 @@ source(here::here(file.path("src", "construct_shared_dependencies.r")))
 # date/time information
 current_month <- as.numeric(format(Sys.Date(), "%m"))
 # create single line break based on output file format
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+if (params$outputFormat == "markdown") markup_separator <- "<br />" else markup_separator <- "  \n"
 run_pg <- (params$nearestMonitor == "Prince George")  #to control conditional text related to Prince George only
 ```
 
 ```{r table-setup, include=FALSE}
 
-pollutants <- "PM25"
+data_pollutants <- "PM25"
 min_data_capture_pct <- 75
 
-results <- construct_pollutants_table(pollutants, params$nearestMonitor, min_data_capture_pct)
-local_hour <- results$local_hour
-final_table <- results$final_table
+local_results <- construct_pollutants_table(data_pollutants, params$nearestMonitor, min_data_capture_pct)
+string_local_hour <- local_results$local_hour
+data_pollutants_table <- local_results$data_pollutants_table
 ```
 
 ```{r health-authority, include=FALSE}
 #| results: asis
 
-health_authority_details <- get_health_authority_details(params$location)
-HAauth <- health_authority_details$health_authority
-HAcontact <- health_authority_details$health_authority_contact
+health_authority_details <- get_health_authority_details(params$nearestMonitor, markup_separator)
+string_health_authority <- health_authority_details$health_authority
+data_health_authority_contact <- health_authority_details$health_authority_contact
 ```
 
 ```{r voluntary_reduction, include=FALSE}
@@ -96,31 +96,31 @@ voluntary_reduction_PM25 <- paste0(
 ```{r pollutant_specific_clauses, include=FALSE}
 
 # Lookup table for pollutants
-pollutant_tbl <- tribble(
-  ~pollutant,~pollutantExpansion,~voluntary_reduction,
+data_pollutant_tbl <- tribble(
+  ~pollutant,~string_pollutant_expansion,~voluntary_reduction,
   "PM25","fine particulate matter",voluntary_reduction_PM25,
 )
 
 # Pick the row for the current pollutant
-pollutant_info <- pollutant_tbl |> filter(pollutant == "PM25")
+data_pollutant_info <- data_pollutant_tbl |> filter(pollutant == "PM25")
 
 # Assign values
-pollutantExpansion  <- pollutant_info$pollutantExpansion
-voluntary_reduction <- pollutant_info$voluntary_reduction
+string_pollutant_expansion  <- data_pollutant_info$pollutantExpansion
+voluntary_reduction <- data_pollutant_info$voluntary_reduction
 
 # Build first_paragraph
 if (params$ice == "Issue") {
   first_paragraph <- paste0(
     "The Ministry of Environment and Parks in collaboration with the ",
-    HAauth, " has issued a Pollution Prevention Notice within ", params$burnRestrictionArea,
-    " due to elevated ", pollutantExpansion, "."
+    string_health_authority, " has issued a Pollution Prevention Notice within ", params$burnRestrictionArea,
+    " due to elevated ", string_pollutant_expansion, "."
   )
 } else if (params$ice == "Continue") {
   first_paragraph <- paste0(
     "The Ministry of Environment and Parks in collaboration with the ",
-    HAauth, " issued Pollution Prevention Notice within ", params$burnRestrictionArea,
+    string_health_authority, " issued Pollution Prevention Notice within ", params$burnRestrictionArea,
     " on ", format(as.Date(params$issuedate), "%B %d, %Y"),
-    ". The warning remains in effect due to elevated ", pollutantExpansion, "."
+    ". The warning remains in effect due to elevated ", string_pollutant_expansion, "."
   )
 }
 
@@ -128,7 +128,7 @@ if (params$ice == "Issue") {
 
 ```{r additional_info, include=FALSE, results='asis'}
 
-additional_info_PM25 <- paste0("Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.\n\n", "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$nearestMonitor, " and nearest monitored communities at ", local_hour, " local time today:"
+additional_info_PM25 <- paste0("Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.\n\n", "The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ", params$nearestMonitor, " and nearest monitored communities at ", string_local_hour, " local time today:"
 )
 ```
 
@@ -155,9 +155,9 @@ burn_ban <- paste0(
   " ",
   params$burnRestrictionEndTime,
   " local time. No vegetative debris may be ignited or added to ignited piles. Contravention of these provisions may be subject to a fine under the Regulation.\n\n",
-  "&emsp;&emsp;&nbsp;Date issued: ", format(Sys.Date(), "%B %d, %Y"), sep_type,
-  "&emsp;&emsp;&nbsp;", name_line, sep_type,
-  "&emsp;&emsp;&nbsp;", title_line1, sep_type,
+  "&emsp;&emsp;&nbsp;Date issued: ", format(Sys.Date(), "%B %d, %Y"), markup_separator,
+  "&emsp;&emsp;&nbsp;", name_line, markup_separator,
+  "&emsp;&emsp;&nbsp;", title_line1, markup_separator,
   "&emsp;&emsp;&nbsp;", title_line2
   )
 
@@ -166,7 +166,7 @@ burn_ban <- paste0(
 ```{r create-logo-list}
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
 # This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
-logos <- construct_logos(params$outputFormat, HAauth)
+logos <- construct_logos(params$outputFormat, string_health_authority)
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
@@ -194,7 +194,7 @@ cat(
   )
 ```
 
-Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic
+Exposure to `r string_pollutant_expansion` is particularly a concern for infants, older adults, individuals with chronic
 conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant.
 Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise
 until the warning is ended. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort,
@@ -235,7 +235,7 @@ obstructive pulmonary disease (COPD), heart disease and diabetes, and people who
 ```{r, results='asis', echo=FALSE}
 
 if (current_month %in% 6:8) {
-  cat("- During warm weather, stay cool and drink plenty of fluids.", sep_type)
+  cat("- During warm weather, stay cool and drink plenty of fluids.", markup_separator)
 }
 ```
 
@@ -327,11 +327,11 @@ if (current_month %in% 6:8) {
 ### Current conditions
 :::
 
-```{r final-table, results='asis', echo=FALSE}
+```{r pollutants-table, results='asis', echo=FALSE}
 # Single pollutant: PM25
   cat(additional_info_PM25, "\n\n")
   cat('[::: {.table-responsive}]{.content-visible when-format="markdown"}\n')
-  print(knitr::kable(final_table, row.names = FALSE, escape = FALSE))
+  print(knitr::kable(data_pollutants_table, row.names = FALSE, escape = FALSE))
   cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ```
 
@@ -395,7 +395,7 @@ card_end >}}
 {{< card_start width="wide" >}}
 :::
 
-`r get_meteorologist_contact(params$aqMet, sep_type)`
+`r get_meteorologist_contact(params$aqMet, markup_separator)`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}
@@ -410,7 +410,7 @@ card_end >}}
 {{< card_start width="wide" >}}
 :::
 
-`r paste(HAcontact$html_string, collapse = "\n\n")`
+`r paste(data_health_authority_contact$html_string, collapse = "\n\n")`
 
 ::: {.content-visible when-format="markdown"}
 {{< card_end >}}

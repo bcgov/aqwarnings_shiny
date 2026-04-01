@@ -12,7 +12,7 @@ construct_pollutants_table <- function(pollutants, station_location, min_data_ca
     pollutant <- pollutants[i]
 
     # ---- Check that locations are valid for this pollutant ----
-    valid_locations <- buddy_stations |>
+    valid_locations <- reference_buddy_stations |>
       filter(location %in% station_location) |>
       pull(Buddy_location) |>
       unique()
@@ -132,16 +132,16 @@ construct_pollutants_table <- function(pollutants, station_location, min_data_ca
     if (pollutant != "O3") { formatted_table <- formatted_table |>  filter(Community != "max_conc") }
 
     # clean up labels
-    final_table <- formatted_table |>
+    data_pollutants_table <- formatted_table |>
       mutate(Community = case_when(
         Community == "mean_conc" ~ sprintf("%s average (%s)", lookup[pollutant, "avgtimelabel"], lookup[pollutant, "units"]),
         Community == "max_conc" ~ sprintf("Max. within %s (%s)", gsub("-", " ", lookup[pollutant, "avgtimelabel"]), lookup[pollutant, "units"]),
         TRUE ~ Community
       ))
 
-    results[[paste0("final_table", i)]] <- final_table
+    results[[paste0("data_pollutants_table", i)]] <- data_pollutants_table
   }
 
-  return(list(results = results, local_hour = local_hour, final_table = final_table))
+  return(list(results = results, local_hour = local_hour, data_pollutants_table = data_pollutants_table))
 
 }

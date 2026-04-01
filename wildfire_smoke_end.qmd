@@ -58,15 +58,15 @@ source(here::here(file.path("src", "construct_shared_dependencies.r")))
 #| results: asis
 #| strip.white: false
 
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+if (params$outputFormat == "markdown") markup_separator <- "<br />" else markup_separator <- "  \n"
 
 #AQ met information
-HAcontact <- health_contact |>
+data_health_authority_contact <- reference_health_authority_contact |>
   filter(authority %in% params$healthAuth) |>
   mutate(authority = factor(authority))|>
   select(authority, contact) |>
   group_by(authority) |>
-  summarise(html_string = paste(contact, collapse = sep_type))
+  summarise(html_string = paste(contact, collapse = markup_separator))
 
 ```
 
@@ -102,9 +102,9 @@ Real-time air quality information is available on the [BC Air Quality website](h
 **Media questions regarding air quality conditions related to this Air Quality Warning:**
 
 [{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}
-`r get_meteorologist_contact(params$aqMet, sep_type)`
+`r get_meteorologist_contact(params$aqMet, markup_separator)`
 [{{< card_end >}}]{.content-visible when-format="markdown"}
 
 **Media questions regarding health implications of wildfire smoke:**
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r paste(data_health_authority_contact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
