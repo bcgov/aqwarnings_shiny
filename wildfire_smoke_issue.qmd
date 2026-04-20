@@ -60,6 +60,9 @@ library(dplyr)
 
 # Import files in the quarto environment
 source(here::here("load_metadata.r"))
+source(here::here(file.path("src", "construct_banners.r")))
+source(here::here(file.path("src", "construct_logos.r")))
+source(here::here(file.path("src", "construct_shared_dependencies.r")))
 
 ```
 
@@ -68,22 +71,16 @@ source(here::here("load_metadata.r"))
 #| results: asis
 #| strip.white: false
 
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
-
-  # AQ met information
-  ENVcontact <- aq_mets |>
-    filter(fullname == params$aqMet) |>
-    mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |>
-    pull(contact)
+if (params$outputFormat == "markdown") markup_separator <- "<br />" else markup_separator <- "  \n"
 
 # Check for first health authority
-a <- match_eccc_health |>
+a <- reference_match_eccc_health |>
   filter(eccc %in% params$warningLevel$all) |>
   distinct(healthAuth1) |>
   pull(healthAuth1)
 
 # Check for second health authority
-b <- match_eccc_health |>
+b <- reference_match_eccc_health |>
   filter(eccc %in% params$warningLevel$all) |>
   distinct(healthAuth2) |>
   pull(healthAuth2)
@@ -93,31 +90,30 @@ unique_HA <- unique(c(a,b))
 unique_HA <- unique_HA [! unique_HA %in% ""]
 
 # Filter health authorities, always include FNHA
-HAcontact <- health_contact |>
+data_health_authority_contact <- reference_health_authority_contact |>
   filter(authority %in% c("First Nations Health Authority", unique_HA)) |>
   mutate(authority = factor(authority))|>
   select(authority, contact) |>
   group_by(authority) |>
-  summarise(html_string = paste(contact, collapse = sep_type))
+  summarise(html_string = paste(contact, collapse = markup_separator))
 
 # Retrieve descriptions (utility_files/eccc_descriptions.csv) for each affected region
 # descriptions included at end of bulletin
-bulletin_regions <- reg_description |>
+local_bulletin_regions <- reference_reg_description |>
   filter(eccc %in% params$warningLevel$all) |>
   filter(!is.na(region_name) & region_name != "")|>
   mutate(eccc = factor(eccc))
 
-region <- paste(bulletin_regions$region_name, collapse = ", ")
+local_description <- paste(local_bulletin_regions$description, collapse = "; ")
+string_region_names <- paste(local_bulletin_regions$region_name, collapse = ", ")
 
-description <- paste(bulletin_regions$description, collapse = "; ")
-
-region_output <- bulletin_regions |>
+string_region_output <- local_bulletin_regions |>
   distinct(region_name, description) |>
-  mutate(output_line = paste0("* **", region_name, ":** ", description)) |>
+  mutate(output_line = paste0("* **", region_name, ":** ", local_description)) |>
   pull(output_line) |>
   paste(collapse = "\n")
 
-run_pg <- "Prince George" %in% bulletin_regions$region
+flag_run_pg <- "Prince George" %in% local_bulletin_regions$region
 ```
 
 ```{r}
@@ -134,7 +130,7 @@ issueBasename <- "wildfire_smoke_issue"
 m <- leaflet::leaflet() |>
   leaflet::addTiles() |>
   leaflet::addPolygons(
-    data = eccc_map_env,
+    data = reference_eccc_map_env,
     fillOpacity = 0.025,
     opacity = 0.75,
     color = "black",
@@ -150,7 +146,7 @@ m <- leaflet::leaflet() |>
 
   if (length(params$warningLevel$yellow) > 0) {
     m <- leaflet::addPolygons(m,
-      data = eccc_map_env[which(eccc_map_env$NAME %in% params$warningLevel$yellow), ],
+      data = reference_eccc_map_env[which(reference_eccc_map_env$NAME %in% params$warningLevel$yellow), ],
       fillOpacity = 0.65,
       opacity = 0.65,
       color = "black",
@@ -163,7 +159,7 @@ m <- leaflet::leaflet() |>
 
   if (length(params$warningLevel$orange) > 0) {
       m <- leaflet::addPolygons(m,
-        data = eccc_map_env[which(eccc_map_env$NAME %in% params$warningLevel$orange), ],
+        data = reference_eccc_map_env[which(reference_eccc_map_env$NAME %in% params$warningLevel$orange), ],
         fillOpacity = 0.65,
         opacity = 0.65,
         color = "black",
@@ -176,7 +172,7 @@ m <- leaflet::leaflet() |>
 
   if (length(params$warningLevel$red) > 0) {
     m <- leaflet::addPolygons(m,
-      data = eccc_map_env[which(eccc_map_env$NAME %in% params$warningLevel$red), ],
+      data = reference_eccc_map_env[which(reference_eccc_map_env$NAME %in% params$warningLevel$red), ],
       fillOpacity = 0.65,
       opacity = 0.65,
       color = "black",
@@ -199,7 +195,7 @@ map <- if (params$outputFormat == "markdown") map_html else map_png
 # Add in extra information if Interior Health Authority (IH) is present in contacts
 
 if(params$outputFormat == "markdown") {
-  HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
+  HA_text <- if (any(data_health_authority_contact$authority == "Interior Health Authority")) {
   "{{< card_start title=\"Interior Health Authority\" logo=\"/assets/logo_IH_horizontal.png\" >}}
 Steps to prepare and manage wildfire-related issues.
 
@@ -208,110 +204,14 @@ Steps to prepare and manage wildfire-related issues.
     }}
 
 if (params$outputFormat == "pdf") {
-      HA_text <- if (any(HAcontact$authority == "Interior Health Authority")) {
+      HA_text <- if (any(data_health_authority_contact$authority == "Interior Health Authority")) {
       "* Interior Health Authority - [Steps to prepare for and manage wildfire-related issues](https://www.interiorhealth.ca/health-and-wellness/natural-disasters-and-emergencies/wildfires)"
 }}
 
 ```
 ```{r}
-#| label: add-banners
-
-banners <- ""
-
-if (length(params$warningLevel$yellow) > 0) {
-  if (params$outputFormat == "markdown") {
-    banners <- paste(banners, "{{< banner_alert_start title='Yellow Warning - Air Quality' variant='yellow'>}}")
-    banners <- paste(banners, "{{< banner_alert_end >}}")
-  } else if (params$outputFormat == "pdf") {
-    banners <- paste(banners, "\\YellowBanner")
-  }
-}
-
-if (length(params$warningLevel$orange) > 0) {
-  if (params$outputFormat == "markdown") {
-    banners <- paste(banners, "{{< banner_alert_start title='Orange Warning - Air Quality' variant='orange'>}}")
-    banners <- paste(banners, "{{< banner_alert_end >}}")
-  } else if (params$outputFormat == "pdf") {
-    banners <- paste(banners, "\\OrangeBanner")
-  }
-}
-
- if (length(params$warningLevel$red) > 0) {
-  if (params$outputFormat == "markdown") {
-    banners <- paste(banners, "{{< banner_alert_start title='Red Warning - Air Quality' variant='red'>}}")
-    banners <- paste(banners, "{{< banner_alert_end >}}")
-  } else if (params$outputFormat == "pdf") {
-    banners <- paste(banners, "\\RedBanner")
-  }
-}
-```
-```{r}
 #| label: create-logo-list
-
-# Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
-# This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
-logos_list <- list(
-  "Government of British Columbia" = "BCID_V_RGB_pos",
-  "First Nations Health Authority" = "FNHA",
-  "Interior Health Authority" = "IH",
-  "Fraser Health Authority" = "FH",
-  "Vancouver Coastal Health Authority" = "VCH",
-  "Vancouver Island Health Authority" = "VIH",
-  "Northern Health Authority" = "NH"
-)
-
-# Logos selected by user, always select BC and FNHA, and sort as per logos_list
-logos_names_selected <- c("Government of British Columbia",
-                          "First Nations Health Authority",
-                          unique_HA[order(match(unique_HA, names(logos_list)))])
-logos_selected <- logos_list[logos_names_selected]
-
-# Count number of logos to display
-n_logos <- length(logos_selected)
-
-logo_image_line <- c()
-logos_combined <- c()
-
-# Set logo path based on output format
-if (params$outputFormat == "markdown") {
-  logo_path <- " logo](//assets/logo_"
-
-  # Build a vector of quarto lines to insert image for each logo
-  # It is more efficient to use `sapply` but this might be more readable
-
-  # Add each logo's insert line to the vector
-  for (logo_name in names(logos_selected)) {
-    logo_image_line <- c(logo_image_line,
-                         paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png)\\"))
-  }}
-
-
-if (params$outputFormat == "pdf") {
-
-  logo_path <- "https://github.com/bcgov/aqwarnings/blob/main/frontend/assets/logo_"
-  logo_urls <- c() #start with empty vector
-
-  # create vector of urls
-  for (logo_name in names(logos_selected)) {
-    logo_urls <- c(
-      logo_urls,
-      paste0(logo_path,
-             logos_selected[[logo_name]],
-             ".png?raw=true"
-             )
-    )
-  }
-
-# format logos
-logos <- magick::image_read(logo_urls) |>
-  magick::image_trim() |> # remove all white space
-  magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
-  magick::image_scale("x200") # scale
-
-# Combine logos into single image and scale
-logos_combined <- magick::image_append(logos) |>
-  magick::image_write(path = "logo.png")
-}
+logos <- construct_logos(params$outputFormat, unique_HA[order(match(unique_HA, names(reference_logos_list)))])
 
 ```
 
@@ -319,7 +219,7 @@ logos_combined <- magick::image_append(logos) |>
 <!-- the trailing slash means the text in square brackets is alt text -->
 <!-- note: logos and title for PDF output handled in src/header.txt -->
 
-[`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
+[`r paste("::: {layout-ncol=", logos$n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
 ```{r}
 #| label: print-logos
@@ -327,12 +227,12 @@ logos_combined <- magick::image_append(logos) |>
 
 # `cat` is used to avoid extra processing
 # `sep` argument adds the line break and then a new line as required
-if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
+if (params$outputFormat == "markdown") cat(logos$logo_image_line, sep="\n\n")
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
 
-`r banners`
+`r build_banners(params$outputFormat, length(params$warningLevel$yellow) > 0, length(params$warningLevel$orange) > 0, length(params$warningLevel$red) > 0)`
 
 The Regions of BC highlighted on the map are being impacted or are likely to be impacted by wildfire smoke over the next `r params$smokeDuration`.
 
@@ -359,7 +259,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 
 ::: {.content-visible when-format="markdown"}
 
-![Descriptions of affected region(s) are provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map_html`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r region`." width="100%" height="600px"}
+![Descriptions of affected region(s) are provided at the end of this page. This Air Quality Warning excludes the area managed by Metro Vancouver. Refer to the More Information section for a link to air quality notifications issued by Metro Vancouver.](`r map_html`){fig-alt="Air Quality Warning - Wildfire Smoke Regions for `r format(Sys.Date(), '%B %d, %Y')`: `r string_region_names`." width="100%" height="600px"}
 
 :::
 
@@ -470,7 +370,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
   [Smoke forecast map] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and map of air quality and weather data.
 
   [Air quality data and warnings] {{< card_end >}}
-```{r, results='asis', echo=FALSE, eval= run_pg}
+```{r, results='asis', echo=FALSE, eval= flag_run_pg}
 
   cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}\n\n')
 ```
@@ -497,7 +397,7 @@ Wildfire smoke forecasts
 
 - BlueSky Canada smoke forecasts - [FireSmoke Canada][Smoke forecast map]
 
-```{r, results='asis', echo=FALSE, eval= run_pg}
+```{r, results='asis', echo=FALSE, eval= flag_run_pg}
 cat("Local resources\n\n")
 cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.pgairquality.com/)\n\n")
 ```
@@ -571,7 +471,7 @@ Worksafe BC
 ### Media questions regarding air quality conditions related to this Air Quality Warning
 :::
 
-`r ENVcontact`
+`r get_meteorologist_contact(params$aqMet, markup_separator)`
 
 ::: {.content-visible when-format="markdown"}
 
@@ -589,8 +489,8 @@ Worksafe BC
 
 :::
 
-`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
+`r paste(data_health_authority_contact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
 
 ## Regions included under this Air Quality Warning
 
-`r region_output`
+`r string_region_output`

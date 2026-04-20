@@ -16,6 +16,7 @@ There are also how-to videos on the **AQ Warnings** Teams channel.
 - Launch the **aqwarnings_shiny** app
 - Select warning type in the sidebar on the left <br>
 - Enter warning details <br>
+- For the Wildfire Smoke Issue Warning, clicking on a region on the map will cycle it through warning colours sequentially.
 - Generate the warning: Click **Go!** button <br>
 
 <img src="images/1_shinyio_enter_data.png" width="60%" /> <br>

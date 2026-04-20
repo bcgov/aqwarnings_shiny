@@ -18,6 +18,7 @@ library(leaflet)
 library(dplyr)
 library(webshot)
 library(zip)
+library(sf)
 
 # Ensure PhantomJS is installed for webshot (used for map snapshots)
 if (is.null(suppressMessages(webshot:::find_phantom()))) { webshot::install_phantomjs() }
@@ -26,7 +27,7 @@ if (is.null(suppressMessages(webshot:::find_phantom()))) { webshot::install_phan
 Sys.setenv(OPENSSL_CONF = "/dev/null")
 
 # Define custom icons for fire incidents on maps
-fireIcons <- awesomeIconList(
+local_reference_fire_icons <- awesomeIconList(
   #Out = makeAwesomeIcon(icon = "circle", library = "fa", markerColor = "lightgray"),
   `Fire of Note` = makeAwesomeIcon(icon = "fire", library = "fa", markerColor = "darkred", iconColor = "#FFF"),
   `Being Held` = makeAwesomeIcon(icon = "circle", library = "fa", markerColor = "orange", iconColor = "#DB9B3B"),
@@ -36,19 +37,9 @@ fireIcons <- awesomeIconList(
 
 # Create a color palette for fire markers using the markerColor of each icon
 # Ordered factor ensures consistent legend ordering on maps
-fireIconFactorPalette <- colorFactor(as.vector(sapply(fireIcons, get, x = "markerColor")), levels = names(fireIcons), ordered = TRUE)
+local_fire_palette <- colorFactor(as.vector(sapply(local_reference_fire_icons, get, x = "markerColor")), levels = names(local_reference_fire_icons), ordered = TRUE)
 
-#--------------------------------------------------
-# Warning Level Definitions
-#--------------------------------------------------
-
-# You can add more layers if required. This is the only place in code where they are defined.
-
-warningLevelDefinitions <- data.frame(Name = c("unselected", "yellow", "orange", "red"), # names as they will appear in template parameters
-                                      Colour = c("#656565", "#FFFF00", "#FF9500", "#D10000"), # used both in UI and PDF generation
-                                      PolygonOpacity = c(0.0, 0.75, 0.75, 0.75),
-                                      IsTemplateParameter = c(FALSE, TRUE, TRUE, TRUE), # If it is passed through as a template param
-                                      Selectable = c(TRUE, TRUE, TRUE, FALSE)) # set to FALSE to disable click-to-select for a given layer
+source("src/warning_level_definitions.r") # shared warning level definitions
 
 #--------------------------------------------------
 # UI
@@ -77,7 +68,7 @@ issueWildfireSmokeUI <- function(id) {
                 inputId = ns("aqMet"),
                 label = h4("Author:"),
                 selected = "",
-                choices = c("", aq_mets$fullname)),
+                choices = c("", reference_aq_mets$fullname)),
 
               # Custom text to predict the smoke duration - default value is 24-48 hours
               textInput(inputId = ns("smokeDuration"),
@@ -186,6 +177,11 @@ issueWildfireSmokeUI <- function(id) {
 # Import URL assignments
 source(here::here("src", "assign_urls.r"))
 
+# Load BCWFS Fires Data
+
+bcwfs_fire_point_data <- st_read(reference_url_bcwfs_fire_data)
+
+
 issueWildfireSmoke <- function(input, output, session) {
 
   # -------------------------------
@@ -216,7 +212,7 @@ issueWildfireSmoke <- function(input, output, session) {
       #add the BC map (outlines of the province)
       addTiles(layerId = "geomap") |>
       addPolygons(
-        data = bc_map,
+        data = reference_bc_map,
         color = "black",
         fillColor = "#f7f7f7",
         opacity = 0.75,
@@ -229,7 +225,7 @@ issueWildfireSmoke <- function(input, output, session) {
 
       # Add the ECCC polygons
       addPolygons(
-        data = eccc_map_env,
+        data = reference_eccc_map_env,
         fillOpacity = 0.025,
         opacity = 0.75,
         color = "black",
@@ -243,64 +239,61 @@ issueWildfireSmoke <- function(input, output, session) {
         labelOptions = labelOptions(textsize = "15px"),
       ) -> m
 
-    # Add ECCC for selections (user clicks) - from warningLevelDefinitions DF
-    for (i in 1:nrow(warningLevelDefinitions)) {
-      warningLevel <- warningLevelDefinitions[i,]
+    # Add ECCC for selections (user clicks) - from warning DF
+    for (i in seq_len(nrow(reference_warning_levels_df))) {
+      warning_level <- reference_warning_levels_df[i,]
 
       addPolygons(
         m,
-        data = eccc_map_env,
+        data = reference_eccc_map_env,
         stroke = TRUE,
-        fillOpacity = warningLevel$PolygonOpacity,
+        fillOpacity = warning_level$PolygonOpacity,
         opacity = 1,
         color = "black",
         weight = 1.75,
-        fillColor = warningLevel$Colour,
+        fillColor = warning_level$Colour,
         options = pathOptions(pane = "ames_polygons"),
         label = ~NAME,
         labelOptions = labelOptions(textsize = "15px"),
         layerId = ~OBJECTID,
-        group = paste0(eccc_map_env$NAME, "-", i)
+        group = paste0(reference_eccc_map_env$NAME, "-", i)
       ) |>
 
-        hideGroup(group = paste0(eccc_map_env$NAME, "-", i)) -> m # hide until clicked
+        hideGroup(group = paste0(reference_eccc_map_env$NAME, "-", i)) -> m # hide until clicked
     }
 
-    # BCWFS fire layer
-    leaflet.esri::addEsriFeatureLayer(
-      m,
-      url = bcwfs_fire_layer,
-      useServiceSymbology = FALSE,
-      labelProperty = "FIRE_ID",     #"FIRE_STATUS" redundant with legend
-      labelOptions = labelOptions(textsize = "12px"),
-      markerType = "marker",    # "circleMarker" won't work with icon symbols
-      markerIconProperty = "FIRE_STATUS",
-      markerIcons = fireIcons,
-      options = leaflet.esri::featureLayerOptions(where = "FIRE_STATUS <> 'Out'"),
-      group = "BCWFS Fires"
-    ) |>
       addLegend(
-        pal = fireIconFactorPalette,
-        values = names(fireIcons),
+        m,
+        pal = local_fire_palette,
+        values = names(local_reference_fire_icons),
         position = "topright",
         group = "BCWFS Fires"
       ) |>
+      addAwesomeMarkers(
+       data = bcwfs_fire_point_data,
+       label = ~paste0(FIRE_ID, " - ", GEOGRAPHIC_DESCRIPTION),
+       labelOptions = labelOptions(textsize = "12px"),
+       options = markerOptions(),
+       icon = ~local_reference_fire_icons[FIRE_STATUS],
+       group = "BCWFS Fires"
+      ) -> m
 
       # Current weather
       addWMSTiles(
-        current_weather,
+        m,
+        reference_url_current_weather,
         layers = "CURRENT_CONDITIONS",
         options = WMSTileOptions(format = "image/png", transparent = TRUE, freezeAtZoom = "max"),
         group = "Wx current",
-        attribution = paste0("'<a href =", msc_attribution, ">MSC Open Data</a>'")
+        attribution = paste0("'<a href =", reference_url_msc_attribution, ">MSC Open Data</a>'")
       ) |>
 
       # GOES visible sat
       addWMSTiles(
-        goes_vis_sat,
+        reference_url_goes_vis_sat,
         layers = "GOES-West_ABI_GeoColor",
         options = WMSTileOptions(format = "image/png", transparent = TRUE),
-        attribution = paste0("'NASA <a href = ", goes_vis_sat, ">GIBS</a>'"),
+        attribution = paste0("'NASA <a href = ", reference_url_goes_vis_sat, ">GIBS</a>'"),
         group = "GOES West"
       ) |>
 
@@ -308,28 +301,28 @@ issueWildfireSmoke <- function(input, output, session) {
       # NOTE: there are many other WMS layers available from
       # this service; consider for future.
       addWMSTiles(
-        current_weather,
+        reference_url_current_weather,
         layers = "RADAR_1KM_RRAI",
         options = WMSTileOptions(format = "image/png", transparent = TRUE),
-        attribution = paste0("'<a href =", msc_attribution, ">MSC Open Data</a>'"),
+        attribution = paste0("'<a href =", reference_url_msc_attribution, ">MSC Open Data</a>'"),
         group = "RADAR"
       ) |>
 
       # ECCC FireWork - current hour forecast
       addWMSTiles(
-        current_weather,
+        reference_url_current_weather,
         layers = "RAQDPS-FW.SFC_PM2.5",
         options = WMSTileOptions(format = "image/png", transparent = TRUE, opacity = 0.55),
-        attribution = paste0("'<a href =", msc_attribution, ">MSC Open Data</a>'"),
+        attribution = paste0("'<a href =", reference_url_msc_attribution, ">MSC Open Data</a>'"),
         group = "FireWork PM2.5 Sfc"
       ) |>
 
       # NRCan Fire perimeters
       addWMSTiles(
-        nrcan_fire_perim,
+        reference_url_nrcan_fire_perim,
         layers = "m3_polygons_current",
         options = WMSTileOptions(format = "image/png", transparent = TRUE),
-        attribution = paste0("'<a href =", nrcan_cwfis_attribution, ">CWFIS Datamart</a>'"),
+        attribution = paste0("'<a href =", reference_url_nrcan_cwfis_attribution, ">CWFIS Datamart</a>'"),
         group = "NRCan Fire perimeters"
       ) |>
 
@@ -364,7 +357,7 @@ issueWildfireSmoke <- function(input, output, session) {
   observeEvent(input$map_shape_click, {
     # The selection states of polygons are represented by a 2-column dataframe
     # $id is the name of the polygon region on the map
-    # $colour is an index into the warningLevelDefinitions dataframe used to represent the currently-selected index
+    # $colour is an index into the reference_warning_levels_df dataframe used to represent the currently-selected index
 
     # input$map_shape_click$group --> group of map objects, e.g., "regions"
     # input$map_shape_click$id    --> name/ID of the individual region clicked
@@ -384,11 +377,11 @@ issueWildfireSmoke <- function(input, output, session) {
 
     updatedColour <- currentlySelectedColour
 
-    for (i in 1:nrow(warningLevelDefinitions)) {
-      nextIndex <- 1 + (i + currentlySelectedColour - 1) %% nrow(warningLevelDefinitions) # use modulus operator to circularly visit the dataframe
+    for (i in seq_len(nrow(reference_warning_levels_df))) {
+      nextIndex <- 1 + (i + currentlySelectedColour - 1) %% nrow(reference_warning_levels_df) # use modulus operator to circularly visit the dataframe
 
       # skip colours that are not selectable
-      if (warningLevelDefinitions[nextIndex,]$Selectable == TRUE) {
+      if (reference_warning_levels_df[nextIndex,]$Selectable == TRUE) {
         updatedColour <- nextIndex
         break
       }
@@ -400,7 +393,7 @@ issueWildfireSmoke <- function(input, output, session) {
     by(selRegions$DF, seq_len(nrow(selRegions$DF)), function(row) {
 
       # iterate over the selRegion dataframe, calling the map proxy to hide inactive and show active selections
-      for (i in 1:nrow(warningLevelDefinitions)) {
+      for (i in seq_len(nrow(reference_warning_levels_df))) {
         active <- row$colour == i
         group_name <- paste0(row$id, "-", i)
 
@@ -437,7 +430,7 @@ issueWildfireSmoke <- function(input, output, session) {
                     fillOpacity = 1, # Fully opaque
                     opacity = 0) |> # No border
       # Add the BC map (outlines of the province)
-      addPolygons(data = bc_map,
+      addPolygons(data = reference_bc_map,
                   color = "black",
                   opacity = 0.7,
                   fillOpacity = 0,
@@ -445,7 +438,7 @@ issueWildfireSmoke <- function(input, output, session) {
                   smoothFactor = 0.2,
                   group = "background") |>
       # Add the eccc polygons
-      addPolygons(data = eccc_map_env,
+      addPolygons(data = reference_eccc_map_env,
                   fillColor = "white",
                   color = "black",
                   opacity = 0.7,
@@ -453,7 +446,7 @@ issueWildfireSmoke <- function(input, output, session) {
                   smoothFactor = 0.2) |>
 
       # Add city labels as circle markers
-      addCircleMarkers(data = cities,
+      addCircleMarkers(data = reference_cities,
                        radius = 1,
                        color = "black",
                        opacity = 1,
@@ -473,24 +466,24 @@ issueWildfireSmoke <- function(input, output, session) {
                            "font-style" = "bold"))) |>
 
       # Add additional monitoring points (lm_pts) as small non-interactive markers
-      addCircleMarkers(data = lm_pts,
+      addCircleMarkers(data = reference_lm_pts,
                        options = markerOptions(interactive = FALSE),
                        stroke = FALSE,
                        fillColor = "black",
                        fillOpacity = 0.3,
                        radius = 0.75)
 
-    for (i in 1:nrow(warningLevelDefinitions)) {
-      warningLevel <- warningLevelDefinitions[i,]
+    for (i in seq_len(nrow(reference_warning_levels_df))) {
+      warning_level <- reference_warning_levels_df[i,]
 
       if (selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
         m <- addPolygons(
           m,
-          data = eccc_map_env[which(eccc_map_env$NAME %in% (selRegions$DF %>% filter(colour == i))$id),],
+          data = reference_eccc_map_env[which(reference_eccc_map_env$NAME %in% (selRegions$DF %>% filter(colour == i))$id),],
           stroke = FALSE,
-          fillOpacity = warningLevel$PolygonOpacity,
+          fillOpacity = warning_level$PolygonOpacity,
           opacity = 0.75,
-          fillColor = warningLevel$Colour,
+          fillColor = warning_level$Colour,
         )
       }
     }
@@ -529,9 +522,9 @@ issueWildfireSmoke <- function(input, output, session) {
   observeEvent(input$genWarning, {
 
     atLeastOneRegionSelected <- FALSE
-    for (i in 1:nrow(warningLevelDefinitions)) {
-      warningLevel <- warningLevelDefinitions[i,]
-      if (warningLevel$IsTemplateParameter == TRUE && selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
+    for (i in seq_len(nrow(reference_warning_levels_df))) {
+      warning_level <- reference_warning_levels_df[i,]
+      if (warning_level$IsTemplateParameter == TRUE && selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
         atLeastOneRegionSelected <- TRUE
         break
       }
@@ -582,21 +575,21 @@ issueWildfireSmoke <- function(input, output, session) {
 
       # Compute `level` metadata for document (used in recent warnings table)
       levels <- c()
-      for (i in 1:nrow(warningLevelDefinitions)) {
-        warningLevel <- warningLevelDefinitions[i,]
-        if (warningLevel$IsTemplateParameter == TRUE && selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
-          levels <- append(levels, warningLevel$Name)
+      for (i in seq_len(nrow(reference_warning_levels_df))) {
+        warning_level <- reference_warning_levels_df[i,]
+        if (warning_level$IsTemplateParameter == TRUE && selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
+          levels <- append(levels, warning_level$Name)
         }
       }
 
       # Compute a list of selected regions for each warning level ( + 1 for allRegions) for inclusion in parameters
       regionSelectionsForTemplate <- list()
-      for (i in 1:nrow(warningLevelDefinitions)) {
-        warningLevel <- warningLevelDefinitions[i,]
-        if (warningLevel$IsTemplateParameter == TRUE) {
-          regionSelectionsForTemplate[[warningLevel$Name]] <- list()
+      for (i in seq_len(nrow(reference_warning_levels_df))) {
+        warning_level <- reference_warning_levels_df[i,]
+        if (warning_level$IsTemplateParameter == TRUE) {
+          regionSelectionsForTemplate[[warning_level$Name]] <- list()
           if (selRegions$DF %>% filter(colour == i) %>% nrow() > 0) {
-            regionSelectionsForTemplate[[warningLevel$Name]] <- as.list(selRegions$DF %>% filter(colour == i))$id
+            regionSelectionsForTemplate[[warning_level$Name]] <- as.list(selRegions$DF %>% filter(colour == i))$id
           }
           regionSelectionsForTemplate[["all"]] <- append(regionSelectionsForTemplate[["all"]], as.list(selRegions$DF %>% filter(colour == i))$id)
         }

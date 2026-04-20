@@ -19,7 +19,7 @@ library(dplyr)
 
 source("src/warning_level_definitions.r") # shared warning level definitions
 
-filteredWarningLevelDefinitions <- warningLevelDefinitions %>%
+filteredWarningLevelDefinitions <- reference_warning_levels_df %>%
   filter(Selectable == TRUE) %>%
   filter(IsTemplateParameter == TRUE)
 
@@ -48,7 +48,7 @@ issueLocalEmissionsUI <- function(id) {
                 inputId = ns("aqMet"),
                 label = h4("Author:"),
                 selected = "",
-                choices = c("", aq_mets$fullname)
+                choices = c("", reference_aq_mets$fullname)
               ),
 
               # Select whether this warning is being issued or continued
@@ -184,7 +184,7 @@ issueLocalEmissionsUI <- function(id) {
                 inputId = ns("location"),
                 label = h4("Location:"),
                 selected = "",
-                choices = c("", match_health_city$location),
+                choices = c("", reference_match_health_city$location),
               ),
 
               # -------------------------------

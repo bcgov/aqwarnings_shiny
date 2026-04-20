@@ -9,7 +9,8 @@ rsconnect/
 outputs/*
 !outputs/.gitkeep
 
-# ignore temporary files in main project directory
+# ignore temporary directories and files in main project directory
+wildfire_smoke_issue_files/
 logo.png
 *map.html
 *map.png
