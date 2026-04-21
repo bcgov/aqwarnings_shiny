@@ -276,12 +276,40 @@ pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
 pollutantExpansion  <- pollutant_info$pollutantExpansion
 voluntary_reduction <- pollutant_info$voluntary_reduction
 
+# Look up table for warning level - column name format: warning level_section_descriptor
+tbl_level <- tribble(
+  ~level,
+  ~level_intro_description,
+  ~level_intro_action,
+  ~level_action_first_paragraph,
+  ~level_action_action,
+  "yellow", 
+  "elevated ", 
+  " postpone or reduce ", 
+  "As air contaminant levels increase, health risks increase. Consider reducing or rescheduling",  
+  " reduce or rescheudle ",
+  "orange", 
+  "very high levels of ", 
+  " avoid ",
+  "Dangerous levels of air contaminant pose threat to your health regardless of age or health status. Reschedule or cancel ",
+  "avoid"
+)
+
+# Pick the row for the current warning level
+level_text <- tbl_level |> filter(level == params$warningLevel)
+
+# Assign values
+level_intro_description <- level_text$level_intro_description
+level_intro_action <- level_text$level_intro_action
+level_action_first_paragraph <- level_text$level_action_first_paragraph
+level_action_action <- level_text$level_action_action
+
 # Build first_paragraph
 if (params$ice == "Issue") {
   first_paragraph <- paste0(
     "The Ministry of Environment and Parks in collaboration with the ",
     HAauth, " has issued an Air Quality Warning for ", params$location,
-    " due to elevated ", pollutantExpansion, "."
+    " due to ", level_intro_description, pollutantExpansion, "."
   )
 } else if (params$ice == "Continue") {
   first_paragraph <- paste0(
@@ -540,7 +568,13 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 `r first_paragraph`
 
-Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant. Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the warning is ended. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
+Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant.
+
+Persons with chronic underlying medical conditions or acute infections should `r level_intro_action` strenuous exercise until the warning is ended.
+
+Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider.
+
+Staying indoors helps to reduce exposure.
 
 ```{r, results='asis', echo=FALSE}
 if (params$burnRestrictions > 0) {
@@ -560,9 +594,9 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 
 ## Actions you can take
 
-As air contaminant levels increase, health risks increase. Consider reducing or rescheduling outdoor sports, activities and events.
+`r level_action_first_paragraph` outdoor sports, activities and events.
 
-People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
+People more likely to be negatively impacted by outdoor air pollution should `r level_action_action` strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_controls >}} {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
