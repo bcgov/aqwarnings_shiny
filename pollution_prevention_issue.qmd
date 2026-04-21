@@ -404,7 +404,11 @@ cat(
   )
 ```
 
-Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant. Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the warning is ended. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
+Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant.
+
+Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise until the warning is ended.
+
+Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to reduce exposure.
 
 `r params$customMessage`
 
