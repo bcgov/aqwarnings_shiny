@@ -21,6 +21,7 @@ params:
         - Whistler
       red:
         - South Okanagan
+  twoLevels: FALSE
 format:
   markdown: default
   pdf:
@@ -246,6 +247,28 @@ if (length(params$warningLevel$orange) > 0) {
 }
 ```
 ```{r}
+#| label: add-dynamic-text
+#| include: FALSE
+
+# Create dynamic text based on colour level(s) selected
+
+all_text <- "This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors."
+
+string_yellow_text <- paste("As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
+
+People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms.", all_text)
+
+string_orange_text <- paste("Dangerous smoke levels pose threat to your health regardless of age or health status. Limit time outdoors. Reschedule or cancel outdoor sports, activities and events.
+
+People more likely to be negatively impacted by outdoor air pollution should avoid strenuous activities outdoors or seek medical attention if experiencing symptoms.", all_text)
+
+string_action_text <- if(length(params$warningLevel$yellow) > 0 & length(params$warningLevel$orange) == 0) {
+  string_yellow_text
+} else if(!params$twoLevels & length(params$warningLevel$orange) > 0 & length(params$warningLevel$yellow) == 0) {
+  string_orange_text
+}
+```
+```{r}
 #| label: create-logo-list
 
 # Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
@@ -364,9 +387,49 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 :::
 
 ## Actions you can take
-As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
+::: {.content-hidden when-meta= "twoLevels"}
 
-People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
+`r string_action_text`
+
+:::
+::: {.content-visible when-meta= "twoLevels"}
+
+::: {.content-visible when-format="markdown"}
+  
+  {{< accordion_controls >}}
+  {{< accordion_start title="For regions under YELLOW warnings" initiallyOpen="true" >}}
+  
+:::
+  
+::: {.content-visible when-format="pdf"}
+  
+ **For regions under YELLOW warnings**
+  
+:::
+  
+  `r string_yellow_text`
+  
+::: {.content-visible when-format="markdown"}
+  
+  {{< accordion_end >}}
+  {{< accordion_start title="For regions under ORANGE warnings" initiallyOpen="true" >}}
+  
+:::
+  
+::: {.content-visible when-format="pdf"}
+  
+  **For regions under ORANGE warnings**
+  
+:::
+  
+  `r string_orange_text`
+  
+::: {.content-visible when-format="markdown"}
+  
+  {{< accordion_end >}}
+  
+:::
+:::
 
 ## During smoky conditions
 
