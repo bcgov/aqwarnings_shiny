@@ -624,6 +624,7 @@ issueWildfireSmoke <- function(input, output, session) {
                               author = input$aqMet,
                               ice = "Issue",
                               level = paste(levels, collapse = " / "),
+                              twoLevels = length(regionSelectionsForTemplate$yellow) > 0 && length(regionSelectionsForTemplate$orange) > 0,
                               location = input$location,
                               title = "Air quality warning in effect for wildfire smoke",
                               type = "wildfire_smoke",
@@ -654,7 +655,8 @@ issueWildfireSmoke <- function(input, output, session) {
                                                   location = input$location,
                                                   outputFormat = "pdf"),
                             metadata = list(
-                              title = "Air quality warning in effect for wildfire smoke"
+                              title = "Air quality warning in effect for wildfire smoke",
+                              twoLevels = length(regionSelectionsForTemplate$yellow) > 0 && length(regionSelectionsForTemplate$orange) > 0
                             ),
                             debug = FALSE)
 
