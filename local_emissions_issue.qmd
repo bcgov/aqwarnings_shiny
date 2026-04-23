@@ -231,20 +231,26 @@ HAcontact <- health_contact |>
 
 ```{r voluntary_reduction, include=FALSE}
 
-voluntary_reduction_PM25 <- paste0(
-  if (current_month %in% c(10:12, 1:4)) {
-    "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n"
-  } else {
-    ""
-  },
-  "- Reduce vehicle use where possible and avoid idling vehicles.\n",
-  sep=""
-)
+if (current_month %in% c(1:4, 10:12)) {
+  voluntary_reduction_PM25 <- paste0(
+    "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n",
+    "- Reduce vehicle use where possible and avoid idling vehicles.\n",
+    "- Compost or mulch garden waste intead of burning it.\n",
+    "- Take public transit or carpool whenever possible."
+    )
+} else {
+  paste0(
+    "- Reduce vehicle use where possible and avoid idling vehicles.\n",
+    "- Compost or mulch garden waste intead of burning it.\n",
+    "- Take public transit or carpool whenever possible."
+    )
+  }
 
 voluntary_reduction_PM10 <- paste0(
   "- Avoid driving on the road shoulder or other areas where road traction material has accumulated.\n",
-  "- When cleaning driveways and parking lots, lightly wet the area before sweeping. Avoid using leaf blowers to clean up dirt during spring clean up.\n"
-)
+  "- When cleaning driveways and parking lots, lightly wet the area before sweeping\n",
+  "- Avoid using leaf blowers to clean up dirt during spring clean up.\n"
+  )
 
 voluntary_reduction_PM <- paste0(
   voluntary_reduction_PM25,
@@ -276,33 +282,33 @@ pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
 pollutantExpansion  <- pollutant_info$pollutantExpansion
 voluntary_reduction <- pollutant_info$voluntary_reduction
 
-# Look up table for warning level - column name format: warning level_section_descriptor
+# Look up table for warning level dynamic text in intro and actions you can take sections
 tbl_level <- tribble(
   ~level,
-  ~level_intro_description,
-  ~level_intro_action,
-  ~level_action_first_paragraph,
-  ~level_action_action,
+  ~intro_description,
+  ~intro_action,
+  ~intro_indoors,
+  ~action_first_paragraph,
   "yellow", 
   "elevated ", 
-  " postpone or reduce ", 
-  "As air contaminant levels increase, health risks increase. Consider reducing or rescheduling",  
-  " reduce or rescheudle ",
+  "Postpone or reduce ", 
+  "Spend time ",
+  "Exposure to poor air quality can affect your health. Reduce the duration and intensity of outdoor activities. Spend time indoors in a space with filtered air.",
   "orange", 
   "very high levels of ", 
-  " avoid ",
-  "Dangerous levels of air contaminant pose threat to your health regardless of age or health status. Reschedule or cancel ",
-  "avoid"
+  "Avoid ",
+  "Stay ",
+  "Exposure to high levels of air contaminants pose a threat to your health regardless of age or health status. Avoid outdoor activities. Stay indoors in a space with filtered air."
 )
 
 # Pick the row for the current warning level
 level_text <- tbl_level |> filter(level == params$warningLevel)
 
 # Assign values
-string_level_intro_description <- level_text$level_intro_description
-string_level_intro_action <- level_text$level_intro_action
-string_level_action_first_paragraph <- level_text$level_action_first_paragraph
-string_level_action_action <- level_text$level_action_action
+string_level_intro_description <- level_text$intro_description
+string_level_intro_action <- level_text$intro_action
+string_level_intro_indoors <- level_text$intro_indoors
+string_level_action_first_paragraph <- level_text$action_first_paragraph
 
 # Build first_paragraph
 if (params$ice == "Issue") {
@@ -570,11 +576,7 @@ if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n")
 
 Exposure to `r pollutantExpansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant.
 
-Persons with chronic underlying medical conditions or acute infections should `r string_level_intro_action` strenuous exercise until the warning is ended.
-
-Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort, shortness of breath, cough or wheezing, should follow the advice of their health care provider.
-
-Staying indoors helps to reduce exposure.
+`r string_level_intro_action` strenuous outdoor activities until the warning has ended. `r string_level_intro_indoors` indoors in a space with filtered air. Monitor your symptoms and seek prompt medical attention if needed.
 
 ```{r, results='asis', echo=FALSE}
 if (params$burnRestrictions > 0) {
@@ -594,9 +596,9 @@ Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/conte
 
 ## Actions you can take
 
-`r string_level_action_first_paragraph` outdoor sports, activities and events.
+`r string_level_action_first_paragraph`
 
-People more likely to be negatively impacted by outdoor air pollution should `r string_level_action_action` strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
+Some people are more likely to be negatively impacted by outdoor air pollution. This includes people with lung and heart conditions, pregnant individuals, infants and young children, people aged 65 and older, and anyone whose health is affected by a chronic condition or an acute illness. 
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_controls >}} {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
@@ -628,44 +630,46 @@ if (current_month %in% 6:8) {
 - More serious but less common symptoms include wheezing, chest pains or severe cough.
 - People with asthma or other chronic illness should follow any personal care plans designed with their family physicians.
 - If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
-- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
+- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. **If you are having a medical emergency, call 9-1-1.**
 
 ::: {.content-visible when-format="markdown"}
-{{< accordion_end >}} {{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}
+{{< accordion_end >}}
+{{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
 ### Tips to reduce your exposure to air pollution
 :::
 
-- Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
-- When indoors, keep windows and doors closed as much as possible.
+- Air contaminant levels may be elevated indoors, so stay aware of your symptoms even when you are indoors.
 
 ```{r, results='asis', echo=FALSE}
 
 if (current_month %in% 6:8) {
-  cat("- When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.\n")
+  cat(
+    "- When indoors, keep windows and doors closed.  If it is hot, prioritize keeping cool.\n",
+    "- When there is an extreme heat event ocurring with poor air quality , prioritize keeping cool.\n",
+    "- If your home is too hot, spend time in places with air conditioning such as community centres, libraries, or malls.\n"
+    )
+}
+
+if (current_month %in% c(1:5, 9:12)) {
+  cat("- When indoors, keep windows and doors closed.\n")
 }
 
 if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
   cat(
-    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Control [fact sheet](https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf).\n", 
-    "- If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n"
+    "- Protect your indoor air from outdoor air pollution. Use a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Avoid models that generate ozone, as these can produce harmful ozone concentrations indoors. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Control [Do-it-yourself Air Cleaners](https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf) fact sheet.\n", 
+    "- If you must be outside, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n",
+    "- When in a vehicle, keep windows closed with air set to recirculate."
   )
 }
 
-if (params$pollutant == "PM10" && current_month %in% 6:8) {
-  cat("- Avoid busy roadways.\n")
-}
-
-if (params$pollutant == "PM25" && current_month %in% 6:8) {
-  cat("-  Avoid roads with heavy vehicle traffic.\n")
-}
-
-if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && current_month %in% c(9:12, 1:5)) {
-  cat("-  Avoid roads with heavy vehicle traffic and areas with wood smoke.\n")
+if (params$pollutant == "O3") {
+  cat("-Air cleaners can help improve indoor air quality, but avoid models that generate ozone, as these can produce harmful ozone concentrations indoors.")
 }
 ```
+
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_end >}}
@@ -759,11 +763,11 @@ cat('[\n:::]{.content-visible when-format="markdown"}\n')
 - Visit the provincial [air quality map](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) to view real-time air quality measurements
 - Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for more information about air quality in B.C.
 - Visit Metro Vancouver's [air quality data and warnings page](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories)
+- Subscribe to receive air quality warnings on the [Air Quality Subscriptions Service](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality/air-advisories/air-quality-subscription-service) page
 ```{r, results='asis', echo=FALSE, eval= run_pg}
   cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.pgairquality.com/)")
 ```
 :::
-
 
 ## Contact
 
