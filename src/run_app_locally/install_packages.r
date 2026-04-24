@@ -19,10 +19,12 @@ list_of_packages <- c(
   "fs",
   "here",
   "htmlwidgets",
+  "httr",
   "knitr",
   "leaflet",
   "remotes",
   "mapview",
+  "magick",
   "sf",
   "shiny",
   "shinydashboard",
@@ -46,6 +48,5 @@ lapply(list_of_packages,function(x){library(x, character.only = TRUE)})
 webshot::install_phantomjs()
 
 remotes::install_github("trafficonese/leaflet.extras")
-remotes::install_github("trafficonese/leaflet.esri")
 
 

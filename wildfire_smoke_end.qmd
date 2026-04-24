@@ -1,20 +1,20 @@
 ---
-date: "`r Sys.Date()`" 
-params: 
-  aqMet: "Sakshi Jain" 
-  lastWarning: "2025-02-10" 
-  customMessage: "`Custom message.`" 
+date: "`r Sys.Date()`"
+params:
+  aqMet: "Sakshi Jain"
+  lastWarning: "2025-02-10"
+  customMessage: "`Custom message.`"
   location: "Multiple locations in B.C."
   outputFormat: "markdown"
-  healthAuth: 
-    - First Nations Health Authority 
-    - Northern Health 
+  healthAuth:
+    - First Nations Health Authority
+    - Northern Health
 format:
   markdown: default
   pdf:
     mainfont: "Roboto"
     date-format: long
-    include-in-header: 
+    include-in-header:
       - src/header.tex
     fontsize: "12pt"
     urlcolor: bcblue
@@ -48,6 +48,8 @@ library(dplyr)
 
 # Import files in the quarto environment
 source(here::here("load_metadata.r"))
+source(here::here(file.path("src", "construct_logos.r")))
+source(here::here(file.path("src", "construct_shared_dependencies.r")))
 
 ```
 
@@ -56,104 +58,27 @@ source(here::here("load_metadata.r"))
 #| results: asis
 #| strip.white: false
 
-if (params$outputFormat == "markdown") sep_type <- "<br />" else sep_type <- "  \n"
+if (params$outputFormat == "markdown") markup_separator <- "<br />" else markup_separator <- "  \n"
 
 #AQ met information
-
-ENVcontact <- aq_mets |>
-  filter(fullname == params$aqMet) |>
-  mutate(contact = paste(fullname_typeset, title, ministry, phone, sep = sep_type)) |> 
-  pull(contact)
-
-HAcontact <- health_contact |>
+data_health_authority_contact <- reference_health_authority_contact |>
   filter(authority %in% params$healthAuth) |>
-  mutate(authority = factor(authority))|> 
+  mutate(authority = factor(authority))|>
   select(authority, contact) |>
-  group_by(authority) |> 
-  summarise(html_string = paste(contact, collapse = sep_type))
+  group_by(authority) |>
+  summarise(html_string = paste(contact, collapse = markup_separator))
 
 ```
 
 ```{r}
 #| label: create-logo-list
-
-# Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
-# This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
-
-logos_list <- list(
-  "Government of British Columbia" = "BCID_V_RGB_pos",
-  "First Nations Health Authority" = "FNHA",
-  "Interior Health Authority" = "IH", 
-  "Fraser Health Authority" = "FH", 
-  "Vancouver Coastal Health Authority" = "VCH", 
-  "Vancouver Island Health Authority" = "VIH", 
-  "Northern Health Authority" = "NH")
-
-# Logos selected by user and ordered as per logos_list
-logos_names_selected <- c(
-  "Government of British Columbia", # always select BC
-  "First Nations Health Authority", # always select FNHA 
-  params$healthAuth) # Note: if FNHA is selected in app, it will duplicate
-
-## This line will remove the duplicated FNHA value if it appears twice
-## Side effect: If the app user did NOT select FNHA, this will force FNHA to appear
-logos_names_selected <- unique(logos_names_selected)
-logos_names_selected <- logos_names_selected[order(match(logos_names_selected, names(logos_list)))]  # match order to logos_list
-logos_selected <- logos_list[logos_names_selected] # subset of logo_list
-
-# Count number of logos to display
-n_logos <- length(logos_selected)
-
-logo_image_line <- c()
-logos_combined <- c()
-
-# Set logo path based on output format
-if (params$outputFormat == "markdown") {
-  logo_path <- " logo](//assets/logo_"
-
-  # Build a vector of quarto lines to insert image for each logo
-  # It is more efficient to use `sapply` but this might be more readable
-
-  # Add each logo's insert line to the vector
-  for (logo_name in names(logos_selected)) {
-    logo_image_line <- c(logo_image_line,
-                         paste0("![", logo_name, logo_path, logos_selected[[logo_name]], ".png)\\"))
-  }}
-
-
-if (params$outputFormat == "pdf") {
-  
-  logo_path <- "https://github.com/bcgov/aqwarnings/blob/main/frontend/assets/logo_"
-  logo_urls <- c() #start with empty vector
-  
-  # create vector of urls
-  for (logo_name in names(logos_selected)) {
-    logo_urls <- c(
-      logo_urls, 
-      paste0(logo_path,
-             logos_selected[[logo_name]],
-             ".png?raw=true"
-             )
-    )
-  }
-
-# format logos
-logos <- magick::image_read(logo_urls) |> 
-  magick::image_trim() |> # remove all white space
-  magick::image_border(color = "none", geometry = "100x25") |> # add uniform white space to top and right side of each image
-  magick::image_scale("x200") # scale
-
-# Combine logos into single image and scale
-logos_combined <- magick::image_append(logos) |> 
-  magick::image_write(path = "logo.png")
-}
-
+logos <- construct_logos(params$outputFormat, params$healthAuth)
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
 <!-- the trailing slash means the text in square brackets is alt text -->
 
-[`r paste("::: {layout-ncol=", n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
+[`r paste("::: {layout-ncol=", logos$n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
 
 ```{r}
 #| label: print-logos
@@ -161,7 +86,7 @@ logos_combined <- magick::image_append(logos) |>
 
 # `cat` is used to avoid extra processing
 # `sep` argument adds the line break and then a new line as required
-if (params$outputFormat == "markdown") cat(logo_image_line, sep="\n\n") 
+if (params$outputFormat == "markdown") cat(logos$logo_image_line, sep="\n\n")
 ```
 
 [`r paste(":::")`]{.content-visible when-format="markdown"}
@@ -176,8 +101,10 @@ Real-time air quality information is available on the [BC Air Quality website](h
 
 **Media questions regarding air quality conditions related to this Air Quality Warning:**
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r ENVcontact`[{{< card_end >}}]{.content-visible when-format="markdown"}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}
+`r get_meteorologist_contact(params$aqMet, markup_separator)`
+[{{< card_end >}}]{.content-visible when-format="markdown"}
 
 **Media questions regarding health implications of wildfire smoke:**
 
-[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r paste(HAcontact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}
+[{{< card_start width="wide" >}}]{.content-visible when-format="markdown"}`r paste(data_health_authority_contact$html_string, collapse = "\n\n")`[{{< card_end >}}]{.content-visible when-format="markdown"}

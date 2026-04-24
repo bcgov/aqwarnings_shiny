@@ -21,7 +21,7 @@ library(dplyr)
 # UI
 #--------------------------------------------------
 
-#UI function for the "Wildfire Smoke Warning - End" tab 
+#UI function for the "Wildfire Smoke Warning - End" tab
 
 endWildfireSmokeUI <- function(id) {
   ns <- NS(id)
@@ -35,7 +35,7 @@ endWildfireSmokeUI <- function(id) {
         # -------------------------------
         # Section 1: Metadata required to generate warning
         # -------------------------------
-        
+
         h4(tags$b("1. Warning Information")),
 
         # Author selection (Air Quality Meteorologist)
@@ -43,7 +43,7 @@ endWildfireSmokeUI <- function(id) {
           inputId = ns("aqMet"),
           label = h4("Author:"),
           selected = "",
-          choices = c("", aq_mets$fullname)
+          choices = c("", reference_aq_mets$fullname)
         ),
 
         # Date the last warning was issued; default is yesterday
@@ -68,16 +68,16 @@ endWildfireSmokeUI <- function(id) {
         checkboxGroupInput(
           inputId = ns("healthAuth"),
           label = h4("Health Authorities included on last warning (select all that apply; FNHA is automatically selected):"),
-          choices = unique(health_contact$authority)[unique(health_contact$authority) != "First Nations Health Authority"],   #exclude FNHA as a choice - exists on all bulletins
+          choices = unique(reference_health_authority_contact$authority)[unique(reference_health_authority_contact$authority) != "First Nations Health Authority"],   #exclude FNHA as a choice - exists on all bulletins
         ),
-        
+
         # -------------------------------
         # Section 2: Affected location
         # -------------------------------
-        
+
         tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         h4(tags$b("2. Affected location")),
-        
+
         # Describe affected location(s) for the warning table on the website
         selectizeInput(
           inputId = ns("location"),
@@ -86,48 +86,48 @@ endWildfireSmokeUI <- function(id) {
           choices = c("", "Southeast B.C.", "Central Interior", "Cariboo", "Northeast B.C.", "Northwest B.C.", "Multiple regions in B.C." ),
           options = list(create = TRUE)
         ),
-        
+
         # -------------------------------
         # Section 3: Generate outputs
         # -------------------------------
-        
+
         tags$div(style = "margin-top: 40px;"),  # Adds vertical space
         h4(tags$b("3. Generate Warning")),
-        
+
         # Trigger report generation
         actionButton(
           inputId = ns("genWarning"),
           label = "Go!",
           style = "width: 100%; color: #fff; background-color: #3c8dbc; border-color: #2e6da4;"
         ),
-       
+
        hr(),
-       
+
        # Download button
        downloadButton(ns("download_report"), "Download Files", style = "font: 16pt"),
 
        hr(),
-       
+
        # Utility button to clean working directories
        actionButton(
          inputId = ns("cleanupdir"),
          label = "clean dir"
        )
       ), # end main box
-      
+
       # -------------------------------
       # Instructions panel
       # -------------------------------
-      
+
       box(width=9,
           status="info",
-          
+
           # Include user instructions from an external Markdown file
           includeMarkdown("docs/instructions-aqwarnings.md"))
-      
+
     ) # end fluidRow
   ) # end tabItem
-} 
+}
 
 #--------------------------------------------------
 # Server
@@ -137,7 +137,7 @@ endWildfireSmokeUI <- function(id) {
 
 endWildfireSmoke <- function(input, output, session){
   observeEvent(input$genWarning, {
-    
+
     # Input validation
     if (input$aqMet == "") {
       showNotification("No author selected; please select an author.", type = "error")
@@ -146,12 +146,12 @@ endWildfireSmoke <- function(input, output, session){
     } else if (input$location == "") {
       showNotification("No location description provided; please select or type a location description.", type = "error")
     } else {
-      
+
       # Progress indicator
       progress <- shiny::Progress$new()
       on.exit(progress$close())
       progress$set(message = "Preparing files...", value = 0)
-      
+
       # Set output file name
       endBasename <- "wildfire_smoke_end"
 
@@ -169,19 +169,19 @@ endWildfireSmoke <- function(input, output, session){
                                                   location = input$location,
                                                   outputFormat = "markdown"),
                             metadata = list(
-                              author = input$aqMet, 
+                              author = input$aqMet,
                               ice = "End",
                               location = input$location,
                               title = "Air quality warning for wildfire smoke ended",
                               type = "wildfire_smoke"
                             ),
                             debug = FALSE)
-      
+
       # Relocate the .md file to outputs/ directory
       # quarto_render() plays nice if output is written to main directory, fails if output is written to a sub directory
       markdown_output_file <- list.files(pattern = sprintf("%s_%s.md", Sys.Date(), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(markdown_output_file), new_path = here::here("outputs"))
-      
+
       # -------------------------------
       # PDF output
       # -------------------------------
@@ -199,23 +199,23 @@ endWildfireSmoke <- function(input, output, session){
                               title = "Air quality warning for wildfire smoke ended"
                             ),
                             debug = FALSE)
-  
-      
+
+
       # Relocate the .pdf to outputs/ directory
       # to keep it consistent with the Markdown files
       pdf_output_file <- list.files(pattern = sprintf("%s_%s.pdf", Sys.Date(), endBasename), full.names = TRUE)
       fs::file_move(path = paste0(pdf_output_file), new_path = here::here("outputs"))
-      
-      progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.") 
+
+      progress$inc(amount = 1, message = "Processing complete.", detail = " Files are ready for downloading.")
       Sys.sleep(5)
-      
+
     } #end else
   }) #end observeEvent
-  
+
   # --------------------------------------------------
   # Download handler: zip all outputs
   # --------------------------------------------------
-  
+
   output$download_report <- downloadHandler(
     filename = function() {
       sprintf("%s_wildfire_smoke_end.zip", Sys.Date())
@@ -228,7 +228,7 @@ endWildfireSmoke <- function(input, output, session){
       file.path("outputs", sprintf(
         "%s_wildfire_smoke_end.pdf", Sys.Date()
       )))
-      
+
       # Zip the files into the download target
       zip::zip(zipfile = file,
                files = files_to_zip,
@@ -236,25 +236,25 @@ endWildfireSmoke <- function(input, output, session){
     },
     contentType = "application/zip"
   )
-  
+
   # --------------------------------------------------
   # Cleanup directory
   # --------------------------------------------------
   observeEvent(input$cleanupdir, {
     output_files <- dir(path = here::here("outputs"), full.names = TRUE)
     temp_files <- dir(full.names = TRUE, pattern = ".png")
-    
+
     filesToRemove <- c(output_files, temp_files)
-    
+
     nfiles <- length(filesToRemove)
     if (nfiles == 0) {
       showNotification("No files or directories to remove", type = "message")
     } else {
-      
+
       file.remove(filesToRemove)
-      
-      showNotification(paste("Files removed:", nfiles, "."), type = "message")  
+
+      showNotification(paste("Files removed:", nfiles, "."), type = "message")
     }
   })
-  
+
 }
