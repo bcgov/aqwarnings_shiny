@@ -402,7 +402,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 
 -   Different people have different responses to smoke.
 
--   Mild irritation and discomfort such as eye, nose and throat irritation, phlegm production, runny nose, headaches or mild cogh are common, and usually disappear when the smoke clears.
+-   Mild irritation and discomfort such as eye, nose and throat irritation, phlegm production, runny nose, headaches or mild cough are common, and usually disappear when the smoke clears.
 
 -   More serious but less common symptoms include wheezing, chest pains or severe cough.
 
