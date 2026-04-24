@@ -105,12 +105,11 @@ local_bulletin_regions <- reference_reg_description |>
   filter(!is.na(region_name) & region_name != "")|>
   mutate(eccc = factor(eccc))
 
-local_description <- paste(local_bulletin_regions$description, collapse = "; ")
 string_region_names <- paste(local_bulletin_regions$region_name, collapse = ", ")
 
 string_region_output <- local_bulletin_regions |>
   distinct(region_name, description) |>
-  mutate(output_line = paste0("* **", region_name, ":** ", local_description)) |>
+  mutate(output_line = paste0("* **", region_name, ":** ", description)) |>
   pull(output_line) |>
   paste(collapse = "\n")
 
