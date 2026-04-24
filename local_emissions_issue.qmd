@@ -88,7 +88,7 @@ data_health_authority_contact <- health_authority_details$health_authority_conta
 ```
 ```{r voluntary_reduction, include=FALSE}
 
-if (current_month %in% c(1:4, 10:12)) {
+if (numeric_current_month %in% c(1:4, 10:12)) {
   string_voluntary_reduction_PM25 <- paste0(
     "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n",
     "- Reduce vehicle use where possible and avoid idling vehicles.\n",
@@ -172,7 +172,7 @@ if (params$ice == "Issue") {
   first_paragraph <- paste0(
     "The Ministry of Environment and Parks in collaboration with the ",
     string_health_authority, " has issued an Air Quality Warning for ", params$location,
-    " due to ", string_level_intro_description, pollutantExpansion, "."
+    " due to ", string_level_intro_description, string_pollutant_expansion, "."
   )
 } else if (params$ice == "Continue") {
   first_paragraph <- paste0(
@@ -376,8 +376,7 @@ if (numeric_current_month %in% 6:8) {
   walk-in clinic, or emergency department. **If you are having a medical emergency, call 9-1-1.**
 
 ::: {.content-visible when-format="markdown"}
-{{< accordion_end >}}
-{{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}
+{{< accordion_end >}} {{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
@@ -388,7 +387,7 @@ if (numeric_current_month %in% 6:8) {
 
 ```{r, results='asis', echo=FALSE}
 
-if (current_month %in% 6:8) {
+if (numeric_current_month %in% 6:8) {
   cat(
     "- When indoors, keep windows and doors closed.  If it is hot, prioritize keeping cool.\n",
     "- When there is an extreme heat event ocurring with poor air quality , prioritize keeping cool.\n",
@@ -396,7 +395,7 @@ if (current_month %in% 6:8) {
     )
 }
 
-if (current_month %in% c(1:5, 9:12)) {
+if (numeric_current_month %in% c(1:5, 9:12)) {
   cat("- When indoors, keep windows and doors closed.\n")
 }
 
@@ -412,6 +411,7 @@ if (params$pollutant == "O3") {
   cat("-Air cleaners can help improve indoor air quality, but avoid models that generate ozone, as these can produce harmful ozone concentrations indoors.")
 }
 ```
+
 ::: {.content-visible when-format="markdown"}
 {{< accordion_end >}}
 :::
@@ -486,7 +486,7 @@ cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ::: {.content-visible when-format="markdown"}
 **For additional information about air quality in British Columbia:**
 
-::: bcds-card-wrapper
+  ::: bcds-card-wrapper
 {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of
 latest index and forecast.
 
@@ -504,7 +504,7 @@ card_end >}}
 
   cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}\n\n')
   ```
-:::
+  :::
 :::
 
 ::: {.content-visible when-format="pdf"}
