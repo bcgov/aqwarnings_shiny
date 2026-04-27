@@ -241,7 +241,7 @@ issueLocalEmissions <- function(input, output, session){
   # Conditional UI logic
   # -------------------------------
 
-  # Hide burn restriction section when pollutant is O3
+  # Hide burn restriction section when pollutant is O3 or PM10
   observeEvent(input$pollutant, {
     if (input$pollutant %in% c("O3", "PM10")) {
       shinyjs::hide("burnRestrictions")
