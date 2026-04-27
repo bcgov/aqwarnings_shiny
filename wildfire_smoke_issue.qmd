@@ -325,7 +325,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 ::: {.content-visible when-meta="twoLevels" when-format="markdown"}
   
   {{< accordion_controls >}}
-  {{< accordion_start title="For regions under yellow warnings" initiallyOpen="true" >}}
+  {{< accordion_start title="For regions under yellow warnings" initiallyOpen="true" variant="yellow">}}
   
 :::
   
@@ -342,7 +342,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 ::: {.content-visible when-meta="twoLevels" when-format="markdown"}
   
   {{< accordion_end >}}
-  {{< accordion_start title="For regions under orange warnings" initiallyOpen="true" >}}
+  {{< accordion_start title="For regions under orange warnings" initiallyOpen="true" variant="orange">}}
   
 :::
   
