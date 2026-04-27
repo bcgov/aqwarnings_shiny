@@ -88,20 +88,17 @@ data_health_authority_contact <- health_authority_details$health_authority_conta
 ```
 ```{r voluntary_reduction, include=FALSE}
 
+string_voluntary_reduction_PM25 <- paste0(
+    "- Reduce vehicle use where possible and avoid idling vehicles.\n",
+    "- Compost or mulch garden waste intead of burning it.\n",
+    "- Take public transit or carpool whenever possible."
+    )
+
 if (numeric_current_month %in% c(1:4, 10:12)) {
   string_voluntary_reduction_PM25 <- paste0(
     "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n",
-    "- Reduce vehicle use where possible and avoid idling vehicles.\n",
-    "- Compost or mulch garden waste intead of burning it.\n",
-    "- Take public transit or carpool whenever possible."
-    )
-} else {
-  paste0(
-    "- Reduce vehicle use where possible and avoid idling vehicles.\n",
-    "- Compost or mulch garden waste intead of burning it.\n",
-    "- Take public transit or carpool whenever possible."
-    )
-  }
+    string_voluntary_reduction_PM25)
+}
 
 string_voluntary_reduction_PM10 <- paste0(
   "- Avoid driving on the road shoulder or other areas where road traction material has accumulated.\n",
