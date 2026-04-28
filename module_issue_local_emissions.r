@@ -58,18 +58,8 @@ issueLocalEmissionsUI <- function(id) {
                 choices = list("Issue", "Continue"),
                 selected = "Issue",
                 inline = TRUE
-              ),
-
-              # Select whether this warning is being issued or continued
-              radioButtons(
-                inputId = ns("warningLevel"),
-                label = h4("Warning Level:"),
-                choiceNames = as.list(gsub("\\b([a-z])", "\\U\\1", filteredWarningLevelDefinitions$Name, perl = TRUE)),
-                choiceValues = as.list(filteredWarningLevelDefinitions$Name),
-                selected = filteredWarningLevelDefinitions[1,]$Name,
-                inline = TRUE
-              ),
-
+              ), 
+              
               # Date the warning was first issued
               # Displayed conditionally when Issue Type is set to "Continue"
               shinyjs::hidden(
@@ -81,6 +71,16 @@ issueLocalEmissionsUI <- function(id) {
                   startview = "month",
                   weekstart = 0,
                 )
+              ),
+
+              # Select the warning level
+              radioButtons(
+                inputId = ns("warningLevel"),
+                label = h4("Warning Level:"),
+                choiceNames = as.list(gsub("\\b([a-z])", "\\U\\1", filteredWarningLevelDefinitions$Name, perl = TRUE)),
+                choiceValues = as.list(filteredWarningLevelDefinitions$Name),
+                selected = filteredWarningLevelDefinitions[1,]$Name,
+                inline = TRUE
               ),
 
               # Pollutant selection
