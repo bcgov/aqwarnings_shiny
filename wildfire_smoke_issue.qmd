@@ -314,7 +314,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 :::
 
 ## Actions you can take
-::: {.content-hidden when-meta="twoLevels"}
+::: {.content-hidden when-meta="parametersAsRendered.twoLevels"}
 
 `r string_action_text`
 
@@ -322,14 +322,15 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 
 :::
 
-::: {.content-visible when-meta="twoLevels" when-format="markdown"}
+
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="markdown"}
   
   {{< accordion_controls >}}
   {{< accordion_start title="For regions under yellow warnings" initiallyOpen="true" variant="yellow">}}
   
 :::
   
-::: {.content-visible when-meta="twoLevels" when-format="pdf"}
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="pdf"}
   
  **For regions under yellow warnings**
   
@@ -339,14 +340,14 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
   
   `r string_all_levels`
   
-::: {.content-visible when-meta="twoLevels" when-format="markdown"}
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="markdown"}
   
   {{< accordion_end >}}
   {{< accordion_start title="For regions under orange warnings" initiallyOpen="true" variant="orange">}}
   
 :::
   
-::: {.content-visible when-meta="twoLevels" when-format="pdf"}
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="pdf"}
   
   **For regions under orange warnings**
   
@@ -357,7 +358,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
   `r string_all_levels`
   
   
-::: {.content-visible when-meta="twoLevels" when-format="markdown"}
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="markdown"}
   
   {{< accordion_end >}}
   
