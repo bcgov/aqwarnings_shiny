@@ -606,6 +606,7 @@ issueWildfireSmoke <- function(input, output, session) {
                                customMessage = input$smokeMessage,
                                location = input$location,
                                warningLevel = regionSelectionsForTemplate,
+                               twoLevels = length(regionSelectionsForTemplate$yellow) > 0 && length(regionSelectionsForTemplate$orange) > 0,
                                outputFormat = "markdown")
 
 
@@ -617,7 +618,6 @@ issueWildfireSmoke <- function(input, output, session) {
                               author = input$aqMet,
                               ice = "Issue",
                               level = paste(levels, collapse = " / "),
-                              twoLevels = length(regionSelectionsForTemplate$yellow) > 0 && length(regionSelectionsForTemplate$orange) > 0,
                               location = input$location,
                               title = "Air quality warning in effect for wildfire smoke",
                               type = "wildfire_smoke",
@@ -648,8 +648,7 @@ issueWildfireSmoke <- function(input, output, session) {
                                                   location = input$location,
                                                   outputFormat = "pdf"),
                             metadata = list(
-                              title = "Air quality warning in effect for wildfire smoke",
-                              twoLevels = length(regionSelectionsForTemplate$yellow) > 0 && length(regionSelectionsForTemplate$orange) > 0
+                              title = "Air quality warning in effect for wildfire smoke"
                             ),
                             debug = FALSE)
 
