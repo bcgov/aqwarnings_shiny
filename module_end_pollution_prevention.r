@@ -179,24 +179,27 @@ endPollutionPrevention <- function(input, output, session){
       # -------------------------------
       # Markdown output
       # -------------------------------
+      renderParameters <- list(aqMet = input$aqMet,
+                               nearestMonitor = input$nearestMonitor,
+                               burnRestrictionArea = input$burnRestrictionArea,
+                               issuedate = input$issuedate,
+                               customMessage = input$customMessage,
+                               outputFormat = "markdown"
+                               )
+      
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("pollution_prevention_end.qmd"),
                             output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
                             output_format = "markdown",
-                            execute_params = list(
-                              aqMet = input$aqMet,
-                              nearestMonitor = input$nearestMonitor,
-                              burnRestrictionArea = input$burnRestrictionArea,
-                              issuedate = input$issuedate,
-                              customMessage = input$customMessage,
-                              outputFormat = "markdown"),
+                            execute_params = renderParameters,
                             metadata = list(
                               author = input$aqMet,
                               burnRestrictions = 0,
                               ice = "End",
                               location = input$nearestMonitor,
                               title = warningTitle,
-                              type = "pollution_prevention"
+                              type = "pollution_prevention",
+                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
                               ),
                             debug = FALSE)
 
@@ -208,17 +211,13 @@ endPollutionPrevention <- function(input, output, session){
       # -------------------------------
       # PDF output
       # -------------------------------
+      renderParameters[["outputFormat"]] <- "pdf"
+      
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("pollution_prevention_end.qmd"),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
                             output_format = "pdf",
-                            execute_params = list(
-                              aqMet = input$aqMet,
-                              nearestMonitor = input$nearestMonitor,
-                              burnRestrictionArea = input$burnRestrictionArea,
-                              issuedate = input$issuedate,
-                              customMessage = input$customMessage,
-                              outputFormat = "pdf"),
+                            execute_params = renderParameters,
                             metadata = list(
                               title = warningTitle
                             ),

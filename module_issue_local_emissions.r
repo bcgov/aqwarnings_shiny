@@ -363,7 +363,8 @@ issueLocalEmissions <- function(input, output, session){
                                location = input$location,
                                nextUpdate = input$nextUpdate,
                                outputFormat = "markdown",
-                               pollutant = input$pollutant)
+                               pollutant = input$pollutant
+                               )
 
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
@@ -400,8 +401,7 @@ issueLocalEmissions <- function(input, output, session){
                             output_format = "pdf",
                             execute_params = renderParameters,
                             metadata = list(
-                              title = warningTitle,
-                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
+                              title = warningTitle
                               ),
                             debug = FALSE)
 

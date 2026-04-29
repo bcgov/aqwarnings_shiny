@@ -262,7 +262,8 @@ issuePollutionPrevention <- function(input, output, session){
                                burnRestrictionEndTime = input$burnRestrictionEndTime,
                                issuedate = input$issuedate,nextUpdate = input$nextUpdate,
                                customMessage = input$customMessage,
-                               outputFormat = "markdown")
+                               outputFormat = "markdown"
+                               )
       
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("pollution_prevention_issue.qmd"),
