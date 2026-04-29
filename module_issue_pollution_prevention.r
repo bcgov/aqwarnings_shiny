@@ -253,29 +253,30 @@ issuePollutionPrevention <- function(input, output, session){
       # -------------------------------
       # Markdown output
       # -------------------------------
+      renderParameters <- list(aqMet = input$aqMet,
+                               ice = input$ice,
+                               nearestMonitor = input$nearestMonitor,
+                               burnRestrictions = input$burnRestrictions,
+                               burnRestrictionArea = input$burnRestrictionArea,
+                               burnRestrictionEndDate = input$burnRestrictionEndDate,
+                               burnRestrictionEndTime = input$burnRestrictionEndTime,
+                               issuedate = input$issuedate,nextUpdate = input$nextUpdate,
+                               customMessage = input$customMessage,
+                               outputFormat = "markdown")
+      
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("pollution_prevention_issue.qmd"),
                             output_file = sprintf("%s_%s.md", Sys.Date(), output_file_name),
                             output_format = "markdown",
-                            execute_params = list(
-                              aqMet = input$aqMet,
-                              ice = input$ice,
-                              nearestMonitor = input$nearestMonitor,
-                              burnRestrictions = input$burnRestrictions,
-                              burnRestrictionArea = input$burnRestrictionArea,
-                              burnRestrictionEndDate = input$burnRestrictionEndDate,
-                              burnRestrictionEndTime = input$burnRestrictionEndTime,
-                              issuedate = input$issuedate,
-                              nextUpdate = input$nextUpdate,
-                              customMessage = input$customMessage,
-                              outputFormat = "markdown"),
+                            execute_params = renderParameters,
                             metadata = list(
                               author = input$aqMet,
                               ice = input$ice,
                               location = input$nearestMonitor,
                               title = warningTitle,
                               type = "pollution_prevention",
-                              burnRestrictions = input$burnRestrictions
+                              burnRestrictions = input$burnRestrictions,
+                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
                               ),
                             debug = FALSE)
 
@@ -287,25 +288,16 @@ issuePollutionPrevention <- function(input, output, session){
       # -------------------------------
       # PDF output
       # -------------------------------
+      renderParameters[["outputFormat"]] <- "pdf"
+      
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("pollution_prevention_issue.qmd"),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
                             output_format = "pdf",
-                            execute_params = list(
-                              aqMet = input$aqMet,
-                              ice = input$ice,
-                              nearestMonitor = input$nearestMonitor,
-                              burnRestrictions = input$burnRestrictions,
-                              burnRestrictionArea = input$burnRestrictionArea,
-                              burnRestrictionEndDate = input$burnRestrictionEndDate,
-                              burnRestrictionEndTime = input$burnRestrictionEndTime,
-                              issuedate = input$issuedate,
-                              nextUpdate = input$nextUpdate,
-                              customMessage = input$customMessage,
-                              outputFormat = "pdf"),
+                            execute_params = renderParameters,
                             metadata = list(
                               title = warningTitle
-                            ),
+                              ),                      
                             debug = FALSE)
 
       # Relocate the .pdf to outputs/ directory

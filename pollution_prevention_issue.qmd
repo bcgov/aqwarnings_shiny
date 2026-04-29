@@ -81,7 +81,7 @@ data_health_authority_contact <- health_authority_details$health_authority_conta
 
 ```{r voluntary_reduction, include=FALSE}
 
-voluntary_reduction_PM25 <- 
+string_voluntary_reduction_PM25 <- 
     paste0(
     "- Reduce vehicle use where possible and avoid idling vehicles.\n",
     "- Compost or mulch garden waste intead of burning it.\n",
@@ -89,9 +89,9 @@ voluntary_reduction_PM25 <-
     )
 
 if (current_month %in% c(1:4, 10:12)) {
-  voluntary_reduction_PM25 <- paste0(
+  string_voluntary_reduction_PM25 <- paste0(
     "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n",
-    voluntary_reduction_PM25
+    string_voluntary_reduction_PM25
     )
   }
 ```
@@ -101,7 +101,7 @@ if (current_month %in% c(1:4, 10:12)) {
 # Lookup table for pollutants
 data_pollutant_tbl <- tribble(
   ~pollutant,~string_pollutant_expansion,~voluntary_reduction,
-  "PM25","fine particulate matter",voluntary_reduction_PM25,
+  "PM25","fine particulate matter",string_voluntary_reduction_PM25,
 )
 
 # Pick the row for the current pollutant
@@ -142,6 +142,7 @@ additional_info_PM25 <- paste0("Fine particulate matter refers to airborne solid
     name_line <- "Benjamin Weinstein"
     title_line1 <- "For Director, Environmental Management Act"
     title_line2 <- "Environmental Monitoring and Analysis Branch"
+    
   } else if (params$burnRestrictions == 2) {
     name_line <- "TBD"
     title_line1 <- "Director, Environmental Management Act"
@@ -149,7 +150,7 @@ additional_info_PM25 <- paste0("Fine particulate matter refers to airborne solid
   }
 
 # to do: improve formatting - single line spacing for sdm information, \n and <br> don't seem to work; rather than using paste could this text be added to a conditional code block directly in the document?
-burn_ban <- paste0(
+string_burn_ban <- paste0(
   "NOTICE of DIRECTOR under s.30 Open Burning Smoke Control Regulation:\n\n",
   "> As pollution is occurring or is likely to occur from open burning, pursuant to Sections 30(1) and 30(2) of the Open Burning Smoke Control Regulation, the Director has prohibited open burning within ",
   params$burnRestrictionArea,
@@ -167,12 +168,11 @@ burn_ban <- paste0(
 ```
 
 ```{r create-logo-list}
-# Identify which set of logos to include in document header (note: BC Gov and FNHA logos are included in all cases so are not used to define logo file name)
-# This list contains the full name (used for Alt Text and identification) on the left as the keys of the list and the initials (used for the logo file name) on the right as values of the list
 logos <- construct_logos(params$outputFormat, string_health_authority)
 ```
 
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
+
 <!-- the trailing slash means the text in square brackets is alt text -->
 
 [`r paste("::: {layout-ncol=", logos$n_logos," layout-valign=\"bottom\"}")`]{.content-visible when-format="markdown"}
@@ -300,13 +300,13 @@ cat(
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_start title="Mandatory actions" initiallyOpen="true" >}}
-`r if (params$burnRestrictions > 0) paste("-", burn_ban)`
+`r if (params$burnRestrictions > 0) paste("-", string_burn_ban)`
 {{< accordion_end >}}
 :::
 
 ::: {.content-visible when-format="pdf"}
 ### Mandatory actions
-`r if (params$burnRestrictions > 0) paste("-", burn_ban)`
+`r if (params$burnRestrictions > 0) paste("-", string_burn_ban)`
 :::
 
 ::: {.content-visible when-format="markdown"}
@@ -352,7 +352,7 @@ cat(
 ::: {.content-visible when-format="markdown"}
 **For additional information about air quality in British Columbia:**
 
-::: bcds-card-wrapper
+  ::: bcds-card-wrapper
 {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of
 latest index and forecast.
 
@@ -370,7 +370,7 @@ card_end >}}
 
   cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}')
   ```
-:::
+  :::
 :::
 
 ::: {.content-visible when-format="pdf"}
