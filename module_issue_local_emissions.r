@@ -380,7 +380,7 @@ issueLocalEmissions <- function(input, output, session){
                               pollutant = input$pollutant,
                               title = warningTitle,
                               type = "local_emissions",
-                              parametersAsRendered = renderParameters
+                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
                               ),
                             debug = FALSE)
 
@@ -392,26 +392,16 @@ issueLocalEmissions <- function(input, output, session){
       # -------------------------------
       # PDF output
       # -------------------------------
+      renderParameters[["outputFormat"]] <- "pdf"
+      
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
                             output_format = "pdf",
-                            execute_params = list(
-                              aqMet = input$aqMet,
-                              pollutant = input$pollutant,
-                              ice = input$ice,
-                              location = input$location,
-                              burnRestrictions = input$burnRestrictions,
-                              burnRestrictionArea = input$burnRestrictionArea,
-                              burnRestrictionEndDate = input$burnRestrictionEndDate,
-                              burnRestrictionEndTime = input$burnRestrictionEndTime,
-                              warningLevel = input$warningLevel,
-                              issuedate = input$issuedate,
-                              nextUpdate = input$nextUpdate,
-                              customMessage = input$customMessage,
-                              outputFormat = "pdf"),
+                            execute_params = renderParameters,
                             metadata = list(
-                              title = warningTitle
+                              title = warningTitle,
+                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
                               ),
                             debug = FALSE)
 
