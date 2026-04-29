@@ -21,6 +21,7 @@ params:
         - Whistler
       red:
         - South Okanagan
+  twoLevels: FALSE
 format:
   markdown: default
   pdf:
@@ -104,12 +105,11 @@ local_bulletin_regions <- reference_reg_description |>
   filter(!is.na(region_name) & region_name != "")|>
   mutate(eccc = factor(eccc))
 
-local_description <- paste(local_bulletin_regions$description, collapse = "; ")
 string_region_names <- paste(local_bulletin_regions$region_name, collapse = ", ")
 
 string_region_output <- local_bulletin_regions |>
   distinct(region_name, description) |>
-  mutate(output_line = paste0("* **", region_name, ":** ", local_description)) |>
+  mutate(output_line = paste0("* **", region_name, ":** ", description)) |>
   pull(output_line) |>
   paste(collapse = "\n")
 
@@ -210,6 +210,56 @@ if (params$outputFormat == "pdf") {
 
 ```
 ```{r}
+#| label: add-banners
+
+banners <- ""
+
+if (length(params$warningLevel$yellow) > 0) {
+  if (params$outputFormat == "markdown") {
+    banners <- paste(banners, "{{< banner_alert_start title='Yellow Warning - Air Quality' variant='yellow'>}}")
+    banners <- paste(banners, "{{< banner_alert_end >}}")
+  } else if (params$outputFormat == "pdf") {
+    banners <- paste(banners, "\\YellowBanner")
+  }
+}
+
+if (length(params$warningLevel$orange) > 0) {
+  if (params$outputFormat == "markdown") {
+    banners <- paste(banners, "{{< banner_alert_start title='Orange Warning - Air Quality' variant='orange'>}}")
+    banners <- paste(banners, "{{< banner_alert_end >}}")
+  } else if (params$outputFormat == "pdf") {
+    banners <- paste(banners, "\\OrangeBanner")
+  }
+}
+
+ if (length(params$warningLevel$red) > 0) {
+  if (params$outputFormat == "markdown") {
+    banners <- paste(banners, "{{< banner_alert_start title='Red Warning - Air Quality' variant='red'>}}")
+    banners <- paste(banners, "{{< banner_alert_end >}}")
+  } else if (params$outputFormat == "pdf") {
+    banners <- paste(banners, "\\RedBanner")
+  }
+}
+```
+```{r}
+#| label: add-warning-level-text
+#| include: FALSE
+
+# Create dynamic text based on warning level
+
+string_all_levels <- "Some people are more likely to be negatively impacted by smoke. This includes people with lung and heart conditions, pregnant individuals, infants and young children, people aged 65 and older, and anyone whose health is affected by a chronic condition or acute illness."
+
+string_yellow_text <- "Exposure to smoke can affect your health. Postpone or reduce strenuous outdoor activities until the warning has ended. Spend time indoors in a space with cleaner air."
+
+string_orange_text <- "Exposure to high smoke levels can pose threat to your health regardless of age of health status. Avoid strenuous outdoor activities until the warning has ended. Stay indoors in a space with cleaner air."
+
+string_action_text <- if(length(params$warningLevel$yellow) > 0 & length(params$warningLevel$orange) == 0) {
+  string_yellow_text
+} else if(!params$twoLevels & length(params$warningLevel$orange) > 0 & length(params$warningLevel$yellow) == 0) {
+  string_orange_text
+}
+```
+```{r}
 #| label: create-logo-list
 logos <- construct_logos(params$outputFormat, unique_HA[order(match(unique_HA, names(reference_logos_list)))])
 
@@ -264,16 +314,61 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 :::
 
 ## Actions you can take
-As smoke levels increase, health risks increase. Limit time outdoors. Consider reducing or rescheduling outdoor sports, activities and events.
+::: {.content-hidden when-meta="parametersAsRendered.twoLevels"}
 
-People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant individuals, infants and young children, people with an existing illness or chronic health condition such as chronic obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
+`r string_action_text`
+
+`r string_all_levels`
+
+:::
+
+
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="markdown"}
+  
+  {{< accordion_controls >}}
+  {{< accordion_start title="For regions under yellow warnings" initiallyOpen="true" variant="yellow">}}
+  
+:::
+  
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="pdf"}
+  
+ **For regions under yellow warnings**
+  
+:::
+  
+  `r string_yellow_text`
+  
+  `r string_all_levels`
+  
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="markdown"}
+  
+  {{< accordion_end >}}
+  {{< accordion_start title="For regions under orange warnings" initiallyOpen="true" variant="orange">}}
+  
+:::
+  
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="pdf"}
+  
+  **For regions under orange warnings**
+  
+:::
+  
+  `r string_orange_text`
+  
+  `r string_all_levels`
+  
+  
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="markdown"}
+  
+  {{< accordion_end >}}
+  
+:::
 
 ## During smoky conditions
 
 ::: {.content-visible when-format="markdown"}
 
 {{< accordion_controls >}}
-
 {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
 
 :::
@@ -295,7 +390,6 @@ People more likely to be negatively impacted by outdoor air pollution should red
 ::: {.content-visible when-format="markdown"}
 
 {{< accordion_end >}}
-
 {{< accordion_start title="Monitor your symptoms" initiallyOpen="true" >}}
 
 :::
@@ -308,7 +402,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   Different people have different responses to smoke.
 
--   Mild irritation and discomfort such as eye, nose and throat irritation, headaches or a mild cough are common, and usually disappear when the smoke clears.
+-   Mild irritation and discomfort such as eye, nose and throat irritation, phlegm production, runny nose, headaches or mild cough are common, and usually disappear when the smoke clears.
 
 -   More serious but less common symptoms include wheezing, chest pains or severe cough.
 
@@ -316,12 +410,11 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 -   If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
 
--   If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
+-   If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, walk-in clinic, or emergency department. **If you are having a medical emergency, call 9-1-1.**
 
 ::: {.content-visible when-format="markdown"}
 
 {{< accordion_end >}}
-
 {{< accordion_start title="Tips to reduce your smoke exposure" initiallyOpen="true" >}}
 
 :::
@@ -332,15 +425,17 @@ People more likely to be negatively impacted by outdoor air pollution should red
 
 :::
 
--   Smoke levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you are indoors.
+-   Smoke levels may still be elevated indoors, so stay aware of your symptoms even when you are indoors.
 
--   When indoors, keep windows and doors closed as much as possible.
+-   When indoors, keep windows and doors closed. If it is hot, prioritize keeping cool.
 
--   When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.
+-   Protect your indoor air from wildfire smoke. Use a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Disease Control [Do-it Yourself Air Cleaners][DIY air cleaner fact sheet] fact sheet. 
 
--   Protect your indoor air from wildfire smoke. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles.
+-   If your home is smoky or hot, spend time in places with cleaner, air conditioned air such as community centres, libraries, or malls.
 
--   If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to the fine particles in the smoke. Even though exposure may be reduced, there can still be risks to health.
+-   If you must be outside, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to the fine particles in the smoke. Even though exposure may be reduced, there can still be risks to health.
+
+-   When in a vehicle, keep windows closed with the air flow (or air conditioning) set to recirculate.
 
 -   Check on others who are in your care or live nearby who may be more likely to be impacted by wildfire smoke.
 
@@ -376,6 +471,7 @@ People more likely to be negatively impacted by outdoor air pollution should red
 ```
 :::
 :::
+
 
 ::: {.content-visible when-format="pdf"}
 
@@ -433,7 +529,7 @@ cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.p
 
 BC Centre for Disease Control
 
-- Wildfire smoke and its health impacts - [Fact sheet][Wildfire smoke]
+- Wildfire smoke and its health impacts - [Fact sheets][Wildfire smoke]
 
 Provincial Health Authorities
 
@@ -454,6 +550,7 @@ Worksafe BC
 :::
 
 [Wildfire smoke]: http://www.bccdc.ca/health-info/prevention-public-health/wildfire-smoke
+[DIY air cleaner Fact Sheet]: https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf
 [Wildfire smoke health information]: https://www.fnha.ca/about/news-and-events/news/wildfire-smoke-health-information
 [Wildfires and your health]: https://www.healthlinkbc.ca/health-library/health-features/wildfires-and-your-health
 [Wildfire FAQ]: https://www.worksafebc.com/en/resources/health-safety/information-sheets/wildfire-smoke-frequently-asked-questions-faq

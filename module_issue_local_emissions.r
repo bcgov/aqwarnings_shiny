@@ -58,18 +58,8 @@ issueLocalEmissionsUI <- function(id) {
                 choices = list("Issue", "Continue"),
                 selected = "Issue",
                 inline = TRUE
-              ),
-
-              # Select whether this warning is being issued or continued
-              radioButtons(
-                inputId = ns("warningLevel"),
-                label = h4("Warning Level:"),
-                choiceNames = as.list(gsub("\\b([a-z])", "\\U\\1", filteredWarningLevelDefinitions$Name, perl = TRUE)),
-                choiceValues = as.list(filteredWarningLevelDefinitions$Name),
-                selected = filteredWarningLevelDefinitions[1,]$Name,
-                inline = TRUE
-              ),
-
+              ), 
+              
               # Date the warning was first issued
               # Displayed conditionally when Issue Type is set to "Continue"
               shinyjs::hidden(
@@ -81,6 +71,16 @@ issueLocalEmissionsUI <- function(id) {
                   startview = "month",
                   weekstart = 0,
                 )
+              ),
+
+              # Select the warning level
+              radioButtons(
+                inputId = ns("warningLevel"),
+                label = h4("Warning Level:"),
+                choiceNames = as.list(gsub("\\b([a-z])", "\\U\\1", filteredWarningLevelDefinitions$Name, perl = TRUE)),
+                choiceValues = as.list(filteredWarningLevelDefinitions$Name),
+                selected = filteredWarningLevelDefinitions[1,]$Name,
+                inline = TRUE
               ),
 
               # Pollutant selection
@@ -241,9 +241,9 @@ issueLocalEmissions <- function(input, output, session){
   # Conditional UI logic
   # -------------------------------
 
-  # Hide burn restriction section when pollutant is O3
+  # Hide burn restriction section when pollutant is O3 or PM10
   observeEvent(input$pollutant, {
-    if (input$pollutant == "O3") {
+    if (input$pollutant %in% c("O3", "PM10")) {
       shinyjs::hide("burnRestrictions")
     } else {
       shinyjs::show("burnRestrictions")
@@ -363,7 +363,8 @@ issueLocalEmissions <- function(input, output, session){
                                location = input$location,
                                nextUpdate = input$nextUpdate,
                                outputFormat = "markdown",
-                               pollutant = input$pollutant)
+                               pollutant = input$pollutant
+                               )
 
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
@@ -380,7 +381,7 @@ issueLocalEmissions <- function(input, output, session){
                               pollutant = input$pollutant,
                               title = warningTitle,
                               type = "local_emissions",
-                              parametersAsRendered = renderParameters
+                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
                               ),
                             debug = FALSE)
 
@@ -392,24 +393,13 @@ issueLocalEmissions <- function(input, output, session){
       # -------------------------------
       # PDF output
       # -------------------------------
+      renderParameters[["outputFormat"]] <- "pdf"
+      
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = here::here("local_emissions_issue.qmd"),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), output_file_name),
                             output_format = "pdf",
-                            execute_params = list(
-                              aqMet = input$aqMet,
-                              pollutant = input$pollutant,
-                              ice = input$ice,
-                              location = input$location,
-                              burnRestrictions = input$burnRestrictions,
-                              burnRestrictionArea = input$burnRestrictionArea,
-                              burnRestrictionEndDate = input$burnRestrictionEndDate,
-                              burnRestrictionEndTime = input$burnRestrictionEndTime,
-                              warningLevel = input$warningLevel,
-                              issuedate = input$issuedate,
-                              nextUpdate = input$nextUpdate,
-                              customMessage = input$customMessage,
-                              outputFormat = "pdf"),
+                            execute_params = renderParameters,
                             metadata = list(
                               title = warningTitle
                               ),

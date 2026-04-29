@@ -86,22 +86,26 @@ health_authority_details <- get_health_authority_details(params$location, markup
 string_health_authority <- health_authority_details$health_authority
 data_health_authority_contact <- health_authority_details$health_authority_contact
 ```
+
 ```{r voluntary_reduction, include=FALSE}
 
 string_voluntary_reduction_PM25 <- paste0(
-  if (numeric_current_month %in% c(10:12, 1:4)) {
-    "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n"
-  } else {
-    ""
-  },
-  "- Reduce vehicle use where possible and avoid idling vehicles.\n",
-  sep=""
-)
+    "- Reduce vehicle use where possible and avoid idling vehicles.\n",
+    "- Compost or mulch garden waste intead of burning it.\n",
+    "- Take public transit or carpool whenever possible."
+    )
+
+if (numeric_current_month %in% c(1:4, 10:12)) {
+  string_voluntary_reduction_PM25 <- paste0(
+    "- Avoid using wood stoves and fireplaces unless it is the sole heating source. If wood burning is the sole heating source, burn dry, seasoned wood and ensure an adequate supply of combustion air.\n",
+    string_voluntary_reduction_PM25)
+}
 
 string_voluntary_reduction_PM10 <- paste0(
   "- Avoid driving on the road shoulder or other areas where road traction material has accumulated.\n",
-  "- When cleaning driveways and parking lots, lightly wet the area before sweeping. Avoid using leaf blowers to clean up dirt during spring clean up.\n"
-)
+  "- When cleaning driveways and parking lots, lightly wet the area before sweeping\n",
+  "- Avoid using leaf blowers to clean up dirt during spring clean up.\n"
+  )
 
 string_voluntary_reduction_PM <- paste0(
   string_voluntary_reduction_PM25,
@@ -133,12 +137,40 @@ pollutant_info <- pollutant_tbl |> filter(pollutant == params$pollutant)
 string_pollutant_expansion  <- pollutant_info$pollutantExpansion
 string_voluntary_reduction <- pollutant_info$voluntary_reduction
 
+# Look up table for warning level dynamic text in intro and actions you can take sections
+tbl_level <- tribble(
+  ~level,
+  ~intro_description,
+  ~intro_action,
+  ~intro_indoors,
+  ~action_first_paragraph,
+  "yellow", 
+  "elevated ", 
+  "Postpone or reduce ", 
+  "Spend time ",
+  "Exposure to poor air quality can affect your health. Reduce the duration and intensity of outdoor activities. Spend time indoors in a space with filtered air.",
+  "orange", 
+  "very high levels of ", 
+  "Avoid ",
+  "Stay ",
+  "Exposure to high levels of air contaminants pose a threat to your health regardless of age or health status. Avoid outdoor activities. Stay indoors in a space with filtered air."
+)
+
+# Pick the row for the current warning level
+level_text <- tbl_level |> filter(level == params$warningLevel)
+
+# Assign values
+string_level_intro_description <- level_text$intro_description
+string_level_intro_action <- level_text$intro_action
+string_level_intro_indoors <- level_text$intro_indoors
+string_level_action_first_paragraph <- level_text$action_first_paragraph
+
 # Build first_paragraph
 if (params$ice == "Issue") {
   first_paragraph <- paste0(
     "The Ministry of Environment and Parks in collaboration with the ",
     string_health_authority, " has issued an Air Quality Warning for ", params$location,
-    " due to elevated ", string_pollutant_expansion, "."
+    " due to ", string_level_intro_description, string_pollutant_expansion, "."
   )
 } else if (params$ice == "Continue") {
   first_paragraph <- paste0(
@@ -157,7 +189,7 @@ reference_more_info_table <- tibble(
   pollutant = c("PM25", "PM10", "O3"),
   info = c(
     paste0(
-      "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can includef wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
+      "Fine particulate matter refers to airborne solid or liquid droplets with diameters of 2.5 micrometers (μm) or less.  PM~2.5~ levels tend to be highest around busy roads, industrial operations and neighbourhoods with residential wood burning. PM~2.5~ can easily penetrate indoors because of their small size. Common sources of PM~2.5~ that contribute to episodes of poor air quality  vary seasonally but can include wood smoke (from wood stoves and/or open burning) as well as emissions from industry and transportation sources such as automobiles, trucks and rail traffic.
 
 The provincial air quality objective for PM~2.5~ is 25 micrograms per cubic metre (μg/m^3^) averaged over 24 hours. 24-hour average PM~2.5~ concentrations are summarized below for ",
 params$location,
@@ -250,11 +282,9 @@ if (params$burnRestrictions > 0) {
 
 ```
 
-
 ```{r create-logo-list}
 logos <- construct_logos(params$outputFormat, string_health_authority)
 ```
-
 <!-- Logo header, the layout-col should be set based on number of logos including FHNA and BCGov -->
 
 <!-- the trailing slash means the text in square brackets is alt text -->
@@ -275,12 +305,9 @@ if (params$outputFormat == "markdown") cat(logos$logo_image_line, sep="\n\n")
 
 `r first_paragraph`
 
-Exposure to `r string_pollutant_expansion` is particularly a concern for infants, older adults, individuals with chronic
-conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant.
-Persons with chronic underlying medical conditions or acute infections should postpone or reduce strenuous exercise
-until the warning is ended. Anyone experiencing symptoms such as continuing eye or throat irritation, chest discomfort,
-shortness of breath, cough or wheezing, should follow the advice of their health care provider. Staying indoors helps to
-reduce exposure.
+Exposure to `r string_pollutant_expansion` is particularly a concern for infants, older adults, individuals with chronic conditions (such as asthma, COPD, heart disease, and diabetes) or respiratory infections, and those who are pregnant.
+
+`r string_level_intro_action` strenuous outdoor activities until the warning has ended. `r string_level_intro_indoors` indoors in a space with filtered air. Monitor your symptoms and seek prompt medical attention if needed.
 
 ```{r, results='asis', echo=FALSE}
 if (params$burnRestrictions > 0) {
@@ -303,13 +330,11 @@ real-time observations.
 
 ## Actions you can take
 
-As air contaminant levels increase, health risks increase. Consider reducing or rescheduling outdoor sports, activities
-and events.
+`r string_level_action_first_paragraph`
 
-People more likely to be negatively impacted by outdoor air pollution should reduce or reschedule strenuous activities
-outdoors or seek medical attention if experiencing symptoms. This includes people aged 65 and older, pregnant
-individuals, infants and young children, people with an existing illness or chronic health condition such as chronic
-obstructive pulmonary disease (COPD), heart disease and diabetes, and people who work outdoors.
+Some people are more likely to be negatively impacted by outdoor air pollution. 
+This includes people with lung and heart conditions, pregnant individuals, infants and young children, 
+people aged 65 and older, and anyone whose health is affected by a chronic condition or an acute illness. 
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_controls >}} {{< accordion_start title="Follow your common sense" initiallyOpen="true" >}}
@@ -343,8 +368,8 @@ if (numeric_current_month %in% 6:8) {
 - People with asthma or other chronic illness should follow any personal care plans designed with their family
   physicians.
 - If you are unsure whether you need medical care, call HealthLink BC at 8-1-1.
-- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician,
-  walk-in clinic, or emergency department. If you are having a medical emergency, call 9-1-1.
+- If you are experiencing difficulty in breathing, chest pain or discomfort, or a severe cough, contact your physician, 
+  walk-in clinic, or emergency department. **If you are having a medical emergency, call 9-1-1.**
 
 ::: {.content-visible when-format="markdown"}
 {{< accordion_end >}} {{< accordion_start title="Tips to reduce your exposure to air pollution" initiallyOpen="true" >}}
@@ -354,33 +379,32 @@ if (numeric_current_month %in% 6:8) {
 ### Tips to reduce your exposure to air pollution
 :::
 
-- Air contaminant levels may be lower indoors but will still be elevated, so stay aware of your symptoms even when you
-  are indoors.
-- When indoors, keep windows and doors closed as much as possible.
+- Air contaminant levels may be elevated indoors, so stay aware of your symptoms even when you are indoors.
 
 ```{r, results='asis', echo=FALSE}
 
 if (numeric_current_month %in% 6:8) {
-  cat("- When there is an extreme heat event occurring with poor air quality, prioritize keeping cool.\n")
+  cat(
+    "- When indoors, keep windows and doors closed.  If it is hot, prioritize keeping cool.\n",
+    "- When there is an extreme heat event ocurring with poor air quality , prioritize keeping cool.\n",
+    "- If your home is too hot, spend time in places with air conditioning such as community centres, libraries, or malls.\n"
+    )
+}
+
+if (numeric_current_month %in% c(1:5, 9:12)) {
+  cat("- When indoors, keep windows and doors closed.\n")
 }
 
 if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
   cat(
-    "- Protect your indoor air from outdoor air pollution. Actions can include using a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Control [fact sheet](https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf).\n",
-    "- If you must spend time outdoors, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n"
+    "- Protect your indoor air from outdoor air pollution. Use a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Avoid models that generate ozone, as these can produce harmful ozone concentrations indoors. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Control [Do-it-yourself Air Cleaners](https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf) fact sheet.\n", 
+    "- If you must be outside, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n",
+    "- When in a vehicle, keep windows closed with air set to recirculate."
   )
 }
 
-if (params$pollutant == "PM10" && numeric_current_month %in% 6:8) {
-  cat("- Avoid busy roadways.\n")
-}
-
-if (params$pollutant == "PM25" && numeric_current_month %in% 6:8) {
-  cat("-  Avoid roads with heavy vehicle traffic.\n")
-}
-
-if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10") && numeric_current_month %in% c(9:12, 1:5)) {
-  cat("-  Avoid roads with heavy vehicle traffic and areas with wood smoke.\n")
+if (params$pollutant == "O3") {
+  cat("-Air cleaners can help improve indoor air quality, but avoid models that generate ozone, as these can produce harmful ozone concentrations indoors.")
 }
 ```
 
@@ -458,7 +482,7 @@ cat('[\n:::]{.content-visible when-format="markdown"}\n')
 ::: {.content-visible when-format="markdown"}
 **For additional information about air quality in British Columbia:**
 
-::: bcds-card-wrapper
+  ::: bcds-card-wrapper
 {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of
 latest index and forecast.
 
@@ -476,24 +500,23 @@ card_end >}}
 
   cat('{{< card_start title="Local Resources" variant="info" logo="/assets/icon_air.svg" >}}\n\n [Prince George Air Improvement Roundtable](https://www.pgairquality.com/) {{< card_end >}}\n\n')
   ```
-:::
+  :::
 :::
 
 ::: {.content-visible when-format="pdf"}
-- View the
+- View the 
   latest [Air Quality Health Index (AQHI) and forecast](https://www.env.gov.bc.ca/epd/bcairquality/data/aqhi-table.html)
-- Visit the provincial [air quality map](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) to
+- Visit the provincial [air quality map](https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html) to 
   view real-time air quality measurements
-- Visit the
-  provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality)
-  for more information about air quality in B.C.
-- Visit Metro
+- Visit the provincial [air quality data webpage](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality) for more information about air quality in B.C.
+- Visit Metro 
   Vancouver's [air quality data and warnings page](https://metrovancouver.org/services/air-quality-climate-action/air-quality-data-and-advisories)
+- Subscribe to receive air quality warnings on
+  the [Air Quality Subscriptions Service](https://www2.gov.bc.ca/gov/content/environment/air-land-water/air/air-quality/air-advisories/air-quality-subscription-service) page
 ```{r, results='asis', echo=FALSE, eval= run_pg}
   cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.pgairquality.com/)")
 ```
 :::
-
 
 ## Contact
 

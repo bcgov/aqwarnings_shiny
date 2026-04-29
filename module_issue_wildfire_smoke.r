@@ -606,6 +606,7 @@ issueWildfireSmoke <- function(input, output, session) {
                                customMessage = input$smokeMessage,
                                location = input$location,
                                warningLevel = regionSelectionsForTemplate,
+                               twoLevels = length(regionSelectionsForTemplate$yellow) > 0 && length(regionSelectionsForTemplate$orange) > 0,
                                outputFormat = "markdown")
 
 
@@ -635,19 +636,16 @@ issueWildfireSmoke <- function(input, output, session) {
       # -------------------------------
       # PDF output
       # -------------------------------
+      renderParameters[["outputFormat"]] <- "pdf"
+      
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), issueBasename),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), issueBasename),
                             output_format = "pdf",
-                            execute_params = list(aqMet = input$aqMet,
-                                                  nextUpdate = as.character(input$nextUpdate),
-                                                  smokeDuration = input$smokeDuration,
-                                                  warningLevel = regionSelectionsForTemplate,
-                                                  customMessage = input$smokeMessage,
-                                                  location = input$location,
-                                                  outputFormat = "pdf"),
+                            execute_params = renderParameters,
                             metadata = list(
-                              title = "Air quality warning in effect for wildfire smoke"
+                              title = "Air quality warning in effect for wildfire smoke",
+                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
                             ),
                             debug = FALSE)
 

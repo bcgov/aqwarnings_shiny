@@ -84,9 +84,13 @@ To deploy to TEST and PROD you require a shinyapps.io account.
         - Enter a name that is at least 4 alphanumeric characters (no spaces). the name will be part of the URL to access your app, for example: `https://<ACCOUNT>.shinyapps.io/<APPNAME>`
     - For PROD the app name is `aqwarnings_shiny`, we publish new apps for major test versions following the convention `aqwarnings_shiny_test_<date>`.
 
-1. Set up athentication for the app. (Note: you only have to do this when publishing a **new app**)
+1. Set up authentication for the app. (Note: you only have to do this when publishing a **new app**)
     - Go to the [shinyapps.io dashboard](https://www.shinyapps.io/admin/#/dashboard). 
-    - Navigate to the administrative interface, select the application to modify, and click on the Users tab. - Follow [the instructions](https://docs.posit.co/shinyapps.io/guide/authentication_and_user_management/) to change the Application Visibility setting to "**Private**" and restart the app.
+    - Navigate to the administrative interface, select the application to modify:
+        - Click on the Users tab. Follow [the instructions](https://docs.posit.co/shinyapps.io/guide/authentication_and_user_management/) to change the Application Visibility setting to "**Private**". 
+        - Click on the Settings tab. Change the Instance Size to 2GB. 
+        - Click on Save Settings.
+        - Restart the app.
 
 ## Getting Help or Reporting an Issue
 

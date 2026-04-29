@@ -158,22 +158,25 @@ endWildfireSmoke <- function(input, output, session){
       # -------------------------------
       # Markdown output
       # -------------------------------
+      renderParameters <- list(aqMet = input$aqMet,
+                               lastWarning = input$lastWarning,
+                               customMessage = input$customMessage,
+                               healthAuth = input$healthAuth,
+                               location = input$location,
+                               outputFormat = "markdown")
+      
       progress$inc(amount = 0.3, message = "Generating Markdown file...", detail = "Step 1 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.md", Sys.Date(), endBasename),
                             output_format = "markdown",
-                            execute_params = list(aqMet = input$aqMet,
-                                                  lastWarning = input$lastWarning,
-                                                  customMessage = input$customMessage,
-                                                  healthAuth = input$healthAuth,
-                                                  location = input$location,
-                                                  outputFormat = "markdown"),
+                            execute_params = renderParameters,
                             metadata = list(
                               author = input$aqMet,
                               ice = "End",
                               location = input$location,
                               title = "Air quality warning for wildfire smoke ended",
-                              type = "wildfire_smoke"
+                              type = "wildfire_smoke",
+                              parametersAsRendered = renderParameters # save all param actual values in the front matter for future reference
                             ),
                             debug = FALSE)
 
@@ -185,19 +188,16 @@ endWildfireSmoke <- function(input, output, session){
       # -------------------------------
       # PDF output
       # -------------------------------
+      renderParameters[["outputFormat"]] <- "pdf"
+      
       progress$inc(amount = 0.5, message = "Generating PDF file...", detail = "Step 2 of 2")
       quarto::quarto_render(input = sprintf(here::here("%s.qmd"), endBasename),
                             output_file = sprintf("%s_%s.pdf", Sys.Date(), endBasename),
                             output_format = "pdf",
-                            execute_params = list(aqMet = input$aqMet,
-                                                  lastWarning = input$lastWarning,
-                                                  customMessage = input$customMessage,
-                                                  healthAuth = input$healthAuth,
-                                                  location = input$location,
-                                                  outputFormat = "pdf"),
+                            execute_params = renderParameters,
                             metadata = list(
                               title = "Air quality warning for wildfire smoke ended"
-                            ),
+                              ),
                             debug = FALSE)
 
 
