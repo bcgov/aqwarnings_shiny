@@ -458,7 +458,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 
   [What's the air like today?] {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
 
-  [Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
+  [Latest air quality data] Low cost sensor data [Low cost sensor map] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
 
   [Smoke forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
 
@@ -487,6 +487,8 @@ Air quality data
 
 - Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
 
+- Visit [aqmap.ca][Low cost sensor map] to view real-time low cost sensor measurements
+
 Wildfire smoke forecasts
 
 - Environment and Climate Change Canada smoke forecasts - [FireWork][Smoke forecast maps]
@@ -504,6 +506,7 @@ cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.p
 [Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
 [Smoke forecast maps]: https://weather.gc.ca/firework/index_e.html
 [Smoke forecast map]: https://firesmoke.ca/forecasts/current/
+[Low cost sensor map]: https://aqmap.ca/aqmap/
 
 ::: {.content-visible when-format="markdown"}
 
