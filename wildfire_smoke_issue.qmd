@@ -458,7 +458,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 
   [What's the air like today?] {{< card_end >}} {{< card_start title="Provincial Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
 
-  [Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
+  [Latest air quality data] Low cost sensor data [Low cost sensor map] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
 
   [Smoke forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
 
