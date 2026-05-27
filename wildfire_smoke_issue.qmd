@@ -456,13 +456,15 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 ::: bcds-card-wrapper
   {{< card_start title="Air Quality Health Index" variant="info" logo="/assets/icon_air.svg" >}} Provincial summary of latest index and forecast.
 
-  [What's the air like today?] {{< card_end >}} {{< card_start title="Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
+  [What's the air like today?] {{< card_end >}} {{< card_start title="Provincial Air Quality Map" variant="info" logo="/assets/icon_air.svg" >}} Provincial air quality data refreshed every hour.
 
   [Latest air quality data] {{< card_end >}} {{< card_start title="Environment and Climate Change Canada FireWork" variant="danger" logo="/assets/icon_smoke.svg" >}} Air quality maps of next 72 hours.
 
   [Smoke forecast maps] {{< card_end >}} {{< card_start title="FireSmoke Canada" variant="danger" logo="/assets/icon_smoke.svg" >}} BlueSky Canada smoke forecasting system.
 
-  [Smoke forecast map] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and map of air quality and weather data.
+  [Smoke forecast map] {{< card_end >}} {{< card_start title="Low Cost Sensor Map" variant="info" logo="/assets/icon_air.svg" >}} Crowdsourced low cost sensor data.
+  
+  [Low cost sensor map] {{< card_end >}} {{< card_start title="Metro Vancouver Air Quality" variant="success" logo="/assets/icon_chart.svg" >}} Warnings and map of air quality and weather data.
 
   [Air quality data and warnings] {{< card_end >}}
 ```{r, results='asis', echo=FALSE, eval= flag_run_pg}
@@ -487,6 +489,8 @@ Air quality data
 
 - Visit the provincial [air quality map][Latest air quality data] to view real-time air quality measurements
 
+- Visit [aqmap.ca][Low cost sensor map] to view real-time low cost sensor measurements
+
 Wildfire smoke forecasts
 
 - Environment and Climate Change Canada smoke forecasts - [FireWork][Smoke forecast maps]
@@ -504,6 +508,7 @@ cat("- Visit the [Prince George Air Improvement Roundtable's page](https://www.p
 [Latest air quality data]: https://www.env.gov.bc.ca/epd/bcairquality/readings/find-stations-map.html
 [Smoke forecast maps]: https://weather.gc.ca/firework/index_e.html
 [Smoke forecast map]: https://firesmoke.ca/forecasts/current/
+[Low cost sensor map]: https://aqmap.ca/aqmap/
 
 ::: {.content-visible when-format="markdown"}
 
