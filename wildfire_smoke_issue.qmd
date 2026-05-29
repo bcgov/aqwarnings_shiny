@@ -429,7 +429,7 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 
 -   When indoors, keep windows and doors closed. If it is hot, prioritize keeping cool.
 
--   Protect your indoor air from wildfire smoke. Use a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Disease Control [Do-it Yourself Air Cleaners][DIY air cleaner fact sheet] fact sheet. 
+-   Protect your indoor air from wildfire smoke. Use a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre for Disease Control [Do-it Yourself Air Cleaners][DIY air cleaner fact sheet] fact sheet. 
 
 -   If your home is smoky or hot, spend time in places with cleaner, air conditioned air such as community centres, libraries, or malls.
 
