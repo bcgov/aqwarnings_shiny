@@ -397,7 +397,7 @@ if (numeric_current_month %in% c(1:5, 9:12)) {
 
 if (params$pollutant %in% c("PM25", "PM10", "PM25 & PM10")) {
   cat(
-    "- Protect your indoor air from outdoor air pollution. Use a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Avoid models that generate ozone, as these can produce harmful ozone concentrations indoors. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre of Control [Do-it-yourself Air Cleaners](https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf) fact sheet.\n", 
+    "- Protect your indoor air from outdoor air pollution. Use a clean, good quality air filter in your ventilation system and/or a certified portable air cleaner that can filter fine particles. Avoid models that generate ozone, as these can produce harmful ozone concentrations indoors. Do-it-yourself air cleaners may also be used if other options are unavailable. For more details, see the BC Centre for Disease Control [Do-it-yourself Air Cleaners](https://www.bccdc.ca/resource-gallery/Documents/Guidelines%20and%20Forms/Guidelines%20and%20Manuals/Health-Environment/BCCDC_WildFire_FactSheet_BoxFanAirFilters.pdf) fact sheet.\n", 
     "- If you must be outside, a well-constructed, well-fitting and properly worn respirator type mask (such as a NIOSH-certified N95 or equivalent respirator) can reduce your exposure to particulate matter. Even though exposure may be reduced, there can still be risks to health.\n",
     "- When in a vehicle, keep windows closed with air set to recirculate."
   )
