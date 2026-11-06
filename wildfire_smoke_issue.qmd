@@ -251,7 +251,7 @@ string_all_levels <- "Some people are more likely to be negatively impacted by s
 
 string_yellow_text <- "Exposure to smoke can affect your health. Postpone or reduce strenuous outdoor activities until the warning has ended. Spend time indoors in a space with cleaner air."
 
-string_orange_text <- "Exposure to high smoke levels can pose threat to your health regardless of age of health status. Avoid strenuous outdoor activities until the warning has ended. Stay indoors in a space with cleaner air."
+string_orange_text <- "Exposure to high smoke levels can pose threat to your health regardless of age or health status. Avoid strenuous outdoor activities until the warning has ended. Stay indoors in a space with cleaner air."
 
 string_action_text <- if(length(params$warningLevel$yellow) > 0 & length(params$warningLevel$orange) == 0) {
   string_yellow_text
@@ -328,39 +328,34 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
   {{< accordion_controls >}}
   {{< accordion_start title="For regions under yellow warnings" initiallyOpen="true" variant="yellow">}}
   
-:::
-  
-::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="pdf"}
-  
- **For regions under yellow warnings**
-  
-:::
-  
   `r string_yellow_text`
   
   `r string_all_levels`
   
-::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="markdown"}
-  
   {{< accordion_end >}}
   {{< accordion_start title="For regions under orange warnings" initiallyOpen="true" variant="orange">}}
-  
-:::
-  
-::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="pdf"}
-  
-  **For regions under orange warnings**
-  
-:::
   
   `r string_orange_text`
   
   `r string_all_levels`
   
-  
-::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="markdown"}
-  
   {{< accordion_end >}}
+ 
+:::
+  
+::: {.content-visible when-meta="parametersAsRendered.twoLevels" when-format="pdf"}
+  
+ **For regions under yellow warnings**
+ 
+ `r string_yellow_text`
+ 
+ `r string_all_levels`
+ 
+ **For regions under orange warnings**
+ 
+  `r string_orange_text`
+  
+  `r string_all_levels`
   
 :::
 

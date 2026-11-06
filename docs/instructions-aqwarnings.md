@@ -162,5 +162,4 @@ Once the warning is live, send Air Quality Subscription (AQSS) notifications usi
 **4. File the PDF in ORCS and update summary stats** <br>
 In the ORCS directory **26600-04 Reporting - Air Quality Warnings**: <br>
 - Save PDF(s) from the ZIP archive <br>
-- Update summary file: **summary_warnings_local_emissions.xlsx** <br>
 
