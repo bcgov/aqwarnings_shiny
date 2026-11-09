@@ -308,13 +308,13 @@ issueWildfireSmoke <- function(input, output, session) {
         group = "RADAR"
       ) |>
 
-      # ECCC FireWork - current hour forecast
+      # ECCC RAQDPS - surface PM2.5 forecast
       addWMSTiles(
         reference_url_current_weather,
-        layers = "RAQDPS-FW.SFC_PM2.5",
+        layers = "RAQDPS.SFC_PM2.5",
         options = WMSTileOptions(format = "image/png", transparent = TRUE, opacity = 0.55),
         attribution = paste0("'<a href =", reference_url_msc_attribution, ">MSC Open Data</a>'"),
-        group = "FireWork PM2.5 Sfc"
+        group = "RAQDPS PM2.5 Sfc"
       ) |>
 
       # NRCan Fire perimeters
@@ -327,9 +327,9 @@ issueWildfireSmoke <- function(input, output, session) {
       ) |>
 
       addLayersControl(
-        overlayGroups = c("GOES West", "Wx current", "RADAR", "FireWork PM2.5 Sfc", "BCWFS Fires", "NRCan Fire perimeters"),
+        overlayGroups = c("GOES West", "Wx current", "RADAR", "RAQDPS PM2.5 Sfc", "BCWFS Fires", "NRCan Fire perimeters"),
         options = layersControlOptions(collapsed = FALSE)) |>
-      hideGroup(c("GOES West", "Wx current", "RADAR", "FireWork PM2.5 Sfc", "BCWFS Fires", "NRCan Fire perimeters"))
+      hideGroup(c("GOES West", "Wx current", "RADAR", "RAQDPS PM2.5 Sfc", "BCWFS Fires", "NRCan Fire perimeters"))
 
   })
 
