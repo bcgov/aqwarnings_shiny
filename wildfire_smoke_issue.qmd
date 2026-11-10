@@ -254,8 +254,12 @@ string_yellow_text <- "Exposure to smoke can affect your health. Postpone or red
 string_orange_text <- "Exposure to high smoke levels can pose threat to your health regardless of age or health status. Avoid strenuous outdoor activities until the warning has ended. Stay indoors in a space with cleaner air."
 
 string_action_text <- if(length(params$warningLevel$yellow) > 0 & length(params$warningLevel$orange) == 0) {
+  string_action_title <- "For regions under yellow warnings"
+  string_action_variant <- "yellow"
   string_yellow_text
 } else if(!params$twoLevels & length(params$warningLevel$orange) > 0 & length(params$warningLevel$yellow) == 0) {
+  string_action_title <- "For regions under orange warnings"
+  string_action_variant <- "orange"
   string_orange_text
 }
 ```
@@ -316,9 +320,24 @@ The next update will be available on `r format(as.Date(params$nextUpdate), '%B %
 ## Actions you can take
 ::: {.content-hidden when-meta="parametersAsRendered.twoLevels"}
 
-`r string_action_text`
+```{r}
+#| label: single-warning-action-advice
+#| results: asis
 
-`r string_all_levels`
+if (is.null(string_action_text)) {
+  cat(string_all_levels)
+} else if (params$outputFormat == "markdown") {
+  cat(sprintf(
+    '{{< accordion_start title="%s" initiallyOpen="true" variant="%s">}}\n\n%s\n\n%s\n\n{{< accordion_end >}}',
+    string_action_title,
+    string_action_variant,
+    string_action_text,
+    string_all_levels
+  ))
+} else {
+  cat(sprintf("**%s**\n\n%s\n\n%s", string_action_title, string_action_text, string_all_levels))
+}
+```
 
 :::
 
